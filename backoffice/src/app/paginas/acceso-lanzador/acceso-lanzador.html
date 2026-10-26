@@ -1,0 +1,198 @@
+
+<div class="pagina-acceso">
+
+    <header class="cabecera-acceso">
+      <div class="cabecera-acceso__izquierda">
+        <a
+          id="marca-mi-despedida"
+          class="marca"
+          routerLink="/acceso"
+          data-i18n="marca_mi_despedida"
+        >
+          MI DESPEDIDA
+        </a>
+      </div>
+  
+      <a
+        id="enlace-visita-web"
+        class="cabecera-acceso__texto"
+        href="http://localhost:4201/"
+        data-i18n="visita_web"
+      >
+        Visita la web
+      </a>
+    </header>
+  
+    <main class="contenido-acceso">
+      <section
+        class="tarjeta-acceso"
+        aria-labelledby="titulo-acceso-lanzador"
+      >
+  
+        <h1
+          id="titulo-acceso-lanzador"
+          class="tarjeta-acceso__titulo"
+          data-i18n="titulo_acceso_lanzador"
+        >
+          ¿Quieres hacer un envío? Accede como lanzador
+        </h1>
+  
+        <p
+          class="tarjeta-acceso__descripcion"
+          data-i18n="descripcion_acceso_lanzador"
+        >
+          Introduce el correo electrónico con el que aceptaste
+          la invitación para actuar como lanzador.
+        </p>
+  
+        @if (!solicitudPreparada) {
+  
+          <form
+            id="formulario-acceso-lanzador"
+            class="formulario-acceso"
+            [formGroup]="formularioCorreo"
+            (ngSubmit)="solicitarAcceso()"
+            novalidate
+          >
+  
+            <div class="campo-formulario">
+  
+              <label
+                for="correo-lanzador"
+                class="campo-formulario__etiqueta"
+                data-i18n="correo_electronico"
+              >
+                Correo electrónico
+              </label>
+  
+              <input
+                id="correo-lanzador"
+                class="campo-formulario__control"
+                type="email"
+                formControlName="correo"
+                autocomplete="email"
+                placeholder="correo@ejemplo.com"
+                data-i18n-placeholder="placeholder_correo_electronico"
+                [attr.aria-invalid]="formularioCorreo.controls.correo.touched && formularioCorreo.controls.correo.invalid"
+                [attr.aria-describedby]="formularioCorreo.controls.correo.touched && formularioCorreo.controls.correo.invalid ? 'error-correo-lanzador' : null"
+              />
+  
+              @if (
+                formularioCorreo.controls.correo.touched &&
+                formularioCorreo.controls.correo.invalid
+              ) {
+                <p
+                  id="error-correo-lanzador"
+                  class="mensaje-error"
+                  role="alert"
+                  data-i18n="error_correo"
+                >
+                  Introduce una dirección de correo válida.
+                </p>
+              }
+  
+            </div>
+  
+            <button
+              id="boton-solicitar-acceso"
+              class="boton-principal"
+              type="submit"
+              data-i18n="solicitar_acceso"
+            >
+              Solicitar acceso
+            </button>
+  
+          </form>
+  
+        } @else {
+  
+          <div class="respuesta-acceso" role="status">
+  
+            <p data-i18n="respuesta_acceso_lanzador">
+              Si este correo tiene autorizaciones vigentes como lanzador,
+              recibirás un email con las instrucciones. Si recibes
+              un código de verificación, introdúcelo en esta pantalla.
+            </p>
+  
+            <p
+              class="aviso-desarrollo"
+              data-i18n="aviso_acceso_no_disponible"
+            >
+              Funcionalidad en preparación: todavía no se envían correos.
+            </p>
+  
+          </div>
+  
+          <button
+            id="boton-introducir-codigo"
+            class="boton-principal"
+            type="button"
+            (click)="cambiarFormularioCodigo()"
+            [attr.aria-expanded]="mostrarCodigo"
+            aria-controls="seccion-codigo-lanzador"
+            data-i18n="introducir_codigo_verificacion"
+          >
+            Introducir código de verificación
+          </button>
+  
+          @if (mostrarCodigo) {
+  
+            <div id="seccion-codigo-lanzador">
+              <form
+                id="formulario-codigo-lanzador"
+                class="formulario-acceso"
+                [formGroup]="formularioCodigo"
+              >
+  
+                <div class="campo-formulario">
+  
+                  <label
+                    for="codigo-lanzador"
+                    class="campo-formulario__etiqueta"
+                    data-i18n="codigo_verificacion"
+                  >
+                    Código de verificación
+                  </label>
+  
+                  <input
+                    id="codigo-lanzador"
+                    class="campo-formulario__control"
+                    type="text"
+                    formControlName="codigo"
+                    autocomplete="one-time-code"
+                    inputmode="text"
+                  />
+  
+                </div>
+  
+                <button
+                  id="boton-verificar-codigo"
+                  class="boton-principal"
+                  type="button"
+                  disabled
+                  data-i18n="verificar_codigo"
+                >
+                  Verificar código
+                </button>
+  
+              </form>
+            </div>
+          }
+  
+        }
+  
+        <div class="enlaces-acceso">
+          <a
+            id="enlace-volver-acceso"
+            class="enlace-acceso"
+            routerLink="/acceso"
+            data-i18n="volver_acceso"
+          >
+            ¿Quieres acceder a tu cuenta de usuario?
+          </a>
+        </div>
+  
+      </section>
+    </main>
+  </div>
+  

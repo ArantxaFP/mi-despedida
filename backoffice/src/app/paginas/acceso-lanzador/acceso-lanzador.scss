@@ -1,0 +1,40 @@
+// Hay estilos compartidos para todos los formularios
+// Aquí los estilos específicos de la pantalla de acceso de usuario lanzador no registrado
+
+:host {
+    display: block;
+    min-height: 100vh;
+  }
+  
+  .mensaje-error {
+    margin: 0;
+    color: #a43b48;
+    font-size: 0.8rem;
+    line-height: 1.4;
+  }
+  
+  .respuesta-acceso {
+    margin-bottom: 1.5rem;
+    color: #3e4653;
+    font-size: 0.95rem;
+    line-height: 1.6;
+  
+    p {
+      margin: 0 0 1rem;
+    }
+  }
+  
+  .aviso-desarrollo {
+    color: #476987;
+    font-size: 0.85rem;
+    font-style: italic;
+  }
+  
+  #seccion-codigo-lanzador {
+    margin-top: 1.5rem;
+  }
+  
+  .boton-principal:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }

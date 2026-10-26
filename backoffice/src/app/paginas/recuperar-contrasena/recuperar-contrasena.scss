@@ -1,0 +1,30 @@
+// Hay estilos compartidos para todos los formularios
+// Aquí los estilos específicos de la pantalla de recuperación de contraseña
+
+:host {
+    display: block;
+    min-height: 100vh;
+  }
+  
+  .mensaje-error {
+    margin: 0;
+    color: #a43b48;
+    font-size: 0.8rem;
+    line-height: 1.4;
+  }
+  
+  .confirmacion-recuperacion {
+    h2 {
+      margin: 0 0 1rem;
+      color: #2f3747;
+      font-family: 'Montserrat Alternates', sans-serif;
+      font-size: 1.4rem;
+      font-weight: 500;
+    }
+  
+    p {
+      margin: 0;
+      color: #3e4653;
+      line-height: 1.6;
+    }
+  }

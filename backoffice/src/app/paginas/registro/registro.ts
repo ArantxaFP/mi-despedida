@@ -18,7 +18,7 @@ export class Registro {
   constructor(private constructorFormulario: FormBuilder) {
     this.formulario = this.constructorFormulario.nonNullable.group({
       nombre: ['', [Validators.required, Validators.minLength(2)]],
-      correo: ['', [Validators.required, Validators.email]],
+      correo: ['', [Validators.required, Validators.email, Validators.pattern(/^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/)]],
       contrasena: ['', [Validators.required, Validators.minLength(8)]],
       confirmarContrasena: ['', [Validators.required]],
       privacidad: [false, [Validators.requiredTrue]]
@@ -48,6 +48,6 @@ export class Registro {
       return;
     }
 
-    // Pendiente de conectar el registro con Supabase.
+
   }
 }

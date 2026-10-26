@@ -1,0 +1,139 @@
+
+<div class="pagina-acceso">
+
+    <header class="cabecera-acceso">
+      <div class="cabecera-acceso__izquierda">
+        <a
+          id="marca-mi-despedida"
+          class="marca"
+          routerLink="/acceso"
+          data-i18n="marca_mi_despedida"
+        >
+          MI DESPEDIDA
+        </a>
+      </div>
+  
+      <a
+        id="enlace-visita-web"
+        class="cabecera-acceso__texto"
+        href="http://localhost:4201/"
+        data-i18n="visita_web"
+      >
+        Visita la web
+      </a>
+    </header>
+  
+    <main class="contenido-acceso">
+  
+      <section
+        class="tarjeta-acceso"
+        aria-labelledby="titulo-recuperar-contrasena"
+      >
+  
+        <h1
+          id="titulo-recuperar-contrasena"
+          class="tarjeta-acceso__titulo"
+          data-i18n="titulo_recuperar_contrasena"
+        >
+          Recuperar contraseña
+        </h1>
+  
+        @if (!enviado) {
+  
+          <p
+            class="tarjeta-acceso__descripcion"
+            data-i18n="descripcion_recuperar_contrasena"
+          >
+            Introduce tu correo electrónico y te enviaremos
+            un enlace para establecer una nueva contraseña.
+          </p>
+  
+          <form
+            id="formulario-recuperar-contrasena"
+            class="formulario-acceso"
+            [formGroup]="formulario"
+            (ngSubmit)="recuperarContrasena()"
+            novalidate
+          >
+  
+            <div class="campo-formulario">
+  
+              <label
+                for="correo-recuperacion"
+                class="campo-formulario__etiqueta"
+                data-i18n="correo_electronico"
+              >
+                Correo electrónico
+              </label>
+  
+              <input
+                id="correo-recuperacion"
+                class="campo-formulario__control"
+                type="email"
+                name="correo"
+                formControlName="correo"
+                autocomplete="email"
+                placeholder="arantxa@ejemplo.com"
+                data-i18n-placeholder="placeholder_correo_electronico"
+                [attr.aria-invalid]="formulario.controls.correo.touched && formulario.controls.correo.invalid"
+                [attr.aria-describedby]="formulario.controls.correo.touched && formulario.controls.correo.invalid ? 'error-correo-recuperacion' : null"
+              />
+  
+              @if (formulario.controls.correo.touched && formulario.controls.correo.invalid) {
+                <p
+                  id="error-correo-recuperacion"
+                  class="mensaje-error"
+                  role="alert"
+                  data-i18n="error_correo"
+                >
+                  Introduce una dirección de correo válida.
+                </p>
+              }
+  
+            </div>
+  
+            <button
+              id="boton-recuperar-contrasena"
+              class="boton-principal"
+              type="submit"
+              data-i18n="enviar_enlace_recuperacion"
+            >
+              Enviar enlace
+            </button>
+  
+          </form>
+  
+        } @else {
+  
+          <div class="confirmacion-recuperacion" role="status">
+  
+            <h2 data-i18n="titulo_solicitud_recibida">
+              Solicitud recibida
+            </h2>
+  
+            <p data-i18n="mensaje_solicitud_recibida">
+              Cuando el servicio de recuperación esté conectado,
+              si existe una cuenta asociada a ese correo,
+              recibirás un enlace para cambiar tu contraseña.
+            </p>
+  
+          </div>
+  
+        }
+  
+        <div class="enlaces-acceso">
+          <a
+            id="enlace-volver-acceso"
+            class="enlace-acceso"
+            routerLink="/acceso"
+            data-i18n="volver_acceso"
+          >
+            Volver al inicio de sesión
+          </a>
+        </div>
+  
+      </section>
+  
+    </main>
+  </div>
+  

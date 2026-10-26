@@ -1,0 +1,9 @@
+// Hay estilos compartidos para todos los formularios
+// Aquí los estilos específicos de la pantalla de acceso
+
+:host {
+  display: block;
+  min-height: 100vh;
+}
+
+

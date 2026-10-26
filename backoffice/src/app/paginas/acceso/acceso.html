@@ -1,0 +1,101 @@
+<div class="pagina-acceso">
+  <header class="cabecera-acceso">
+    <div class="cabecera-acceso__izquierda">
+      <button id="boton-menu" class="boton-menu" type="button" aria-label="Abrir menú"
+        data-i18n-aria-label="abrir_menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+
+      <a id="marca-mi-despedida" class="marca" href="#" data-i18n="marca_mi_despedida">
+        MI DESPEDIDA
+      </a>
+    </div>
+
+    <a id="enlace-visita-web" class="cabecera-acceso__texto" href="http://localhost:4201/" data-i18n="visita_web">
+      Visita la web
+    </a>
+  </header>
+
+  <main class="contenido-acceso">
+    <section class="tarjeta-acceso" aria-labelledby="titulo-acceso">
+      <h1 id="titulo-acceso" class="tarjeta-acceso__titulo" data-i18n="titulo_acceso">
+        Acceso a mi despedida
+      </h1>
+
+      <p id="texto-bienvenida" class="tarjeta-acceso__descripcion" data-i18n="texto_bienvenida_acceso">
+        Un espacio para preparar lo que quieres compartir.
+      </p>
+
+      <form class="formulario-acceso" novalidate>
+        <div class="campo-formulario">
+          <label id="etiqueta-correo-electronico" class="campo-formulario__etiqueta" for="correo-electronico"
+            data-i18n="correo_electronico">
+            Correo electrónico
+          </label>
+
+          <input id="correo-electronico" class="campo-formulario__control" type="email" name="correo-electronico"
+            placeholder="arantxa@ejemplo.com" data-i18n-placeholder="placeholder_correo_electronico"
+            autocomplete="email" />
+        </div>
+
+        <div class="campo-formulario">
+          <label id="etiqueta-contrasena" class="campo-formulario__etiqueta" for="contrasena" data-i18n="contrasena">
+            Contraseña
+          </label>
+
+          <div class="contenedor-contrasena">
+            <input id="contrasena" class="campo-formulario__control" [type]="contrasenaVisible ? 'text' : 'password'"
+              name="contrasena" placeholder="••••••••••" autocomplete="current-password" />
+
+            <button id="boton-visibilidad-contrasena" class="boton-visibilidad-contrasena" type="button"
+              (click)="cambiarVisibilidadContrasena()"
+              [attr.aria-label]="contrasenaVisible ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+              [attr.aria-pressed]="contrasenaVisible" data-i18n-aria-label="visibilidad_contrasena">
+
+              @if (contrasenaVisible) {
+              <!-- Ojo abierto -->
+              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"
+                aria-hidden="true">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                <circle cx="12" cy="12" r="3" />
+              </svg>
+              } @else {
+              <!-- Ojo tachado -->
+              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"
+                aria-hidden="true">
+                <path
+                  d="M17.94 17.94A10.94 10.94 0 0 1 12 20C5 20 1 12 1 12a21.8 21.8 0 0 1 5.06-5.94M9.9 4.24A10.9 10.9 0 0 1 12 4c7 0 11 8 11 8a21.8 21.8 0 0 1-2.16 3.19" />
+                <path d="M14.12 14.12a3 3 0 0 1-4.24-4.24" />
+                <line x1="1" y1="1" x2="23" y2="23" />
+              </svg>
+              }
+
+            </button>
+          </div>
+        </div>
+
+        <button id="boton-entrar" class="boton-principal" type="submit" data-i18n="entrar_en_mi_cuenta">
+          Entrar en mi cuenta
+        </button>
+      </form>
+
+      <div class="enlaces-acceso">
+        <a id="enlace-recuperar-contrasena" class="enlace-acceso" href="#" data-i18n="has_olvidado_la_contrasena">
+          Has olvidado la contraseña
+        </a>
+
+        <a id="enlace-crear-cuenta" class="enlace-acceso" routerLink="/registro" data-i18n="crear_cuenta">
+          ¿Todavía no tienes cuenta? Crear cuenta
+        </a>
+
+        <a id="enlace-acceso-lanzador" class="enlace-acceso" href="#" data-i18n="acceso_lanzador">
+          Acceso lanzador
+        </a>
+      </div>
+    </section>
+  </main>
+</div>

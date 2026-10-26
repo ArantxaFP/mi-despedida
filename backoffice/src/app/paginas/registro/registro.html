@@ -1,0 +1,214 @@
+<div class="pagina-acceso">
+
+    <header class="cabecera-acceso">
+        <div class="cabecera-acceso__izquierda">
+
+            <a id="marca-mi-despedida" class="marca" routerLink="/acceso" data-i18n="marca_mi_despedida">
+                MI DESPEDIDA
+            </a>
+
+        </div>
+
+        <a id="enlace-visita-web" class="cabecera-acceso__texto" href="http://localhost:4201/" data-i18n="visita_web">
+            Visita la web
+        </a>
+    </header>
+
+    <main class="contenido-acceso">
+
+        <section class="tarjeta-acceso" aria-labelledby="titulo-registro">
+
+            <h1 id="titulo-registro" class="tarjeta-acceso__titulo" data-i18n="titulo_registro">
+                Crear mi cuenta
+            </h1>
+
+            <p id="descripcion-registro" class="tarjeta-acceso__descripcion" data-i18n="descripcion_registro">
+                El espacio en el que podrás preparar lo último que quieras compartir.
+            </p>
+
+            <form id="formulario-registro" class="formulario-acceso" [formGroup]="formulario" (ngSubmit)="registrar()"
+                novalidate>
+
+                <!-- Nombre -->
+                <div class="campo-formulario">
+
+                    <label for="nombre" class="campo-formulario__etiqueta" data-i18n="nombre">
+                        Nombre
+                    </label>
+
+                    <input id="nombre" class="campo-formulario__control" type="text" name="nombre"
+                        formControlName="nombre" autocomplete="given-name"
+                        [attr.aria-invalid]="formulario.controls.nombre.touched && formulario.controls.nombre.invalid" />
+
+                    @if (formulario.controls.nombre.touched && formulario.controls.nombre.invalid) {
+                    <p id="error-nombre" class="mensaje-error" role="alert" data-i18n="error_nombre">
+                        Introduce un nombre de al menos 2 caracteres.
+                    </p>
+                    }
+
+                </div>
+
+                <!-- Correo electrónico -->
+                <div class="campo-formulario">
+
+                    <label for="correo-registro" class="campo-formulario__etiqueta" data-i18n="correo_electronico">
+                        Correo electrónico
+                    </label>
+
+                    <input id="correo-registro" class="campo-formulario__control" type="email" name="correo"
+                        formControlName="correo" autocomplete="email" placeholder="arantxa@ejemplo.com"
+                        data-i18n-placeholder="placeholder_correo_electronico"
+                        [attr.aria-invalid]="formulario.controls.correo.touched && formulario.controls.correo.invalid" />
+
+                    @if (formulario.controls.correo.touched && formulario.controls.correo.invalid) {
+                    <p id="error-correo" class="mensaje-error" role="alert" data-i18n="error_correo">
+                        Introduce una dirección de correo válida.
+                    </p>
+                    }
+
+                </div>
+
+                <!-- Contraseña -->
+                <div class="campo-formulario">
+
+                    <label for="contrasena-registro" class="campo-formulario__etiqueta" data-i18n="contrasena">
+                        Contraseña
+                    </label>
+
+                    <div class="contenedor-contrasena">
+
+                        <input id="contrasena-registro" class="campo-formulario__control"
+                            [type]="mostrarContrasena ? 'text' : 'password'" name="contrasena"
+                            formControlName="contrasena" autocomplete="new-password"
+                            [attr.aria-invalid]="formulario.controls.contrasena.touched && formulario.controls.contrasena.invalid" />
+
+                        <button id="boton-visibilidad-contrasena-registro" class="boton-visibilidad-contrasena"
+                            type="button" (click)="cambiarVisibilidadContrasena()"
+                            [attr.aria-label]="mostrarContrasena ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+                            [attr.aria-pressed]="mostrarContrasena" data-i18n-aria-label="visibilidad_contrasena">
+
+                            @if (mostrarContrasena) {
+                            <!-- Ojo abierto -->
+                            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                                stroke-linejoin="round" aria-hidden="true">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12" />
+                                <circle cx="12" cy="12" r="3" />
+                            </svg>
+                            } @else {
+                            <!-- Ojo tachado -->
+                            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                                stroke-linejoin="round" aria-hidden="true">
+                                <path
+                                    d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                                <line x1="1" y1="1" x2="23" y2="23" />
+                            </svg>
+                            }
+
+                        </button>
+                    </div>
+
+                    @if (formulario.controls.contrasena.touched && formulario.controls.contrasena.invalid) {
+                    <p id="error-contrasena" class="mensaje-error" role="alert" data-i18n="error_contrasena">
+                        La contraseña debe tener al menos 8 caracteres.
+                    </p>
+                    }
+
+                </div>
+
+                <!-- Repetir contraseña -->
+                <div class="campo-formulario">
+
+                    <label for="confirmar-contrasena" class="campo-formulario__etiqueta"
+                        data-i18n="confirmar_contrasena">
+                        Repetir contraseña
+                    </label>
+
+                    <div class="contenedor-contrasena">
+
+                        <input id="confirmar-contrasena" class="campo-formulario__control"
+                            [type]="mostrarConfirmacion ? 'text' : 'password'" name="confirmar-contrasena"
+                            formControlName="confirmarContrasena" autocomplete="new-password" />
+
+                        <button id="boton-visibilidad-confirmacion" class="boton-visibilidad-contrasena" type="button"
+                            (click)="cambiarVisibilidadConfirmacion()"
+                            [attr.aria-label]="mostrarConfirmacion ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+                            [attr.aria-pressed]="mostrarConfirmacion" data-i18n-aria-label="visibilidad_confirmacion">
+
+                            @if (mostrarConfirmacion) {
+                            <!-- Ojo abierto -->
+                            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                                stroke-linejoin="round" aria-hidden="true">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12" />
+                                <circle cx="12" cy="12" r="3" />
+                            </svg>
+                            } @else {
+                            <!-- Ojo tachado -->
+                            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                                stroke-linejoin="round" aria-hidden="true">
+                                <path
+                                    d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                                <line x1="1" y1="1" x2="23" y2="23" />
+                            </svg>
+                            }
+
+                        </button>
+                    </div>
+
+                    @if (formulario.controls.confirmarContrasena.touched &&
+                    formulario.controls.confirmarContrasena.invalid) {
+                    <p id="error-confirmacion" class="mensaje-error" role="alert" data-i18n="error_confirmacion">
+                        Repite la contraseña.
+                    </p>
+                    }
+
+                    @if (
+                    enviado &&
+                    formulario.controls.confirmarContrasena.valid &&
+                    formulario.controls.contrasena.value !== formulario.controls.confirmarContrasena.value
+                    ) {
+                    <p id="error-contrasenas-diferentes" class="mensaje-error" role="alert"
+                        data-i18n="error_contrasenas_diferentes">
+                        Las contraseñas no coinciden.
+                    </p>
+                    }
+
+                </div>
+
+                <!-- Política de privacidad -->
+                <div class="campo-privacidad">
+
+                    <input id="aceptar-privacidad" type="checkbox" name="privacidad" formControlName="privacidad"
+                        [attr.aria-invalid]="formulario.controls.privacidad.touched && formulario.controls.privacidad.invalid" />
+
+                    <label for="aceptar-privacidad" data-i18n="aceptar_privacidad">
+                        He leído y acepto la política de privacidad.
+                    </label>
+
+                </div>
+
+                @if (formulario.controls.privacidad.touched && formulario.controls.privacidad.invalid) {
+                <p id="error-privacidad" class="mensaje-error" role="alert" data-i18n="error_privacidad">
+                    Debes aceptar la política de privacidad.
+                </p>
+                }
+
+                <!-- Enviar formulario -->
+                <button id="boton-crear-cuenta" class="boton-principal" type="submit" data-i18n="crear_mi_cuenta">
+                    Crear mi cuenta
+                </button>
+
+            </form>
+
+            <div class="enlaces-acceso">
+                <a id="enlace-volver-acceso" class="enlace-acceso" routerLink="/acceso" data-i18n="volver_acceso">
+                    ¿Ya tienes cuenta? Iniciar sesión
+                </a>
+            </div>
+
+        </section>
+    </main>
+</div>

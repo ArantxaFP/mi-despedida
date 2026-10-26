@@ -1,0 +1,22 @@
+# Dependencias
+node_modules/
+
+# Compilaciones
+dist/
+.angular/
+coverage/
+
+# Variables de entorno y credenciales
+.env
+.env.*
+!.env.example
+
+# Sistema operativo
+.DS_Store
+
+# Logs
+*.log
+
+# Archivos temporales de TypeScript
+*.tsbuildinfo
+

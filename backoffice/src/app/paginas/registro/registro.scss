@@ -36,3 +36,22 @@
   font-size: 0.8rem;
   line-height: 1.4;
 }
+
+.mensaje-registro {
+  margin-top: 1.25rem;
+  padding: 1rem;
+  border-radius: 0.75rem;
+  background: #fff0eb;
+  color: #303847;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  &--correcto {
+      background: #e1f8f3;
+      border-left: 3px solid #59f0dd;
+  }
+}
+
+#boton-crear-cuenta:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}

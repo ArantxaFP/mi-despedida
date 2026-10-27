@@ -203,9 +203,16 @@
 
             </form>
 
+            @if (mensajeRegistro) {
+            <p id="mensaje-registro" class="mensaje-registro" [class.mensaje-registro--correcto]="registroCompletado"
+                role="status" aria-live="polite">
+                {{ mensajeRegistro }}
+            </p>
+            }
+
             <div class="enlaces-acceso">
                 <a id="enlace-volver-acceso" class="enlace-acceso" routerLink="/acceso" data-i18n="volver_acceso">
-                    ¿Ya tienes cuenta? Iniciar sesión
+                    ¿Ya tienes cuenta? Inicia sesión
                 </a>
             </div>
 

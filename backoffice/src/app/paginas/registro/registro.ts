@@ -1,6 +1,8 @@
-import { Component } from '@angular/core';
+
+import { Component, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { Autenticacion } from '../../servicios/autenticacion';
 
 @Component({
   selector: 'app-registro',
@@ -9,9 +11,14 @@ import { RouterLink } from '@angular/router';
   styleUrl: './registro.scss'
 })
 export class Registro {
+  private autenticacion = inject(Autenticacion);
+
   mostrarContrasena = false;
   mostrarConfirmacion = false;
   enviado = false;
+  registrando = false;
+  registroCompletado = false;
+  mensajeRegistro = '';
 
   formulario;
 
@@ -33,20 +40,56 @@ export class Registro {
     this.mostrarConfirmacion = !this.mostrarConfirmacion;
   }
 
-  registrar(): void {
+  async registrar(): Promise<void> {
     this.enviado = true;
+    this.mensajeRegistro = '';
+    this.registroCompletado = false;
+
+    if (this.registrando) {
+      return;
+    }
 
     if (this.formulario.invalid) {
       this.formulario.markAllAsTouched();
       return;
     }
 
-    if (
-      this.formulario.controls.contrasena.value !==
-      this.formulario.controls.confirmarContrasena.value
-    ) {
+    const datos = this.formulario.getRawValue();
+
+    if (datos.contrasena !== datos.confirmarContrasena) {
       return;
     }
+
+    this.registrando = true;
+
+    try {
+      const { error } = await this.autenticacion.registrar(
+        datos.nombre.trim(),
+        datos.correo.trim(),
+        datos.contrasena
+      );
+
+      if (error) {
+        console.error('Error al registrar la cuenta:', error.message);
+        this.mensajeRegistro =
+          'No se ha podido completar el registro. Inténtalo de nuevo.';
+        return;
+      }
+
+      this.registroCompletado = true;
+      this.mensajeRegistro =
+        'Solicitud de registro recibida. Revisa tu correo electrónico para confirmar tu cuenta.';
+
+      this.formulario.reset();
+
+    } catch (error) {
+      console.error('Error de conexión durante el registro:', error);
+      this.mensajeRegistro =
+        'No se ha podido conectar con el servicio. Inténtalo de nuevo.';
+    } finally {
+      this.registrando = false;
+    }
+
 
 
   }

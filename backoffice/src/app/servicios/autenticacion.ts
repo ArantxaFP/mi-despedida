@@ -44,4 +44,10 @@ export class Autenticacion {
     async obtenerUsuario() {
         return this.supabase.auth.getUser();
     }
+
+    async cambiarContrasena(nuevaContrasena: string) {
+        return this.supabase.auth.updateUser({
+            password: nuevaContrasena
+        });
+    }
 }

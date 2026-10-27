@@ -29,25 +29,30 @@
       </p>
 
       <form id="formulario-acceso" class="formulario-acceso" [formGroup]="formulario" (ngSubmit)="iniciarSesion()"
-        novalidate>
+        method="post" novalidate>
+
+        <!-- Correo electrónico -->
         <div class="campo-formulario">
+
           <label id="etiqueta-correo-electronico" class="campo-formulario__etiqueta" for="correo-electronico"
             data-i18n="correo_electronico">
             Correo electrónico
           </label>
 
-          <input id="correo-electronico" class="campo-formulario__control" type="email" name="correo-electronico"
-            formControlName="correo" placeholder="arantxa@ejemplo.com"
-            data-i18n-placeholder="placeholder_correo_electronico" autocomplete="email"
+          <input id="correo-electronico" class="campo-formulario__control" type="email" formControlName="correo"
+            placeholder="arantxa@ejemplo.com" data-i18n-placeholder="placeholder_correo_electronico"
+            autocomplete="email"
             [attr.aria-invalid]="formulario.controls.correo.touched && formulario.controls.correo.invalid"
-            aria-describedby="error-correo-acceso" />
+            [attr.aria-describedby]="formulario.controls.correo.touched && formulario.controls.correo.invalid ? 'error-correo-acceso' : null" />
 
           @if (formulario.controls.correo.touched && formulario.controls.correo.invalid) {
           <p id="error-correo-acceso" class="mensaje-error" role="alert" data-i18n="error_correo">
             Introduce una dirección de correo válida.
           </p>
           }
+
         </div>
+
 
         <div class="campo-formulario">
           <label id="etiqueta-contrasena" class="campo-formulario__etiqueta" for="contrasena" data-i18n="contrasena">
@@ -56,7 +61,7 @@
 
           <div class="contenedor-contrasena">
             <input id="contrasena" class="campo-formulario__control" [type]="contrasenaVisible ? 'text' : 'password'"
-              name="contrasena" formControlName="contrasena" placeholder="••••••••••" autocomplete="current-password"
+              formControlName="contrasena" placeholder="••••••••••" autocomplete="current-password"
               [attr.aria-invalid]="formulario.controls.contrasena.touched && formulario.controls.contrasena.invalid" />
 
             <button id="boton-visibilidad-contrasena" class="boton-visibilidad-contrasena" type="button"
@@ -95,22 +100,22 @@
 
         </div>
 
-        <button id="boton-entrar" class="boton-principal" type="submit" [disabled]="accediendo"
+        <button id="boton-entrar" class="boton-principal" type="submit" [disabled]="accediendo()"
           data-i18n="entrar_en_mi_cuenta">
-          {{ accediendo ? 'Accediendo...' : 'Entrar en mi cuenta' }}
+          {{ accediendo() ? 'Accediendo...' : 'Entrar en mi cuenta' }}
         </button>
       </form>
 
-      @if (mensajeAcceso) {
+      @if (mensajeAcceso()) {
       <p id="mensaje-acceso" class="mensaje-acceso" role="status" aria-live="polite">
-        {{ mensajeAcceso }}
+        {{ mensajeAcceso() }}
       </p>
       }
 
       <div class="enlaces-acceso">
         <a id="enlace-recuperar-contrasena" class="enlace-acceso" routerLink="/recuperar-contrasena"
           data-i18n="has_olvidado_la_contrasena">
-          Has olvidado la contraseña
+          ¿Has olvidado la contraseña?
         </a>
 
         <a id="enlace-crear-cuenta" class="enlace-acceso" routerLink="/registro" data-i18n="crear_cuenta">

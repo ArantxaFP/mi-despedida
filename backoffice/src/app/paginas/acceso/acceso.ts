@@ -1,4 +1,5 @@
-import { Component, inject } from '@angular/core';
+
+import { Component, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Autenticacion } from '../../servicios/autenticacion';
@@ -15,8 +16,9 @@ export class Acceso {
   private constructorFormulario = inject(FormBuilder);
 
   contrasenaVisible = false;
-  accediendo = false;
-  mensajeAcceso = '';
+
+  accediendo = signal(false);
+  mensajeAcceso = signal('');
 
   formulario = this.constructorFormulario.nonNullable.group({
     correo: ['', [
@@ -32,9 +34,9 @@ export class Acceso {
   }
 
   async iniciarSesion(): Promise<void> {
-    this.mensajeAcceso = '';
+    this.mensajeAcceso.set('');
 
-    if (this.accediendo) {
+    if (this.accediendo()) {
       return;
     }
 
@@ -43,7 +45,7 @@ export class Acceso {
       return;
     }
 
-    this.accediendo = true;
+    this.accediendo.set(true);
 
     try {
       const datos = this.formulario.getRawValue();
@@ -54,18 +56,20 @@ export class Acceso {
       );
 
       if (error) {
-        this.mensajeAcceso =
-          'No se ha podido iniciar sesión. Comprueba tus datos y que hayas confirmado tu correo electrónico. Si acabas de registrarte, verifica primero tu cuenta y revisa que no te haya llegado al correo de spam.';
+        this.mensajeAcceso.set(
+          'No se ha podido iniciar sesión. Comprueba tus datos y que hayas confirmado tu correo electrónico. Si acabas de registrarte, verifica primero tu cuenta y revisa la carpeta de spam.'
+        );
         return;
       }
 
-      this.mensajeAcceso = 'Has iniciado sesión correctamente.';
+      this.mensajeAcceso.set('Has iniciado sesión correctamente.');
 
     } catch {
-      this.mensajeAcceso =
-        'No se ha podido conectar con el servicio. Vuelve a intentarlo dentro de un rato.';
+      this.mensajeAcceso.set(
+        'No se ha podido conectar con el servicio. Vuelve a intentarlo dentro de un rato.'
+      );
     } finally {
-      this.accediendo = false;
+      this.accediendo.set(false);
     }
   }
 }

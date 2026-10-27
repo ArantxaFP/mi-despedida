@@ -11,14 +11,12 @@ $fondo: #dff3f1;
 $texto: #2f3747;
 $texto-secundario: #3e4653;
 
-// Degradado del marco de la ventana
-$degradado: linear-gradient(
-  90deg,
-  $turquesa 0%,
-  $coral 33.33%,
-  $azul 66.66%,
-  $turquesa 100%
-);
+// Degradado del marco de las ventanas
+$degradado: linear-gradient(90deg,
+    $turquesa 0%,
+    $coral 33.33%,
+    $azul 66.66%,
+    $turquesa 100%);
 
 // Animación del degradado
 @keyframes mover-degradado {
@@ -59,12 +57,10 @@ $degradado: linear-gradient(
   display: inline-flex;
   flex-direction: column;
   justify-content: center;
-  gap: 0.28rem;
-
+  gap: 0.28rem
   width: 2rem;
   height: 2rem;
   padding: 0;
-
   border: 0;
   background: transparent;
   cursor: pointer;
@@ -120,22 +116,16 @@ $degradado: linear-gradient(
 
 
 // Tarjeta con marco y sombra animados
-
 .tarjeta-acceso {
   position: relative;
   z-index: 0;
   isolation: isolate;
-
   width: 100%;
   max-width: 23rem;
   padding: 1.5rem 1.25rem 1.75rem;
-
   border: none;
   border-radius: 1.75rem;
-
   background: #fbfbfb;
-
-  // Sombra degradada animada
   &::before {
     content: '';
     position: absolute;
@@ -144,13 +134,11 @@ $degradado: linear-gradient(
 
     border-radius: inherit;
 
-    background: linear-gradient(
-      90deg,
-      #59f0dd,
-      #ffa38c,
-      #476987,
-      #59f0dd
-    );
+    background: linear-gradient(90deg,
+        #59f0dd,
+        #ffa38c,
+        #476987,
+        #59f0dd);
 
     background-size: 300% 100%;
     animation: mover-degradado 5s linear infinite;
@@ -171,15 +159,6 @@ $degradado: linear-gradient(
     pointer-events: none;
   }
 }
-
-
-
-
-
-
-
-
-
 
 .tarjeta-acceso__titulo {
   margin: 0 0 1rem;
@@ -221,18 +200,13 @@ $degradado: linear-gradient(
   width: 100%;
   min-height: 3.25rem;
   padding: 0.9rem 1rem;
-
   border: 1px solid #5d7797;
   border-radius: 0.85rem;
-
   background: $blanco;
   color: $texto;
-
   font-size: 1rem;
   font-family: inherit;
-
   outline: none;
-
   transition:
     border-color 0.2s ease,
     box-shadow 0.2s ease;
@@ -264,18 +238,14 @@ $degradado: linear-gradient(
   top: 50%;
   right: 0.75rem;
   transform: translateY(-50%);
-
   display: flex;
   align-items: center;
   justify-content: center;
-
   width: 2.5rem;
   height: 2.5rem;
   padding: 0;
-
   border: none;
   border-radius: 0.5rem;
-
   background: transparent;
   color: $azul;
   cursor: pointer;
@@ -300,20 +270,16 @@ $degradado: linear-gradient(
 .boton-principal {
   min-height: 3.25rem;
   padding: 0.85rem 1rem;
-
   border: 1px solid $turquesa;
   border-radius: 0.9rem;
-
   background: $fondo;
   color: $texto-secundario;
-
   font-size: 1rem;
   font-weight: 500;
   font-family: inherit;
   text-align: left;
-
+ 
   cursor: pointer;
-
   transition:
     transform 0.2s ease,
     box-shadow 0.2s ease;
@@ -332,7 +298,6 @@ $degradado: linear-gradient(
   }
 }
 
-
 // Enlaces
 .enlaces-acceso {
   display: flex;
@@ -344,29 +309,22 @@ $degradado: linear-gradient(
 .enlace-acceso {
   position: relative;
   align-self: flex-start;
-
   color: $texto-secundario;
   font-size: 1rem;
   line-height: 1.4;
   text-decoration: none;
-
   &::after {
     content: '';
     position: absolute;
     left: 0;
     bottom: -5px;
-
     width: 0;
     height: 2px;
-
     border-radius: 2px;
-    background: linear-gradient(
-      90deg,
-      $turquesa,
-      $coral,
-      $azul
-    );
-
+    background: linear-gradient(90deg,
+        $turquesa,
+        $coral,
+        $azul );
     box-shadow: 0 2px 4px rgba(71, 105, 135, 0.2);
     transition: width 0.3s ease;
   }
@@ -424,12 +382,11 @@ $degradado: linear-gradient(
   }
 }
 
-
 // Accesibilidad
 @media (prefers-reduced-motion: reduce) {
+
   .tarjeta-acceso::before,
   .tarjeta-acceso::after {
     animation: none;
   }
 }
-

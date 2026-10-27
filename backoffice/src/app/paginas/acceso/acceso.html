@@ -28,7 +28,8 @@
         Un espacio para preparar lo que quieres compartir.
       </p>
 
-      <form class="formulario-acceso" novalidate>
+      <form id="formulario-acceso" class="formulario-acceso" [formGroup]="formulario" (ngSubmit)="iniciarSesion()"
+        novalidate>
         <div class="campo-formulario">
           <label id="etiqueta-correo-electronico" class="campo-formulario__etiqueta" for="correo-electronico"
             data-i18n="correo_electronico">
@@ -36,8 +37,16 @@
           </label>
 
           <input id="correo-electronico" class="campo-formulario__control" type="email" name="correo-electronico"
-            placeholder="arantxa@ejemplo.com" data-i18n-placeholder="placeholder_correo_electronico"
-            autocomplete="email" />
+            formControlName="correo" placeholder="arantxa@ejemplo.com"
+            data-i18n-placeholder="placeholder_correo_electronico" autocomplete="email"
+            [attr.aria-invalid]="formulario.controls.correo.touched && formulario.controls.correo.invalid"
+            aria-describedby="error-correo-acceso" />
+
+          @if (formulario.controls.correo.touched && formulario.controls.correo.invalid) {
+          <p id="error-correo-acceso" class="mensaje-error" role="alert" data-i18n="error_correo">
+            Introduce una dirección de correo válida.
+          </p>
+          }
         </div>
 
         <div class="campo-formulario">
@@ -47,7 +56,8 @@
 
           <div class="contenedor-contrasena">
             <input id="contrasena" class="campo-formulario__control" [type]="contrasenaVisible ? 'text' : 'password'"
-              name="contrasena" placeholder="••••••••••" autocomplete="current-password" />
+              name="contrasena" formControlName="contrasena" placeholder="••••••••••" autocomplete="current-password"
+              [attr.aria-invalid]="formulario.controls.contrasena.touched && formulario.controls.contrasena.invalid" />
 
             <button id="boton-visibilidad-contrasena" class="boton-visibilidad-contrasena" type="button"
               (click)="cambiarVisibilidadContrasena()"
@@ -76,12 +86,26 @@
 
             </button>
           </div>
+
+          @if (formulario.controls.contrasena.touched && formulario.controls.contrasena.invalid) {
+          <p id="error-contrasena-acceso" class="mensaje-error" role="alert" data-i18n="error_contrasena_obligatoria">
+            Introduce tu contraseña.
+          </p>
+          }
+
         </div>
 
-        <button id="boton-entrar" class="boton-principal" type="submit" data-i18n="entrar_en_mi_cuenta">
-          Entrar en mi cuenta
+        <button id="boton-entrar" class="boton-principal" type="submit" [disabled]="accediendo"
+          data-i18n="entrar_en_mi_cuenta">
+          {{ accediendo ? 'Accediendo...' : 'Entrar en mi cuenta' }}
         </button>
       </form>
+
+      @if (mensajeAcceso) {
+      <p id="mensaje-acceso" class="mensaje-acceso" role="status" aria-live="polite">
+        {{ mensajeAcceso }}
+      </p>
+      }
 
       <div class="enlaces-acceso">
         <a id="enlace-recuperar-contrasena" class="enlace-acceso" routerLink="/recuperar-contrasena"

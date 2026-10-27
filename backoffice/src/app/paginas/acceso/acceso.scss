@@ -6,4 +6,19 @@
   min-height: 100vh;
 }
 
+.mensaje-acceso {
+  margin-top: 1.25rem;
+  padding: 1rem;
+  border-radius: 0.75rem;
+  border-left: 3px solid #59f0dd;
+  background: #e1f8f3;
+  color: #303847;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+#boton-entrar:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
 

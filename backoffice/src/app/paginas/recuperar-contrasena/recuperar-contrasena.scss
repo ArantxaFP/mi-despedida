@@ -2,29 +2,49 @@
 // Aquí los estilos específicos de la pantalla de recuperación de contraseña
 
 :host {
-    display: block;
-    min-height: 100vh;
+  display: block;
+  min-height: 100vh;
+}
+
+.mensaje-error {
+  margin: 0;
+  color: #a43b48;
+  font-size: 0.8rem;
+  line-height: 1.4;
+}
+
+.confirmacion-recuperacion {
+  h2 {
+    margin: 0 0 1rem;
+    color: #2f3747;
+    font-family: 'Montserrat Alternates', sans-serif;
+    font-size: 1.4rem;
+    font-weight: 500;
   }
-  
-  .mensaje-error {
+
+  p {
     margin: 0;
-    color: #a43b48;
-    font-size: 0.8rem;
-    line-height: 1.4;
+    color: #3e4653;
+    line-height: 1.6;
   }
-  
-  .confirmacion-recuperacion {
-    h2 {
-      margin: 0 0 1rem;
-      color: #2f3747;
-      font-family: 'Montserrat Alternates', sans-serif;
-      font-size: 1.4rem;
-      font-weight: 500;
-    }
-  
-    p {
-      margin: 0;
-      color: #3e4653;
-      line-height: 1.6;
-    }
+}
+
+.mensaje-recuperacion {
+  margin-top: 1.25rem;
+  padding: 1rem;
+  border-left: 3px solid #59f0dd;
+  border-radius: 0.75rem;
+  background: #e1f8f3;
+  color: #303847;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  &--error {
+    border-left-color: #ffa38c;
+    background: #fff0eb;
   }
+}
+
+#boton-recuperar-contrasena:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}

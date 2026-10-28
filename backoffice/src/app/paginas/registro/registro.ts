@@ -1,4 +1,3 @@
-
 import { Component, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -19,16 +18,35 @@ export class Registro {
   registrando = false;
   registroCompletado = false;
   mensajeRegistro = '';
-
   formulario;
 
   constructor(private constructorFormulario: FormBuilder) {
+
     this.formulario = this.constructorFormulario.nonNullable.group({
-      nombre: ['', [Validators.required, Validators.minLength(2)]],
-      correo: ['', [Validators.required, Validators.email, Validators.pattern(/^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/)]],
-      contrasena: ['', [Validators.required, Validators.minLength(8)]],
-      confirmarContrasena: ['', [Validators.required]],
-      privacidad: [false, [Validators.requiredTrue]]
+      nombre: ['', [
+        Validators.required,
+        Validators.minLength(2)
+      ]],
+
+      correo: ['', [
+        Validators.required,
+        Validators.email,
+        Validators.pattern(/^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/)
+      ]],
+
+      contrasena: ['', [
+        Validators.required,
+        Validators.minLength(10),
+        Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^a-zA-Z0-9\s]).+$/)
+      ]],
+
+      confirmarContrasena: ['', [
+        Validators.required
+      ]],
+
+      privacidad: [false, [
+        Validators.requiredTrue
+      ]]
     });
   }
 

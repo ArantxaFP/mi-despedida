@@ -8,6 +8,8 @@ import { NuevaContrasena } from './paginas/nueva-contrasena/nueva-contrasena';
 import { EstructuraPanel } from './paginas/panel/componentes/estructura-panel/estructura-panel';
 import { Dashboard } from './paginas/panel/01-dashboard/dashboard';
 import { Perfil } from './paginas/panel/02-perfil/perfil';
+import { ContactosLanzadores } from './paginas/panel/03-contactos-lanzadores/contactos-lanzadores';
+import { ContactosDestinatarios } from './paginas/panel/04-contactos-destinatarios/contactos-destinatarios';
 
 import { autenticacionGuard } from './guards/autenticacion.guard';
 
@@ -55,6 +57,14 @@ export const routes: Routes = [
       {
         path: 'perfil',
         component: Perfil
+      },
+      {
+        path: 'contactos-lanzadores',
+        component: ContactosLanzadores
+      },
+      {
+        path: 'contactos-destinatarios',
+        component: ContactosDestinatarios
       }
     ]
   }

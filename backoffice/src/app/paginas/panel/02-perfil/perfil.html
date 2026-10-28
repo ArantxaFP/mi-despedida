@@ -6,3 +6,280 @@
         </p>
     </div>
 </section>
+
+<section class="perfil panel__tarjeta" aria-labelledby="titulo-perfil">
+
+    @if (cargando()) {
+    <p role="status">Cargando los datos de tu perfil...</p>
+    } @else {
+
+    <!-- VISTA PRINCIPAL -->
+    @if (vistaActual() === 'datos') {
+
+    <h1 id="titulo-perfil">Mi perfil</h1>
+    <h2>Datos de tu cuenta</h2>
+
+    <form class="perfil__formulario" [formGroup]="formularioDatos" (ngSubmit)="guardarDatos()" novalidate>
+
+        <div class="perfil__campo">
+            <label for="nombre-perfil">Nombre</label>
+
+            <input id="nombre-perfil" type="text" formControlName="nombre" autocomplete="given-name" maxlength="100"
+                [attr.aria-invalid]="formularioDatos.controls.nombre.invalid && formularioDatos.controls.nombre.touched"
+                [attr.aria-describedby]="formularioDatos.controls.nombre.invalid && formularioDatos.controls.nombre.touched ? 'error-nombre-perfil' : null">
+
+            @if (formularioDatos.controls.nombre.invalid &&
+            formularioDatos.controls.nombre.touched) {
+            <p id="error-nombre-perfil" class="perfil__error">
+                Introduce tu nombre (máximo 100 caracteres).
+            </p>
+            }
+        </div>
+
+        <div class="perfil__campo">
+            <label for="apellidos-perfil">
+                Apellidos <span class="perfil__opcional">(opcional)</span>
+            </label>
+
+            <input id="apellidos-perfil" type="text" formControlName="apellidos" autocomplete="family-name"
+                maxlength="150">
+
+            @if (formularioDatos.controls.apellidos.invalid &&
+            formularioDatos.controls.apellidos.touched) {
+            <p class="perfil__error">
+                Los apellidos no pueden superar los 150 caracteres.
+            </p>
+            }
+        </div>
+
+        <button class="perfil__boton" type="submit" [disabled]="guardando()">
+            {{ guardando() ? 'Guardando...' : 'Guardar datos' }}
+        </button>
+    </form>
+
+    <h2>Correo electrónico</h2>
+
+    <p class="perfil__correo">
+        {{ correoActual() }}
+
+        @if (correoVerificado()) {
+        <span>· Verificado</span>
+        } @else {
+        <span>· Pendiente de verificación</span>
+        }
+    </p>
+
+    <div class="perfil__acciones">
+        <button class="perfil__boton" type="button" (click)="cambiarVista('correo')">
+            Cambiar correo
+        </button>
+
+        <button class="perfil__boton" type="button" (click)="cambiarVista('contrasena')">
+            Cambiar contraseña
+        </button>
+    </div>
+
+    <h2>Cerrar mi cuenta</h2>
+
+    <p>
+        La baja elimina tus contactos y mensajes personales.
+    </p>
+
+    <button class="perfil__boton perfil__boton--peligro" type="button" (click)="cambiarVista('baja')">
+        Solicitar la baja
+    </button>
+
+    }
+
+    <!-- CAMBIAR CORREO -->
+    @if (vistaActual() === 'correo') {
+
+    <h1 id="titulo-perfil">Cambiar correo</h1>
+
+    <p>
+        La nueva dirección deberá verificarse antes
+        de quedar confirmada.
+    </p>
+
+    <form class="perfil__formulario" [formGroup]="formularioCorreo" (ngSubmit)="solicitarCambioCorreo()" novalidate>
+
+        <div class="perfil__campo">
+            <label for="correo-actual">Correo actual</label>
+
+            <input id="correo-actual" type="email" [value]="correoActual()" readonly>
+        </div>
+
+        <div class="perfil__campo">
+            <label for="nuevo-correo">
+                Nuevo correo electrónico
+            </label>
+
+            <input id="nuevo-correo" type="email" formControlName="nuevoCorreo" autocomplete="email"
+                [attr.aria-invalid]="formularioCorreo.controls.nuevoCorreo.invalid && formularioCorreo.controls.nuevoCorreo.touched"
+                [attr.aria-describedby]="formularioCorreo.controls.nuevoCorreo.invalid && formularioCorreo.controls.nuevoCorreo.touched ? 'error-nuevo-correo' : null">
+
+            @if (formularioCorreo.controls.nuevoCorreo.invalid &&
+            formularioCorreo.controls.nuevoCorreo.touched) {
+            <p id="error-nuevo-correo" class="perfil__error">
+                Introduce una dirección de correo válida.
+            </p>
+            }
+        </div>
+
+        <button class="perfil__boton" type="submit" [disabled]="guardando()">
+            {{ guardando() ? 'Enviando...' : 'Enviar verificación' }}
+        </button>
+    </form>
+
+    <button class="perfil__volver" type="button" (click)="cambiarVista('datos')">
+        Cancelar y volver al perfil
+    </button>
+    }
+
+    <!-- CAMBIAR CONTRASEÑA -->
+    @if (vistaActual() === 'contrasena') {
+
+    <h1 id="titulo-perfil">Cambiar contraseña</h1>
+
+    <p>
+        Utiliza una contraseña de al menos 10 caracteres,
+        con mayúsculas, minúsculas, números y símbolos.
+    </p>
+
+    <form class="perfil__formulario" [formGroup]="formularioContrasena" (ngSubmit)="guardarContrasena()" novalidate>
+
+        <div class="perfil__campo">
+            <label for="nueva-contrasena-perfil">
+                Nueva contraseña
+            </label>
+
+            <div class="perfil__contrasena">
+                <input id="nueva-contrasena-perfil" [type]="mostrarContrasena() ? 'text' : 'password'"
+                    formControlName="contrasena" autocomplete="new-password"
+                    [attr.aria-invalid]="formularioContrasena.controls.contrasena.invalid && formularioContrasena.controls.contrasena.touched"
+                    [attr.aria-describedby]="formularioContrasena.controls.contrasena.invalid && formularioContrasena.controls.contrasena.touched ? 'error-contrasena-perfil' : null">
+
+                <button class="perfil__visibilidad" type="button" (click)="cambiarVisibilidadContrasena()"
+                    [attr.aria-label]="mostrarContrasena() ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+                    [attr.aria-pressed]="mostrarContrasena()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                        stroke-linejoin="round" aria-hidden="true">
+                        <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z" />
+                        <circle cx="12" cy="12" r="3" />
+                        @if (mostrarContrasena()) {
+                        <path d="M3 21 21 3" />
+                        }
+                    </svg>
+                </button>
+            </div>
+
+            @if (formularioContrasena.controls.contrasena.invalid &&
+            formularioContrasena.controls.contrasena.touched) {
+            <p id="error-contrasena-perfil" class="perfil__error">
+                La contraseña debe cumplir los requisitos indicados.
+            </p>
+            }
+        </div>
+
+        <div class="perfil__campo">
+            <label for="confirmar-contrasena-perfil">
+                Repetir contraseña
+            </label>
+
+            <div class="perfil__contrasena">
+                <input id="confirmar-contrasena-perfil" [type]="mostrarConfirmacion() ? 'text' : 'password'"
+                    formControlName="confirmarContrasena" autocomplete="new-password"
+                    [attr.aria-invalid]="formularioContrasena.controls.confirmarContrasena.touched && (formularioContrasena.controls.confirmarContrasena.invalid || formularioContrasena.controls.confirmarContrasena.value !== formularioContrasena.controls.contrasena.value)"
+                    [attr.aria-describedby]="formularioContrasena.controls.confirmarContrasena.touched && (formularioContrasena.controls.confirmarContrasena.invalid || formularioContrasena.controls.confirmarContrasena.value !== formularioContrasena.controls.contrasena.value) ? 'error-confirmacion-perfil' : null">
+
+                <button class="perfil__visibilidad" type="button" (click)="cambiarVisibilidadConfirmacion()"
+                    [attr.aria-label]="mostrarConfirmacion() ? 'Ocultar confirmación' : 'Mostrar confirmación'"
+                    [attr.aria-pressed]="mostrarConfirmacion()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                        stroke-linejoin="round" aria-hidden="true">
+                        <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z" />
+                        <circle cx="12" cy="12" r="3" />
+                        @if (mostrarConfirmacion()) {
+                        <path d="M3 21 21 3" />
+                        }
+                    </svg>
+                </button>
+            </div>
+
+            @if (formularioContrasena.controls.confirmarContrasena.touched &&
+            (formularioContrasena.controls.confirmarContrasena.invalid ||
+            formularioContrasena.controls.confirmarContrasena.value !== formularioContrasena.controls.contrasena.value))
+            {
+            <p id="error-confirmacion-perfil" class="perfil__error">
+                Repite la misma contraseña.
+            </p>
+            }
+        </div>
+
+        <button class="perfil__boton" type="submit" [disabled]="guardando()">
+            {{ guardando() ? 'Guardando...' : 'Guardar contraseña' }}
+        </button>
+    </form>
+
+    <button class="perfil__volver" type="button" (click)="cambiarVista('datos')">
+        Cancelar y volver al perfil
+    </button>
+    }
+
+    <!-- SOLICITAR LA BAJA -->
+    @if (vistaActual() === 'baja') {
+
+    <h1 id="titulo-perfil">¿Solicitar la baja?</h1>
+
+    <div class="perfil__aviso-peligro" role="alert">
+        Se eliminarán tus contactos y mensajes personales.
+        Perderás el acceso a tu cuenta.
+    </div>
+
+    <p>
+        Se conservará constancia de que la cuenta ha existido.
+        Si actúas como lanzador de otras personas, dejarás
+        de estar habilitada.
+    </p>
+
+    <form class="perfil__formulario" [formGroup]="formularioBaja">
+
+        <label class="perfil__confirmacion">
+            <input type="checkbox" formControlName="confirmacion">
+            <span>
+                Entiendo las consecuencias y quiero darme de baja.
+            </span>
+        </label>
+
+        <button class="perfil__boton perfil__boton--peligro" type="button" disabled
+            aria-describedby="aviso-baja-pendiente">
+            Confirmar la baja
+        </button>
+
+        <p id="aviso-baja-pendiente" class="perfil__nota">
+            La baja definitiva estará disponible cuando se
+            complete el procedimiento seguro de eliminación
+            de datos y revocación de permisos.
+        </p>
+
+        <button class="perfil__boton" type="button" (click)="cambiarVista('datos')">
+            Conservar mi cuenta
+        </button>
+    </form>
+    }
+
+    <!-- MENSAJES DE RESULTADO -->
+    @if (mensaje()) {
+    <p class="perfil__mensaje-exito" role="status" aria-live="polite">
+        {{ mensaje() }}
+    </p>
+    }
+
+    @if (error()) {
+    <p class="perfil__aviso-peligro" role="alert">
+        {{ error() }}
+    </p>
+    }
+
+    }
+</section>

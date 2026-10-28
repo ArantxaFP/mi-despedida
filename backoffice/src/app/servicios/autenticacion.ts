@@ -6,6 +6,7 @@ import { configuracionSupabase } from '../configuracion/supabase';
     providedIn: 'root'
 })
 export class Autenticacion {
+
     private supabase = createClient(
         configuracionSupabase.url,
         configuracionSupabase.clavePublica
@@ -36,6 +37,7 @@ export class Autenticacion {
         });
     }
 
+    // Registro
     async registrar(nombre: string, correo: string, contrasena: string) {
         return this.supabase.auth.signUp({
             email: correo,
@@ -49,6 +51,7 @@ export class Autenticacion {
         });
     }
 
+    // Inicio se sesión
     async iniciarSesion(correo: string, contrasena: string) {
         return this.supabase.auth.signInWithPassword({
             email: correo,
@@ -56,23 +59,49 @@ export class Autenticacion {
         });
     }
 
+    // Cerrar sesión
     async cerrarSesion() {
         return this.supabase.auth.signOut();
     }
 
+    // Recuperación de contraseña
     async recuperarContrasena(correo: string) {
         return this.supabase.auth.resetPasswordForEmail(correo, {
             redirectTo: `${window.location.origin}/nueva-contrasena`
         });
     }
 
+    // Obtener usuario autenticado
     async obtenerUsuario() {
         return this.supabase.auth.getUser();
     }
 
+    // Cambiar contraseña
     async cambiarContrasena(nuevaContrasena: string) {
         return this.supabase.auth.updateUser({
             password: nuevaContrasena
         });
+    }
+
+    // Actualizar nombre o apellido
+    async actualizarDatosPersonales(nombre: string, apellidos: string) {
+        return this.supabase.auth.updateUser({
+            data: {
+                nombre,
+                apellidos
+            }
+        });
+    }
+
+    // Cambiar correo
+    async cambiarCorreo(nuevoCorreo: string) {
+        return this.supabase.auth.updateUser(
+            {
+                email: nuevoCorreo
+            },
+            {
+                emailRedirectTo: `${window.location.origin}/panel/perfil`
+            }
+        );
     }
 }

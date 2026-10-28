@@ -1,5 +1,5 @@
 import { Component, inject, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Autenticacion } from '../../servicios/autenticacion';
 
@@ -13,6 +13,7 @@ import { Autenticacion } from '../../servicios/autenticacion';
 export class Acceso {
   private autenticacion = inject(Autenticacion);
   private constructorFormulario = inject(FormBuilder);
+  private router = inject(Router);
 
   contrasenaVisible = false;
 
@@ -61,7 +62,17 @@ export class Acceso {
         return;
       }
 
-      this.mensajeAcceso.set('Has iniciado sesión correctamente.');
+      // Inicio de sesión correcto: acceder al panel privado
+      const navegacionCorrecta = await this.router.navigateByUrl(
+        '/panel/dashboard',
+        { replaceUrl: true }
+      );
+
+      if (!navegacionCorrecta) {
+        this.mensajeAcceso.set(
+          'Has iniciado sesión, pero no se ha podido abrir el panel.'
+        );
+      }
 
     } catch {
       this.mensajeAcceso.set(

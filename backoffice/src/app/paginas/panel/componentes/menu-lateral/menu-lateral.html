@@ -1,0 +1,45 @@
+<nav class="menu-lateral" aria-label="Menú de mi espacio">
+    <ul class="menu-lateral__lista">
+
+        <li>
+            <a class="menu-lateral__enlace" routerLink="/panel/dashboard" routerLinkActive="activo"
+                ariaCurrentWhenActive="page">
+                Dashboard
+            </a>
+        </li>
+
+        <li>
+            <a class="menu-lateral__enlace" routerLink="/panel/perfil" routerLinkActive="activo"
+                ariaCurrentWhenActive="page">
+                Perfil
+            </a>
+        </li>
+
+        <li>
+            <a class="menu-lateral__enlace" routerLink="/panel/contactos-lanzadores" routerLinkActive="activo"
+                ariaCurrentWhenActive="page">
+                Contactos lanzadores
+            </a>
+        </li>
+
+        <li>
+            <a class="menu-lateral__enlace" routerLink="/panel/contactos-destinatarios" routerLinkActive="activo"
+                ariaCurrentWhenActive="page">
+                Contactos destinatarios
+            </a>
+        </li>
+
+        <li>
+            <button id="boton-cerrar-sesion" class="menu-lateral__enlace" type="button" (click)="cerrarSesion()"
+                [disabled]="cerrandoSesion()">
+                {{ cerrandoSesion() ? 'Cerrando sesión...' : 'Cerrar sesión' }}
+            </button>
+        </li>
+
+    </ul>
+    @if (mensajeError()) {
+    <p id="error-cerrar-sesion" class="mensaje-error" role="alert">
+        {{ mensajeError() }}
+    </p>
+    }
+</nav>

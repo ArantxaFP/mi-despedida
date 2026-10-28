@@ -1,0 +1,44 @@
+<div class="panel">
+
+    <header class="cabecera-panel">
+        <div class="cabecera-panel__izquierda">
+
+            <button id="boton-menu-panel" class="cabecera-panel__menu" type="button" (click)="cambiarEstadoMenu()"
+                [attr.aria-expanded]="menuAbierto()" aria-controls="navegacion-panel"
+                [attr.aria-label]="menuAbierto() ? 'Ocultar menú' : 'Mostrar menú'">
+
+                <span></span>
+                <span></span>
+                <span></span>
+
+            </button>
+
+            <a class="cabecera-panel__marca" routerLink="/panel/dashboard">
+                MI DESPEDIDA
+            </a>
+
+        </div>
+    </header>
+
+    <div class="panel__contenido" [class.panel__contenido--sin-menu]="!menuAbierto()">
+
+        <aside id="navegacion-panel" class="panel__lateral" [class.panel__lateral--abierto]="menuAbierto()"
+            [hidden]="!menuAbierto()">
+
+            <app-menu-lateral></app-menu-lateral>
+
+            <p class="panel__lema">
+                Prepara tu despedida a tu ritmo.
+            </p>
+
+        </aside>
+
+        <main id="contenido-principal" class="panel__principal">
+
+            <router-outlet></router-outlet>
+
+        </main>
+
+    </div>
+
+</div>

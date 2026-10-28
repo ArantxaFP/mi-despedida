@@ -5,6 +5,12 @@ import { RecuperarContrasena } from './paginas/recuperar-contrasena/recuperar-co
 import { AccesoLanzador } from './paginas/acceso-lanzador/acceso-lanzador';
 import { NuevaContrasena } from './paginas/nueva-contrasena/nueva-contrasena';
 
+import { EstructuraPanel } from './paginas/panel/componentes/estructura-panel/estructura-panel';
+import { Dashboard } from './paginas/panel/01-dashboard/dashboard';
+import { Perfil } from './paginas/panel/02-perfil/perfil';
+
+import { autenticacionGuard } from './guards/autenticacion.guard';
+
 export const routes: Routes = [
   {
     path: '',
@@ -23,15 +29,33 @@ export const routes: Routes = [
     path: 'recuperar-contrasena',
     component: RecuperarContrasena
   },
-
   {
     path: 'acceso-lanzador',
     component: AccesoLanzador
   },
-
   {
     path: 'nueva-contrasena',
     component: NuevaContrasena
-  }
+  },
 
+  {
+    path: 'panel',
+    component: EstructuraPanel,
+    canActivate: [autenticacionGuard],
+    children: [
+      {
+        path: '',
+        redirectTo: 'dashboard',
+        pathMatch: 'full'
+      },
+      {
+        path: 'dashboard',
+        component: Dashboard
+      },
+      {
+        path: 'perfil',
+        component: Perfil
+      }
+    ]
+  }
 ];

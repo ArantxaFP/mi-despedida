@@ -6,12 +6,19 @@
     font-size: var(--texto-normal);
     line-height: 1.6;
 
-    // Etiquetas
+    // Evitar que elementos grandes desborden el contenedor
+    &,
+    *,
+    *::before,
+    *::after {
+        box-sizing: border-box;
+    }
+
     h1,
     h2 {
         font-family: var(--fuente-titulos);
         font-weight: 500;
-        line-height: 1.25;
+        line-height: 1.3;
         overflow-wrap: break-word;
     }
 
@@ -27,9 +34,10 @@
         font-family: var(--fuente-general);
         font-size: var(--texto-h3);
         font-weight: 500;
+        line-height: 1.4;
     }
 
-    // Contenido principal
+    // Contenedor principal del panel
     &__contenido {
         width: 100%;
         max-width: var(--ancho-contenido);
@@ -37,7 +45,6 @@
         padding: var(--espacio-md);
     }
 
-    // Recuadros blancos de sección
     &__tarjeta {
         min-width: 0;
         padding: var(--espacio-lg);
@@ -45,21 +52,29 @@
         background: var(--color-superficie);
     }
 
-    // Botones
+    // Botones globales del panel
     &__boton {
         display: inline-flex;
         align-items: center;
         justify-content: center;
         gap: var(--espacio-xs);
+
         min-height: 3rem;
+        max-width: 100%;
         padding: 0.75rem 1rem;
+
         border: 1px solid var(--color-boton-borde);
         border-radius: var(--radio-boton);
+
         background: var(--color-boton-fondo);
         color: var(--color-boton-texto);
+
         font: inherit;
         font-weight: 500;
+        line-height: 1.4;
         text-align: center;
+        text-decoration: none;
+
         cursor: pointer;
         transition: background-color 0.2s ease;
 
@@ -73,7 +88,6 @@
         }
     }
 
-    // Campos
     input,
     select,
     textarea {
@@ -82,7 +96,13 @@
         color: var(--color-principal);
     }
 
-    :is(a, button, input, select, textarea):focus-visible {
+    // Foco visible para navegación mediante teclado
+    :is(a,
+        button,
+        input,
+        select,
+        textarea,
+        summary):focus-visible {
         outline: 3px solid var(--color-foco);
         outline-offset: 3px;
     }
@@ -94,11 +114,112 @@
         border-radius: var(--radio-campo);
         background: var(--color-error-fondo);
         color: var(--color-error);
+        overflow-wrap: anywhere;
     }
 }
 
-// Tablet
+
+.panel-pagina {
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacio-lg);
+
+    width: 100%;
+    min-width: 0;
+
+    // Tarjeta blanca individual
+    &__bloque {
+        display: flex;
+        flex-direction: column;
+        gap: var(--espacio-md);
+
+        width: 100%;
+        min-width: 0;
+        padding: var(--espacio-lg);
+
+        border-radius: var(--radio-tarjeta);
+        background: var(--color-superficie);
+
+        // Evitar que textos largos desborden las tarjetas
+        overflow-wrap: break-word;
+    }
+
+    // Primera tarjeta: título y descripción de la página
+    &__cabecera {
+        h1 {
+            margin: 0;
+        }
+
+        p {
+            margin: 0;
+        }
+    }
+
+    // Títulos de las tarjetas
+    &__bloque {
+        h2,
+        h3 {
+            margin: 0;
+        }
+    }
+
+    // Zona de acciones
+    &__acciones {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: var(--espacio-md);
+
+        width: 100%;
+        min-width: 0;
+    }
+
+    // Distribución opcional en tarjetas de varias columnas
+    &__cuadricula {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        gap: var(--espacio-lg);
+
+        width: 100%;
+        min-width: 0;
+
+
+        >* {
+            min-width: 0;
+        }
+    }
+
+    &__ancho-completo {
+        grid-column: 1 / -1;
+    }
+
+    &__tabla-responsive {
+        width: 100%;
+        min-width: 0;
+        overflow-x: auto;
+    }
+
+    // Mensajes informativos
+    &__mensaje {
+        padding: var(--espacio-md);
+        border-radius: var(--radio-campo);
+        background: var(--color-fondo);
+        color: var(--color-principal);
+        overflow-wrap: anywhere;
+    }
+
+    &__texto-secundario {
+        color: var(--color-secundario);
+        font-size: var(--texto-secundario);
+        line-height: 1.6;
+    }
+}
+
+
+// TABLET - DESDE 48rem
+
 @media (min-width: 48rem) {
+
     .panel {
         &__contenido {
             padding: var(--espacio-lg);
@@ -108,21 +229,55 @@
             padding: var(--espacio-xl);
         }
     }
+
+    .panel-pagina {
+        gap: var(--espacio-xl);
+
+        &__bloque {
+            padding: var(--espacio-xl);
+        }
+
+        &__cuadricula {
+            gap: var(--espacio-xl);
+        }
+    }
 }
 
-// Escritorio
+
+// ESCRITORIO - DESDE 64rem
+
 @media (min-width: 64rem) {
+
     .panel {
         &__contenido {
             padding: var(--espacio-xl);
         }
     }
+
+    .panel-pagina {
+
+        // Dos columnas solo cuando utilicemos
+        // explícitamente esta cuadrícula
+        &__cuadricula {
+            grid-template-columns: repeat(2,
+                    minmax(0, 1fr));
+        }
+    }
 }
 
+
 @media (prefers-reduced-motion: reduce) {
-    .panel * {
-        scroll-behavior: auto;
-        transition-duration: 0.01ms;
-        animation-duration: 0.01ms;
+
+    .panel {
+
+        &,
+        *,
+        *::before,
+        *::after {
+            scroll-behavior: auto;
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+        }
     }
 }

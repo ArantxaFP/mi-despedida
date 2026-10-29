@@ -1,0 +1,231 @@
+// Hay estilos compartidos para todos el panel
+// Aquí los estilos específicos de la página de contactos lanzadores
+
+.lanzadores {
+
+    // Formularios
+    &__formulario,
+    &__campo {
+        display: flex;
+        flex-direction: column;
+        gap: var(--espacio-md);
+        width: 100%;
+        min-width: 0;
+    }
+
+    &__campo {
+        gap: var(--espacio-xs);
+
+        input {
+            width: 100%;
+            min-width: 0;
+            min-height: 3.25rem;
+            padding: 0.75rem;
+
+            border: 1px solid var(--color-secundario);
+            border-radius: var(--radio-campo);
+            background: var(--color-superficie);
+
+            color: var(--color-principal);
+            font-family: var(--fuente-general);
+            font-size: var(--texto-normal);
+
+            &[aria-invalid='true'] {
+                border-color: var(--color-error);
+            }
+        }
+    }
+
+    // Botones
+    &__boton {
+        justify-content: flex-start;
+        width: 100%;
+        text-align: left;
+
+        &--peligro {
+            min-height: 3rem;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--color-error);
+            border-radius: var(--radio-boton);
+            background: var(--color-superficie);
+            color: var(--color-error);
+            font: inherit;
+            cursor: pointer;
+
+            &:disabled {
+                opacity: 0.65;
+                cursor: not-allowed;
+            }
+        }
+    }
+
+    &__volver {
+        align-self: flex-start;
+        min-height: 2.75rem;
+        padding: 0.5rem 0;
+
+        border: 0;
+        background: transparent;
+        color: var(--color-principal);
+
+        font: inherit;
+        text-decoration: underline;
+        text-underline-offset: 0.2rem;
+        text-align: left;
+        cursor: pointer;
+    }
+
+    // Avisos y mensajes
+    &__recuento,
+    &__aviso,
+    &__correcto {
+        padding: var(--espacio-md);
+        border-radius: var(--radio-campo);
+        background: var(--color-fondo);
+    }
+
+    &__advertencia {
+        padding: var(--espacio-md);
+        border-left: 4px solid var(--color-error);
+        border-radius: var(--radio-campo);
+        background: var(--color-error-fondo);
+        color: var(--color-error);
+    }
+
+    &__error {
+        margin: 0;
+        color: var(--color-error);
+        font-size: var(--texto-secundario);
+    }
+
+    &__nota {
+        font-size: var(--texto-secundario);
+        color: var(--color-secundario);
+    }
+
+    // Listado para móvil
+    &__fichas {
+        display: flex;
+        flex-direction: column;
+        gap: var(--espacio-md);
+    }
+
+    &__ficha {
+        display: flex;
+        flex-direction: column;
+        gap: var(--espacio-sm);
+
+        min-width: 0;
+        padding: var(--espacio-md);
+
+        border: 1px solid var(--color-secundario);
+        border-radius: var(--radio-campo);
+
+        h3,
+        p {
+            margin: 0;
+        }
+    }
+
+    &__correo {
+        overflow-wrap: anywhere;
+    }
+
+    &__estado {
+        display: inline-block;
+        font-weight: 500;
+
+        &--aceptada {
+            color: var(--color-exito);
+        }
+
+        &--pendiente {
+            color: var(--color-malva);
+        }
+    }
+
+    &__acciones-fila {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: var(--espacio-sm);
+
+        button {
+            min-height: 2.75rem;
+            padding: 0.5rem;
+
+            border: 0;
+            border-radius: var(--radio-campo);
+            background: transparent;
+            color: var(--color-secundario);
+
+            font: inherit;
+            font-size: var(--texto-secundario);
+            text-align: left;
+            text-decoration: underline;
+            text-underline-offset: 0.2rem;
+            cursor: pointer;
+
+            &:disabled {
+                opacity: 0.6;
+                cursor: not-allowed;
+            }
+        }
+    }
+
+    // Tabla: oculta inicialmente en móvil
+    &__tabla-contenedor {
+        display: none;
+    }
+
+    &__tabla {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: left;
+
+        th,
+        td {
+            padding: var(--espacio-md);
+            border-bottom: 1px solid var(--color-fondo);
+            vertical-align: top;
+        }
+
+        th {
+            font-weight: 600;
+        }
+
+        tbody tr:last-child td {
+            border-bottom: 0;
+        }
+    }
+
+    &__caption {
+        text-align: left;
+        margin-bottom: var(--espacio-md);
+    }
+}
+
+
+// Tablet y escritorio
+@media (min-width: 48rem) {
+    .lanzadores {
+
+        &__tabla-contenedor {
+            display: block;
+        }
+
+        &__fichas {
+            display: none;
+        }
+
+        &__tabla {
+            min-width: 44rem;
+        }
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .lanzadores * {
+        transition: none;
+    }
+}

@@ -1,0 +1,424 @@
+<section class="panel-pagina lanzadores" aria-labelledby="titulo-lanzadores">
+
+    <header class="panel-pagina__bloque panel-pagina__cabecera">
+
+        <h1 id="titulo-lanzadores">Contactos lanzadores</h1>
+
+        <p>
+            Gestiona las personas autorizadas para activar tu despedida.
+            Necesitas al menos dos lanzadores distintos que hayan aceptado su invitación y mantengan su autorización
+            vigente.
+        </p>
+
+    </header>
+
+
+    <!-- Lista principal -->
+    @if (vistaActual() === 'listado') {
+
+    <!-- Recuento lanzadores -->
+    <section class="panel-pagina__bloque" aria-labelledby="titulo-estado-lanzadores">
+
+        <h2 id="titulo-estado-lanzadores">
+            Estado de las autorizaciones
+        </h2>
+
+        @if (!datosConectados()) {
+
+        <p class="lanzadores__aviso" role="status">
+            El recuento de lanzadores estará disponible cuando conectemos las asignaciones de tu cuenta.
+        </p>
+
+        } @else {
+
+        <p class="lanzadores__recuento">
+            {{ lanzadoresHabilitados() }}
+            lanzadores habilitados · mínimo necesario: 2
+        </p>
+
+        <p>
+            {{ invitacionesPendientes() }}
+            invitaciones pendientes de aceptación.
+        </p>
+
+        @if (!minimoCumplido()) {
+
+        <p class="lanzadores__advertencia" role="status">
+            Tu cuenta todavía no dispone de los lanzadores necesarios.
+            Invita a dos personas distintas y comprueba que hayan aceptado su invitación.
+        </p>
+
+        } @else {
+
+        <p class="lanzadores__correcto" role="status">
+            Tu cuenta dispone del mínimo de lanzadores habilitados.
+        </p>
+
+        }
+        }
+
+    </section>
+
+
+    <!-- Lista -->
+    <section class="panel-pagina__bloque" aria-labelledby="titulo-listado-lanzadores">
+
+        <h2 id="titulo-listado-lanzadores">
+            Mis lanzadores
+        </h2>
+
+        <button class="panel__boton lanzadores__boton" type="button" (click)="abrirInvitacion()">
+            Invitar lanzador
+
+        </button>
+
+        @if (!datosConectados()) {
+
+        <p>
+            El listado de asignaciones estará disponible cuando conectemos el backend.
+        </p>
+
+        } @else if (lanzadores().length === 0) {
+
+        <p>
+            Todavía no has invitado a ninguna persona como lanzadora.
+        </p>
+
+        } @else {
+
+        <!-- Tabla -->
+        <div class="panel-pagina__tabla-responsive
+                            lanzadores__tabla-contenedor">
+
+            <table class="lanzadores__tabla">
+
+                <caption class="lanzadores__caption">
+                    Asignaciones de lanzadores de tu cuenta
+                </caption>
+
+                <thead>
+                    <tr>
+                        <th scope="col">Nombre</th>
+                        <th scope="col">Correo electrónico</th>
+                        <th scope="col">Estado de la asignación</th>
+                        <th scope="col">Acciones</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @for (lanzador of lanzadores(); track lanzador.id) {
+
+                    <tr>
+                        <td>{{ lanzador.nombre }}</td>
+
+                        <td class="lanzadores__correo">
+                            {{ lanzador.correo }}
+                        </td>
+
+                        <td>
+                            <span class="lanzadores__estado"
+                                [class.lanzadores__estado--aceptada]="lanzador.estado === 'aceptada' && lanzador.habilitada"
+                                [class.lanzadores__estado--pendiente]="lanzador.estado === 'pendiente'">
+
+                                {{ nombreEstado(lanzador.estado) }}
+
+                                @if (lanzador.estado === 'aceptada' &&
+                                !lanzador.habilitada) {
+                                · No habilitada
+                                }
+
+                            </span>
+                        </td>
+
+                        <td>
+                            <div class="lanzadores__acciones-fila">
+
+                                @if (lanzador.estado === 'pendiente' ||
+                                lanzador.estado === 'caducada') {
+
+                                <button type="button" disabled title="Pendiente de conexión con el backend">
+                                    Reenviar
+                                </button>
+                                }
+
+                                @if (lanzador.estado === 'pendiente') {
+
+                                <button type="button" disabled title="Pendiente de conexión con el backend">
+                                    Retirar
+                                </button>
+                                }
+
+                                @if (lanzador.estado === 'aceptada' &&
+                                lanzador.habilitada) {
+
+                                <button type="button" (click)="abrirRevocacion(lanzador)">
+                                    Revocar
+                                </button>
+                                }
+
+                                <button type="button" disabled title="Pendiente de conexión con el backend">
+                                    Eliminar
+                                </button>
+
+                            </div>
+                        </td>
+                    </tr>
+
+                    }
+                </tbody>
+            </table>
+        </div>
+
+
+        <!-- Tabla mobile -->
+        <div class="lanzadores__fichas">
+
+            @for (lanzador of lanzadores(); track lanzador.id) {
+
+            <article class="lanzadores__ficha">
+
+                <h3>{{ lanzador.nombre }}</h3>
+
+                <p class="lanzadores__correo">
+                    {{ lanzador.correo }}
+                </p>
+
+                <p>
+                    Estado:
+                    <strong>
+                        {{ nombreEstado(lanzador.estado) }}
+                        @if (lanzador.estado === 'aceptada' &&
+                        !lanzador.habilitada) {
+                        · No habilitada
+                        }
+                    </strong>
+                </p>
+
+                <div class="lanzadores__acciones-fila">
+
+                    @if (lanzador.estado === 'pendiente' ||
+                    lanzador.estado === 'caducada') {
+                    <button type="button" disabled>
+                        Reenviar invitación
+                    </button>
+                    }
+
+                    @if (lanzador.estado === 'pendiente') {
+                    <button type="button" disabled>
+                        Retirar invitación
+                    </button>
+                    }
+
+                    @if (lanzador.estado === 'aceptada' &&
+                    lanzador.habilitada) {
+                    <button type="button" (click)="abrirRevocacion(lanzador)">
+                        Revocar autorización
+                    </button>
+                    }
+
+                    <button type="button" disabled>
+                        Eliminar lanzador
+                    </button>
+
+                </div>
+
+            </article>
+
+            }
+
+        </div>
+        }
+
+    </section>
+    }
+
+    <!-- Formulario para invitar a un nuevo lanzador -->
+    @if (vistaActual() === 'invitar') {
+
+    <section class="panel-pagina__bloque" aria-labelledby="titulo-invitar">
+
+        <h2 id="titulo-invitar">
+            Invitar lanzador
+        </h2>
+
+        <p>
+            Invita a una persona de confianza.
+            No podrá acceder a tus destinatarios ni a tus mensajes privados.
+        </p>
+
+        <form class="lanzadores__formulario" [formGroup]="formularioInvitacion" (ngSubmit)="revisarInvitacion()"
+            novalidate>
+
+            <div class="lanzadores__campo">
+
+                <label for="nombre-lanzador">Nombre</label>
+
+                <input id="nombre-lanzador" type="text" formControlName="nombre" autocomplete="off" maxlength="100"
+                    [attr.aria-invalid]="formularioInvitacion.controls.nombre.invalid && formularioInvitacion.controls.nombre.touched"
+                    [attr.aria-describedby]="formularioInvitacion.controls.nombre.invalid && formularioInvitacion.controls.nombre.touched ? 'error-nombre-lanzador' : null">
+
+                @if (formularioInvitacion.controls.nombre.invalid &&
+                formularioInvitacion.controls.nombre.touched) {
+
+                <p id="error-nombre-lanzador" class="lanzadores__error">
+                    Introduce el nombre del lanzador.
+                </p>
+                }
+
+            </div>
+
+            <div class="lanzadores__campo">
+
+                <label for="correo-lanzador">
+                    Correo electrónico
+                </label>
+
+                <input id="correo-lanzador" type="email" formControlName="correo" autocomplete="off"
+                    [attr.aria-invalid]="formularioInvitacion.controls.correo.invalid && formularioInvitacion.controls.correo.touched"
+                    [attr.aria-describedby]="formularioInvitacion.controls.correo.invalid && formularioInvitacion.controls.correo.touched ? 'error-correo-lanzador' : null">
+
+                @if (formularioInvitacion.controls.correo.invalid &&
+                formularioInvitacion.controls.correo.touched) {
+
+                <p id="error-correo-lanzador" class="lanzadores__error">
+                    Introduce una dirección de correo válida.
+                </p>
+                }
+
+            </div>
+
+            <p>
+                La invitación caducará a los siete días si no se acepta.
+            </p>
+
+            <button class="panel__boton lanzadores__boton" type="submit">
+                Revisar invitación
+            </button>
+
+        </form>
+
+        <button class="lanzadores__volver" type="button" (click)="volverAlListado()">
+
+            Cancelar
+        </button>
+
+    </section>
+    }
+
+
+    <!-- REVISAR INVITACIÓN -->
+    @if (vistaActual() === 'revisar') {
+
+    <section class="panel-pagina__bloque" aria-labelledby="titulo-revisar">
+
+        <h2 id="titulo-revisar">
+            Revisar la invitación
+        </h2>
+
+        <div class="lanzadores__campo">
+
+            <label for="revision-nombre">Nombre</label>
+
+            <input id="revision-nombre" type="text" [value]="formularioInvitacion.controls.nombre.value" readonly>
+        </div>
+
+        <div class="lanzadores__campo">
+
+            <label for="revision-correo">
+                Correo electrónico
+            </label>
+
+            <input id="revision-correo" type="email" [value]="formularioInvitacion.controls.correo.value" readonly>
+        </div>
+
+        @if (!mensajeError()) {
+
+        <p>
+            Comprueba que la dirección es correcta
+            antes de enviar la invitación.
+        </p>
+
+        <button class="panel__boton lanzadores__boton" type="button" disabled
+            aria-describedby="invitacion-pendiente-api">
+            Enviar invitación
+        </button>
+
+        <p id="invitacion-pendiente-api" class="lanzadores__nota">
+            El envío estará disponible cuando conectemos la API segura de invitaciones.
+        </p>
+
+        }
+
+        <button class="lanzadores__volver" type="button" (click)="volverAInvitacion()">
+            Corregir datos
+        </button>
+
+        <button class="lanzadores__volver" type="button" (click)="volverAlListado()">
+            Volver al listado
+        </button>
+
+    </section>
+    }
+
+    <!-- Confirmar revocación de permiso lanzador -->
+    @if (vistaActual() === 'revocar' &&
+    lanzadorSeleccionado(); as lanzador) {
+
+    <section class="panel-pagina__bloque" aria-labelledby="titulo-revocar">
+
+        <h2 id="titulo-revocar">
+            ¿Quieres revocar la autorización?
+        </h2>
+
+        <p>
+            {{ lanzador.nombre }} · {{ lanzador.correo }}
+        </p>
+
+        <div class="lanzadores__advertencia" role="alert">
+            Esta persona dejará de poder actuar como lanzadora de tu cuenta.
+            Su historial se conservará.
+        </div>
+
+        <p>
+            Después de revocar, tendrás
+            {{ habilitadosTrasRevocar() }}
+            lanzadores habilitados.
+            Necesitas al menos dos.
+        </p>
+
+        <button class="lanzadores__boton lanzadores__boton--peligro" type="button" disabled
+            aria-describedby="revocacion-pendiente-api">
+            Revocar autorización
+        </button>
+
+        <p id="revocacion-pendiente-api" class="lanzadores__nota">
+            La revocación estará disponible cuando conectemos el backend.
+        </p>
+
+        <button class="panel__boton lanzadores__boton" type="button" (click)="volverAlListado()">
+            Conservar autorización
+        </button>
+
+    </section>
+    }
+
+
+    <!-- Errores -->
+    @if (mensajeError()) {
+
+    <div class="panel-pagina__bloque">
+
+        <p class="lanzadores__advertencia" role="alert">
+            {{ mensajeError() }}
+        </p>
+
+        <button class="panel__boton lanzadores__boton" type="button" (click)="volverAlListado()">
+
+            Volver al listado
+        </button>
+
+    </div>
+
+    }
+
+</section>

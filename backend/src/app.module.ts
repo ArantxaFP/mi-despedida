@@ -4,6 +4,8 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { SupabaseModule } from './supabase/supabase.module';
 import { ContactosLanzadoresModule } from './contactos-lanzadores/contactos-lanzadores.module';
+import { PrismaModule } from './prisma/prisma.module';
+import { CorreoModule } from './correo/correo.module';
 
 @Module({
   imports: [
@@ -11,7 +13,9 @@ import { ContactosLanzadoresModule } from './contactos-lanzadores/contactos-lanz
       isGlobal: true
     }),
     SupabaseModule,
-    ContactosLanzadoresModule
+    ContactosLanzadoresModule,
+    PrismaModule,
+    CorreoModule
   ],
   controllers: [AppController],
   providers: [AppService]

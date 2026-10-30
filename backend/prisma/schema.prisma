@@ -648,6 +648,7 @@ model invitaciones_lanzadores {
   fecha_caducidad         DateTime                @default(dbgenerated("(now() + '7 days'::interval)")) @db.Timestamptz(6)
   fecha_utilizacion       DateTime?               @db.Timestamptz(6)
   fecha_invalidacion      DateTime?               @db.Timestamptz(6)
+  estado_envio            String                  @default("preparado") @db.VarChar(30)
   asignaciones_lanzadores asignaciones_lanzadores @relation(fields: [asignacion_id], references: [id], onUpdate: NoAction)
 
   @@index([fecha_caducidad], map: "invitaciones_fecha_caducidad_idx", where: raw("((fecha_utilizacion IS NULL) AND (fecha_invalidacion IS NULL))"))

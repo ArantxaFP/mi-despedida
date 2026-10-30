@@ -3262,7 +3262,8 @@ export const Invitaciones_lanzadoresScalarFieldEnum = {
   fecha_creacion: 'fecha_creacion',
   fecha_caducidad: 'fecha_caducidad',
   fecha_utilizacion: 'fecha_utilizacion',
-  fecha_invalidacion: 'fecha_invalidacion'
+  fecha_invalidacion: 'fecha_invalidacion',
+  estado_envio: 'estado_envio'
 } as const
 
 export type Invitaciones_lanzadoresScalarFieldEnum = (typeof Invitaciones_lanzadoresScalarFieldEnum)[keyof typeof Invitaciones_lanzadoresScalarFieldEnum]

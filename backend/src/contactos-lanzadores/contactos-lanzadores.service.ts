@@ -1,6 +1,8 @@
-import { BadRequestException, ConflictException, Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, InternalServerErrorException, Logger, ServiceUnavailableException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { randomBytes, createHash } from 'node:crypto';
 import { PrismaService } from '../prisma/prisma.service';
+import { CorreoService } from '../correo/correo.service';
 import { CrearInvitacionDto } from './dto/crear-invitacion.dto';
 
 @Injectable()
@@ -11,7 +13,9 @@ export class ContactosLanzadoresService {
     );
 
     constructor(
-        private readonly prisma: PrismaService
+        private readonly prisma: PrismaService,
+        private readonly correoService: CorreoService,
+        private readonly config: ConfigService
     ) { }
 
     // --------------------------------------------------
@@ -65,7 +69,6 @@ export class ContactosLanzadoresService {
         correoAdministrador: string,
         datos: CrearInvitacionDto
     ) {
-
         const nombre = datos.nombre.trim();
         const correo = datos.correo.trim().toLowerCase();
         const correoTitular = correoAdministrador.trim().toLowerCase();
@@ -82,29 +85,25 @@ export class ContactosLanzadoresService {
             );
         }
 
-        // Token aleatorio de 32 bytes: 256 bits
+        const ahora = new Date();
+
+        const nuevaCaducidad = new Date(
+            ahora.getTime() + 7 * 24 * 60 * 60 * 1000
+        );
+
         const token = randomBytes(32).toString('hex');
 
-        // En la bbdd guardamos exclusivamente el hash
         const tokenHash = createHash('sha256')
             .update(token)
             .digest('hex');
-
-        const ahora = new Date();
-
-        const fechaCaducidad = new Date(
-            ahora.getTime() + 7 * 24 * 60 * 60 * 1000
-        );
 
         try {
             const resultado = await this.prisma.$transaction(
                 async (tx) => {
 
-                    // Buscar un lanzador existente por su correo
+                    // 1. Localizar o crear al lanzador
                     let lanzador = await tx.lanzadores.findFirst({
-                        where: {
-                            correo
-                        }
+                        where: { correo }
                     });
 
                     if (!lanzador) {
@@ -116,7 +115,14 @@ export class ContactosLanzadoresService {
                         });
                     }
 
-                    // Comprobar si hay una asignación vigente
+                    // 2. Impedir que el titular sea su propio lanzador, incluso si ha cambiado de dirección de correo.
+                    if (lanzador.usuario_id === administradorId) {
+                        throw new BadRequestException(
+                            'No puedes actuar como lanzador de tu propia cuenta.'
+                        );
+                    }
+
+                    // 3. Buscar asignaciones pendientes o aceptadas
                     const asignacionExistente =
                         await tx.asignaciones_lanzadores.findFirst({
                             where: {
@@ -125,66 +131,142 @@ export class ContactosLanzadoresService {
                                 estado: {
                                     in: ['pendiente', 'aceptada']
                                 }
+                            },
+                            orderBy: {
+                                fecha_invitacion: 'desc'
                             }
                         });
 
-                    if (asignacionExistente) {
+                    let asignacion = asignacionExistente;
+                    let esReintento = false;
+
+                    if (asignacion?.estado === 'aceptada') {
                         throw new ConflictException(
-                            'Ya existe una invitación pendiente o una autorización aceptada para este lanzador.'
+                            'Este lanzador ya tiene una autorización aceptada.'
                         );
                     }
 
-                    // Crear la asignación pendiente
-                    const asignacion =
-                        await tx.asignaciones_lanzadores.create({
+                    if (asignacion?.estado === 'pendiente') {
+
+                        // 4. Caducar una asignación que superó su plazo
+                        if (asignacion.fecha_caducidad <= ahora) {
+
+                            await tx.invitaciones_lanzadores.updateMany({
+                                where: {
+                                    asignacion_id: asignacion.id,
+                                    fecha_utilizacion: null,
+                                    fecha_invalidacion: null
+                                },
+                                data: {
+                                    fecha_invalidacion: ahora
+                                }
+                            });
+
+                            await tx.asignaciones_lanzadores.update({
+                                where: { id: asignacion.id },
+                                data: {
+                                    estado: 'caducada',
+                                    updated_at: ahora
+                                }
+                            });
+
+                            await tx.historial_asignaciones.create({
+                                data: {
+                                    asignacion_id: asignacion.id,
+                                    actor_usuario_id: null,
+                                    evento: 'invitacion_caducada',
+                                    estado_anterior: 'pendiente',
+                                    estado_nuevo: 'caducada',
+                                    descripcion:
+                                        'La invitación ha superado su plazo de validez.'
+                                }
+                            });
+
+                            asignacion = null;
+
+                        } else {
+
+                            // 5. Comprobar si ya existe un enlace activo
+                            const tokenActivo =
+                                await tx.invitaciones_lanzadores.findFirst({
+                                    where: {
+                                        asignacion_id: asignacion.id,
+                                        fecha_utilizacion: null,
+                                        fecha_invalidacion: null
+                                    }
+                                });
+
+                            if (tokenActivo) {
+                                throw new ConflictException(
+                                    'Ya existe una invitación pendiente para este lanzador.'
+                                );
+                            }
+
+                            // Si el enlace anterior fue invalidado tras un problema de envío, se reutiliza la asignación pendiente
+                            esReintento = true;
+                        }
+                    }
+
+                    // 6. Crear una asignación únicamente si hace falta
+                    if (!asignacion) {
+                        asignacion = await tx.asignaciones_lanzadores.create({
                             data: {
                                 administrador_id: administradorId,
                                 lanzador_id: lanzador.id,
                                 estado: 'pendiente',
                                 fecha_invitacion: ahora,
-                                fecha_caducidad: fechaCaducidad
+                                fecha_caducidad: nuevaCaducidad
                             }
                         });
+                    }
 
-                    // Crear el registro del token
+                    // El reintento conserva la caducidad original
+                    const fechaCaducidad = asignacion.fecha_caducidad;
+
+                    // 7. Crear un nuevo enlace de un solo uso
                     const invitacion =
                         await tx.invitaciones_lanzadores.create({
                             data: {
                                 asignacion_id: asignacion.id,
                                 token_hash: tokenHash,
                                 fecha_creacion: ahora,
-                                fecha_caducidad: fechaCaducidad
+                                fecha_caducidad: fechaCaducidad,
+                                estado_envio: 'preparado'
                             }
                         });
 
-                    // Registrar el evento en el historial
+                    // 8. Registrar la creación o el reintento
                     await tx.historial_asignaciones.create({
                         data: {
                             asignacion_id: asignacion.id,
                             actor_usuario_id: administradorId,
-                            evento: 'invitacion_creada',
-                            estado_anterior: null,
+                            evento: esReintento
+                                ? 'invitacion_reenviada'
+                                : 'invitacion_creada',
+                            estado_anterior: esReintento
+                                ? 'pendiente'
+                                : null,
                             estado_nuevo: 'pendiente',
-                            descripcion:
-                                'Invitación preparada para su envío.'
+                            descripcion: esReintento
+                                ? 'Nuevo intento de envío de invitación.'
+                                : 'Invitación preparada para su envío.'
                         }
                     });
 
                     return {
                         asignacionId: asignacion.id,
-                        invitacionId: invitacion.id
+                        invitacionId: invitacion.id,
+                        fechaCaducidad
                     };
                 }
             );
 
-
-            // El token solo sale de este método hacia el servicio de correo del backend
+            // No se almacena ni se envía al navegador el token original
             return {
                 ...resultado,
                 token,
                 nombre,
-                correo,
-                fechaCaducidad
+                correo
             };
 
         } catch (error) {
@@ -195,7 +277,6 @@ export class ContactosLanzadoresService {
                 throw error;
             }
 
-            // Conflictos de unicidad detectados por Postgre
             if (
                 typeof error === 'object' &&
                 error !== null &&
@@ -203,7 +284,7 @@ export class ContactosLanzadoresService {
                 error.code === 'P2002'
             ) {
                 throw new ConflictException(
-                    'Ya existe una invitación o un lanzador con estos datos.'
+                    'Ya existe una asignación o un lanzador con estos datos.'
                 );
             }
 
@@ -216,6 +297,124 @@ export class ContactosLanzadoresService {
                 'No se ha podido preparar la invitación.'
             );
         }
-
     }
+
+    // --------------------------------------------------
+    // 3. Crear y enviar una invitación mediante Brevo
+    // --------------------------------------------------
+
+    async crearYEnviarInvitacion(
+        administradorId: string,
+        correoAdministrador: string,
+        datos: CrearInvitacionDto
+    ) {
+        // Impide crear invitaciones sin tener preparado el recorrido público de aceptación
+        if (
+            this.config.get<string>('HABILITAR_ENVIO_INVITACIONES')
+            !== 'true'
+        ) {
+            throw new ServiceUnavailableException(
+                'El envío de invitaciones todavía no está habilitado.'
+            );
+        }
+
+        const frontendUrl =
+            this.config.getOrThrow<string>('FRONTEND_URL');
+
+        // Crea la asignación, el token y el historial
+        const invitacion = await this.prepararInvitacion(
+            administradorId,
+            correoAdministrador,
+            datos
+        );
+
+        // OJO URL de la futura pantalla pública de invitaciones
+        const enlace = new URL(
+            '/invitacion-lanzador',
+            frontendUrl
+        );
+
+        enlace.searchParams.set('token', invitacion.token);
+
+        let messageId: string;
+
+        try {
+            // Solicita el envío a Brevo
+            messageId =
+                await this.correoService.enviarInvitacionLanzador(
+                    invitacion.correo,
+                    invitacion.nombre,
+                    enlace.toString()
+                );
+
+        } catch (error) {
+
+            // Si Brevo no confirma el envío, se invalida el token.
+            // Pero se conserva el historial para auditoría.
+            // No se puede asegurar si Brevo recibió la petición.
+            // Se invalida el enlace, pero se diferencia el resultado del correo con una revocación.
+            try {
+                await this.prisma.invitaciones_lanzadores.update({
+                    where: {
+                        id: invitacion.invitacionId
+                    },
+                    data: {
+                        estado_envio: 'incierto',
+                        fecha_invalidacion: new Date()
+                    }
+                });
+
+            } catch (actualizacionError) {
+                this.logger.error(
+                    'No se ha podido invalidar el token tras un error de Brevo.',
+                    actualizacionError instanceof Error
+                        ? actualizacionError.stack
+                        : String(actualizacionError)
+                );
+            }
+
+            this.logger.error(
+                'Brevo no ha confirmado el envío de la invitación.',
+                error instanceof Error ? error.message : String(error)
+            );
+
+            throw new ServiceUnavailableException(
+                'No se ha podido confirmar el envío de la invitación.'
+            );
+        }
+
+        // Brevo ha aceptado la solicitud.
+        // Esto todavía no confirma la entrega al destinatario.
+        try {
+            await this.prisma.invitaciones_lanzadores.update({
+                where: {
+                    id: invitacion.invitacionId
+                },
+                data: {
+                    estado_envio: 'aceptado_por_brevo'
+                }
+            });
+
+        } catch (error) {
+            this.logger.error(
+                'Brevo ha aceptado el correo, pero no se ha podido actualizar su estado.',
+                error instanceof Error ? error.stack : String(error)
+            );
+
+            throw new InternalServerErrorException(
+                'El correo se ha solicitado, pero no se ha podido confirmar su registro.'
+            );
+        }
+
+        return {
+            asignacionId: invitacion.asignacionId,
+            estado: 'pendiente',
+            correoSolicitado: true,
+            mensaje: 'Brevo ha aceptado la solicitud de envío.',
+            messageId
+        };
+    }
+
 }
+
+

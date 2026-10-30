@@ -33,6 +33,7 @@ export type Invitaciones_lanzadoresMinAggregateOutputType = {
   fecha_caducidad: Date | null
   fecha_utilizacion: Date | null
   fecha_invalidacion: Date | null
+  estado_envio: string | null
 }
 
 export type Invitaciones_lanzadoresMaxAggregateOutputType = {
@@ -43,6 +44,7 @@ export type Invitaciones_lanzadoresMaxAggregateOutputType = {
   fecha_caducidad: Date | null
   fecha_utilizacion: Date | null
   fecha_invalidacion: Date | null
+  estado_envio: string | null
 }
 
 export type Invitaciones_lanzadoresCountAggregateOutputType = {
@@ -53,6 +55,7 @@ export type Invitaciones_lanzadoresCountAggregateOutputType = {
   fecha_caducidad: number
   fecha_utilizacion: number
   fecha_invalidacion: number
+  estado_envio: number
   _all: number
 }
 
@@ -65,6 +68,7 @@ export type Invitaciones_lanzadoresMinAggregateInputType = {
   fecha_caducidad?: true
   fecha_utilizacion?: true
   fecha_invalidacion?: true
+  estado_envio?: true
 }
 
 export type Invitaciones_lanzadoresMaxAggregateInputType = {
@@ -75,6 +79,7 @@ export type Invitaciones_lanzadoresMaxAggregateInputType = {
   fecha_caducidad?: true
   fecha_utilizacion?: true
   fecha_invalidacion?: true
+  estado_envio?: true
 }
 
 export type Invitaciones_lanzadoresCountAggregateInputType = {
@@ -85,6 +90,7 @@ export type Invitaciones_lanzadoresCountAggregateInputType = {
   fecha_caducidad?: true
   fecha_utilizacion?: true
   fecha_invalidacion?: true
+  estado_envio?: true
   _all?: true
 }
 
@@ -168,6 +174,7 @@ export type Invitaciones_lanzadoresGroupByOutputType = {
   fecha_caducidad: Date
   fecha_utilizacion: Date | null
   fecha_invalidacion: Date | null
+  estado_envio: string
   _count: Invitaciones_lanzadoresCountAggregateOutputType | null
   _min: Invitaciones_lanzadoresMinAggregateOutputType | null
   _max: Invitaciones_lanzadoresMaxAggregateOutputType | null
@@ -199,6 +206,7 @@ export type invitaciones_lanzadoresWhereInput = {
   fecha_caducidad?: Prisma.DateTimeFilter<"invitaciones_lanzadores"> | Date | string
   fecha_utilizacion?: Prisma.DateTimeNullableFilter<"invitaciones_lanzadores"> | Date | string | null
   fecha_invalidacion?: Prisma.DateTimeNullableFilter<"invitaciones_lanzadores"> | Date | string | null
+  estado_envio?: Prisma.StringFilter<"invitaciones_lanzadores"> | string
   asignaciones_lanzadores?: Prisma.XOR<Prisma.Asignaciones_lanzadoresScalarRelationFilter, Prisma.asignaciones_lanzadoresWhereInput>
 }
 
@@ -210,6 +218,7 @@ export type invitaciones_lanzadoresOrderByWithRelationInput = {
   fecha_caducidad?: Prisma.SortOrder
   fecha_utilizacion?: Prisma.SortOrderInput | Prisma.SortOrder
   fecha_invalidacion?: Prisma.SortOrderInput | Prisma.SortOrder
+  estado_envio?: Prisma.SortOrder
   asignaciones_lanzadores?: Prisma.asignaciones_lanzadoresOrderByWithRelationInput
 }
 
@@ -224,6 +233,7 @@ export type invitaciones_lanzadoresWhereUniqueInput = Prisma.AtLeast<{
   fecha_caducidad?: Prisma.DateTimeFilter<"invitaciones_lanzadores"> | Date | string
   fecha_utilizacion?: Prisma.DateTimeNullableFilter<"invitaciones_lanzadores"> | Date | string | null
   fecha_invalidacion?: Prisma.DateTimeNullableFilter<"invitaciones_lanzadores"> | Date | string | null
+  estado_envio?: Prisma.StringFilter<"invitaciones_lanzadores"> | string
   asignaciones_lanzadores?: Prisma.XOR<Prisma.Asignaciones_lanzadoresScalarRelationFilter, Prisma.asignaciones_lanzadoresWhereInput>
 }, "id" | "asignacion_id" | "token_hash">
 
@@ -235,6 +245,7 @@ export type invitaciones_lanzadoresOrderByWithAggregationInput = {
   fecha_caducidad?: Prisma.SortOrder
   fecha_utilizacion?: Prisma.SortOrderInput | Prisma.SortOrder
   fecha_invalidacion?: Prisma.SortOrderInput | Prisma.SortOrder
+  estado_envio?: Prisma.SortOrder
   _count?: Prisma.invitaciones_lanzadoresCountOrderByAggregateInput
   _max?: Prisma.invitaciones_lanzadoresMaxOrderByAggregateInput
   _min?: Prisma.invitaciones_lanzadoresMinOrderByAggregateInput
@@ -251,6 +262,7 @@ export type invitaciones_lanzadoresScalarWhereWithAggregatesInput = {
   fecha_caducidad?: Prisma.DateTimeWithAggregatesFilter<"invitaciones_lanzadores"> | Date | string
   fecha_utilizacion?: Prisma.DateTimeNullableWithAggregatesFilter<"invitaciones_lanzadores"> | Date | string | null
   fecha_invalidacion?: Prisma.DateTimeNullableWithAggregatesFilter<"invitaciones_lanzadores"> | Date | string | null
+  estado_envio?: Prisma.StringWithAggregatesFilter<"invitaciones_lanzadores"> | string
 }
 
 export type invitaciones_lanzadoresCreateInput = {
@@ -260,6 +272,7 @@ export type invitaciones_lanzadoresCreateInput = {
   fecha_caducidad?: Date | string
   fecha_utilizacion?: Date | string | null
   fecha_invalidacion?: Date | string | null
+  estado_envio?: string
   asignaciones_lanzadores: Prisma.asignaciones_lanzadoresCreateNestedOneWithoutInvitaciones_lanzadoresInput
 }
 
@@ -271,6 +284,7 @@ export type invitaciones_lanzadoresUncheckedCreateInput = {
   fecha_caducidad?: Date | string
   fecha_utilizacion?: Date | string | null
   fecha_invalidacion?: Date | string | null
+  estado_envio?: string
 }
 
 export type invitaciones_lanzadoresUpdateInput = {
@@ -280,6 +294,7 @@ export type invitaciones_lanzadoresUpdateInput = {
   fecha_caducidad?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   fecha_utilizacion?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   fecha_invalidacion?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  estado_envio?: Prisma.StringFieldUpdateOperationsInput | string
   asignaciones_lanzadores?: Prisma.asignaciones_lanzadoresUpdateOneRequiredWithoutInvitaciones_lanzadoresNestedInput
 }
 
@@ -291,6 +306,7 @@ export type invitaciones_lanzadoresUncheckedUpdateInput = {
   fecha_caducidad?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   fecha_utilizacion?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   fecha_invalidacion?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  estado_envio?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
 export type invitaciones_lanzadoresCreateManyInput = {
@@ -301,6 +317,7 @@ export type invitaciones_lanzadoresCreateManyInput = {
   fecha_caducidad?: Date | string
   fecha_utilizacion?: Date | string | null
   fecha_invalidacion?: Date | string | null
+  estado_envio?: string
 }
 
 export type invitaciones_lanzadoresUpdateManyMutationInput = {
@@ -310,6 +327,7 @@ export type invitaciones_lanzadoresUpdateManyMutationInput = {
   fecha_caducidad?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   fecha_utilizacion?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   fecha_invalidacion?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  estado_envio?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
 export type invitaciones_lanzadoresUncheckedUpdateManyInput = {
@@ -320,6 +338,7 @@ export type invitaciones_lanzadoresUncheckedUpdateManyInput = {
   fecha_caducidad?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   fecha_utilizacion?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   fecha_invalidacion?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  estado_envio?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
 export type Invitaciones_lanzadoresNullableScalarRelationFilter = {
@@ -335,6 +354,7 @@ export type invitaciones_lanzadoresCountOrderByAggregateInput = {
   fecha_caducidad?: Prisma.SortOrder
   fecha_utilizacion?: Prisma.SortOrder
   fecha_invalidacion?: Prisma.SortOrder
+  estado_envio?: Prisma.SortOrder
 }
 
 export type invitaciones_lanzadoresMaxOrderByAggregateInput = {
@@ -345,6 +365,7 @@ export type invitaciones_lanzadoresMaxOrderByAggregateInput = {
   fecha_caducidad?: Prisma.SortOrder
   fecha_utilizacion?: Prisma.SortOrder
   fecha_invalidacion?: Prisma.SortOrder
+  estado_envio?: Prisma.SortOrder
 }
 
 export type invitaciones_lanzadoresMinOrderByAggregateInput = {
@@ -355,6 +376,7 @@ export type invitaciones_lanzadoresMinOrderByAggregateInput = {
   fecha_caducidad?: Prisma.SortOrder
   fecha_utilizacion?: Prisma.SortOrder
   fecha_invalidacion?: Prisma.SortOrder
+  estado_envio?: Prisma.SortOrder
 }
 
 export type invitaciones_lanzadoresCreateNestedOneWithoutAsignaciones_lanzadoresInput = {
@@ -396,6 +418,7 @@ export type invitaciones_lanzadoresCreateWithoutAsignaciones_lanzadoresInput = {
   fecha_caducidad?: Date | string
   fecha_utilizacion?: Date | string | null
   fecha_invalidacion?: Date | string | null
+  estado_envio?: string
 }
 
 export type invitaciones_lanzadoresUncheckedCreateWithoutAsignaciones_lanzadoresInput = {
@@ -405,6 +428,7 @@ export type invitaciones_lanzadoresUncheckedCreateWithoutAsignaciones_lanzadores
   fecha_caducidad?: Date | string
   fecha_utilizacion?: Date | string | null
   fecha_invalidacion?: Date | string | null
+  estado_envio?: string
 }
 
 export type invitaciones_lanzadoresCreateOrConnectWithoutAsignaciones_lanzadoresInput = {
@@ -430,6 +454,7 @@ export type invitaciones_lanzadoresUpdateWithoutAsignaciones_lanzadoresInput = {
   fecha_caducidad?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   fecha_utilizacion?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   fecha_invalidacion?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  estado_envio?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
 export type invitaciones_lanzadoresUncheckedUpdateWithoutAsignaciones_lanzadoresInput = {
@@ -439,6 +464,7 @@ export type invitaciones_lanzadoresUncheckedUpdateWithoutAsignaciones_lanzadores
   fecha_caducidad?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   fecha_utilizacion?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   fecha_invalidacion?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  estado_envio?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
 
@@ -451,6 +477,7 @@ export type invitaciones_lanzadoresSelect<ExtArgs extends runtime.Types.Extensio
   fecha_caducidad?: boolean
   fecha_utilizacion?: boolean
   fecha_invalidacion?: boolean
+  estado_envio?: boolean
   asignaciones_lanzadores?: boolean | Prisma.asignaciones_lanzadoresDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["invitaciones_lanzadores"]>
 
@@ -462,6 +489,7 @@ export type invitaciones_lanzadoresSelectCreateManyAndReturn<ExtArgs extends run
   fecha_caducidad?: boolean
   fecha_utilizacion?: boolean
   fecha_invalidacion?: boolean
+  estado_envio?: boolean
   asignaciones_lanzadores?: boolean | Prisma.asignaciones_lanzadoresDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["invitaciones_lanzadores"]>
 
@@ -473,6 +501,7 @@ export type invitaciones_lanzadoresSelectUpdateManyAndReturn<ExtArgs extends run
   fecha_caducidad?: boolean
   fecha_utilizacion?: boolean
   fecha_invalidacion?: boolean
+  estado_envio?: boolean
   asignaciones_lanzadores?: boolean | Prisma.asignaciones_lanzadoresDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["invitaciones_lanzadores"]>
 
@@ -484,9 +513,10 @@ export type invitaciones_lanzadoresSelectScalar = {
   fecha_caducidad?: boolean
   fecha_utilizacion?: boolean
   fecha_invalidacion?: boolean
+  estado_envio?: boolean
 }
 
-export type invitaciones_lanzadoresOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "asignacion_id" | "token_hash" | "fecha_creacion" | "fecha_caducidad" | "fecha_utilizacion" | "fecha_invalidacion", ExtArgs["result"]["invitaciones_lanzadores"]>
+export type invitaciones_lanzadoresOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "asignacion_id" | "token_hash" | "fecha_creacion" | "fecha_caducidad" | "fecha_utilizacion" | "fecha_invalidacion" | "estado_envio", ExtArgs["result"]["invitaciones_lanzadores"]>
 export type invitaciones_lanzadoresInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   asignaciones_lanzadores?: boolean | Prisma.asignaciones_lanzadoresDefaultArgs<ExtArgs>
 }
@@ -510,6 +540,7 @@ export type $invitaciones_lanzadoresPayload<ExtArgs extends runtime.Types.Extens
     fecha_caducidad: Date
     fecha_utilizacion: Date | null
     fecha_invalidacion: Date | null
+    estado_envio: string
   }, ExtArgs["result"]["invitaciones_lanzadores"]>
   composites: {}
 }
@@ -941,6 +972,7 @@ export interface invitaciones_lanzadoresFieldRefs {
   readonly fecha_caducidad: Prisma.FieldRef<"invitaciones_lanzadores", 'DateTime'>
   readonly fecha_utilizacion: Prisma.FieldRef<"invitaciones_lanzadores", 'DateTime'>
   readonly fecha_invalidacion: Prisma.FieldRef<"invitaciones_lanzadores", 'DateTime'>
+  readonly estado_envio: Prisma.FieldRef<"invitaciones_lanzadores", 'String'>
 }
     
 

@@ -397,14 +397,15 @@
             Necesitas al menos dos.
         </p>
 
-        <button class="lanzadores__boton lanzadores__boton--peligro" type="button" disabled
-            aria-describedby="revocacion-pendiente-api">
-            Revocar autorización
+
+        <button class="lanzadores__boton lanzadores__boton--peligro" type="button" [disabled]="modificandoAsignacion()"
+            (click)="confirmarRevocacion()">
+
+            {{ modificandoAsignacion()
+            ? 'Revocando...'
+            : 'Revocar autorización' }}
         </button>
 
-        <p id="revocacion-pendiente-api" class="lanzadores__nota">
-            La revocación estará disponible cuando conectemos el backend.
-        </p>
 
         <button class="panel__boton lanzadores__boton" type="button" (click)="volverAlListado()">
             Conservar autorización

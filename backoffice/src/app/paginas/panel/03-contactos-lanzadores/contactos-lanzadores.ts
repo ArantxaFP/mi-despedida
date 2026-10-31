@@ -386,4 +386,46 @@ export class ContactosLanzadores implements OnInit {
         }
     }
 
+
+    // Reenviar una invitación conservando su historial
+    async reenviarInvitacion(
+        lanzador: AsignacionLanzador
+    ): Promise<void> {
+
+        if (
+            this.modificandoAsignacion() ||
+            !['pendiente', 'caducada'].includes(lanzador.estado)
+        ) {
+            return;
+        }
+
+        this.modificandoAsignacion.set(true);
+        this.mensajeError.set('');
+        this.mensajeCorrecto.set('');
+
+        try {
+            await this.contactosLanzadoresApi.reenviarInvitacion(
+                lanzador.id
+            );
+
+            await this.cargarLanzadores();
+
+            this.mensajeCorrecto.set(
+                'Brevo ha aceptado la solicitud de reenvío. ' +
+                'El enlace anterior ya no es válido.'
+            );
+
+        } catch (error) {
+            this.mensajeError.set(
+                error instanceof Error
+                    ? error.message
+                    : 'No se ha podido reenviar la invitación.'
+            );
+
+        } finally {
+            this.modificandoAsignacion.set(false);
+        }
+    }
+
+
 }

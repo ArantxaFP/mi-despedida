@@ -84,7 +84,9 @@ export const ModelName = {
   invitaciones_lanzadores: 'invitaciones_lanzadores',
   verificaciones_invitaciones_lanzadores: 'verificaciones_invitaciones_lanzadores',
   cuentas: 'cuentas',
-  historico_cierre_cuentas: 'historico_cierre_cuentas'
+  historico_cierre_cuentas: 'historico_cierre_cuentas',
+  contactos_destinatarios: 'contactos_destinatarios',
+  mensajes_destinatarios: 'mensajes_destinatarios'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -640,6 +642,29 @@ export const Historico_cierre_cuentasScalarFieldEnum = {
 } as const
 
 export type Historico_cierre_cuentasScalarFieldEnum = (typeof Historico_cierre_cuentasScalarFieldEnum)[keyof typeof Historico_cierre_cuentasScalarFieldEnum]
+
+
+export const Contactos_destinatariosScalarFieldEnum = {
+  id: 'id',
+  administrador_id: 'administrador_id',
+  nombre: 'nombre',
+  correo: 'correo',
+  fecha_creacion: 'fecha_creacion',
+  fecha_actualizacion: 'fecha_actualizacion'
+} as const
+
+export type Contactos_destinatariosScalarFieldEnum = (typeof Contactos_destinatariosScalarFieldEnum)[keyof typeof Contactos_destinatariosScalarFieldEnum]
+
+
+export const Mensajes_destinatariosScalarFieldEnum = {
+  id: 'id',
+  destinatario_id: 'destinatario_id',
+  contenido: 'contenido',
+  fecha_creacion: 'fecha_creacion',
+  fecha_actualizacion: 'fecha_actualizacion'
+} as const
+
+export type Mensajes_destinatariosScalarFieldEnum = (typeof Mensajes_destinatariosScalarFieldEnum)[keyof typeof Mensajes_destinatariosScalarFieldEnum]
 
 
 export const SortOrder = {

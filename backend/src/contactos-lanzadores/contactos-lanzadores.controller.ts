@@ -126,4 +126,34 @@ export class ContactosLanzadoresController {
         );
     }
 
+    // Reenviar invitación pendiente o caducada
+    @Post(':id/reenviar')
+    async reenviarInvitacion(
+        @Param('id') asignacionId: string,
+        @Headers('authorization') autorizacion?: string,
+        @Headers('origin') origen?: string
+    ) {
+        const usuario = await this.verificarSesion(
+            autorizacion
+        );
+
+        if (!usuario.email || !usuario.email_confirmed_at) {
+            throw new UnauthorizedException(
+                'La cuenta debe tener un correo verificado.'
+            );
+        }
+
+        await this.cuentasService.comprobarCuentaActiva(
+            usuario.id
+        );
+
+        return this.contactosLanzadoresService.reenviarInvitacion(
+            usuario.id,
+            usuario.email,
+            asignacionId,
+            origen
+        );
+    }
+
+
 }

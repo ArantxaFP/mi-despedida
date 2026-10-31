@@ -681,17 +681,18 @@ model verificaciones_invitaciones_lanzadores {
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model cuentas {
-  id                String    @id @db.Uuid
-  nombre            String    @db.VarChar
-  apellidos         String?   @db.VarChar
-  correo            String    @unique(map: "cuentas_correo_unico") @db.VarChar
-  rol               String    @default("administrador") @db.VarChar
-  estado            String    @default("pendiente_verificacion") @db.VarChar
-  fecha_registro    DateTime  @default(now()) @db.Timestamptz(6)
-  fecha_suspension  DateTime? @db.Timestamptz(6)
-  motivo_suspension String?
-  fecha_cierre      DateTime? @db.Timestamptz(6)
-  users             users     @relation(fields: [id], references: [id], onUpdate: NoAction, map: "cuentas_usuario_id_fkey")
+  id                      String                    @id @db.Uuid
+  nombre                  String                    @db.VarChar
+  apellidos               String?                   @db.VarChar
+  correo                  String                    @unique(map: "cuentas_correo_unico") @db.VarChar
+  rol                     String                    @default("administrador") @db.VarChar
+  estado                  String                    @default("pendiente_verificacion") @db.VarChar
+  fecha_registro          DateTime                  @default(now()) @db.Timestamptz(6)
+  fecha_suspension        DateTime?                 @db.Timestamptz(6)
+  motivo_suspension       String?
+  fecha_cierre            DateTime?                 @db.Timestamptz(6)
+  contactos_destinatarios contactos_destinatarios[]
+  users                   users                     @relation(fields: [id], references: [id], onUpdate: NoAction, map: "cuentas_usuario_id_fkey")
 
   @@schema("public")
 }
@@ -709,6 +710,36 @@ model historico_cierre_cuentas {
   estado_final                String   @db.VarChar
   fecha_cierre                DateTime @db.Timestamptz(6)
   fecha_eliminacion_datos     DateTime @db.Timestamptz(6)
+
+  @@schema("public")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model contactos_destinatarios {
+  id                     String                  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  administrador_id       String                  @db.Uuid
+  nombre                 String                  @db.VarChar(100)
+  correo                 String                  @db.VarChar(254)
+  fecha_creacion         DateTime                @default(now()) @db.Timestamptz(6)
+  fecha_actualizacion    DateTime                @default(now()) @db.Timestamptz(6)
+  cuentas                cuentas                 @relation(fields: [administrador_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  mensajes_destinatarios mensajes_destinatarios?
+
+  @@unique([administrador_id, correo], map: "contactos_destinatarios_administrador_correo_idx")
+  @@index([administrador_id], map: "contactos_destinatarios_administrador_idx")
+  @@schema("public")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model mensajes_destinatarios {
+  id                      String                  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  destinatario_id         String                  @unique @db.Uuid
+  contenido               String
+  fecha_creacion          DateTime                @default(now()) @db.Timestamptz(6)
+  fecha_actualizacion     DateTime                @default(now()) @db.Timestamptz(6)
+  contactos_destinatarios contactos_destinatarios @relation(fields: [destinatario_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@schema("public")
 }

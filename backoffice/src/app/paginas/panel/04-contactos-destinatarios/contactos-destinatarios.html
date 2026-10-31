@@ -1,0 +1,318 @@
+<section class="panel-pagina destinatarios" aria-labelledby="titulo-destinatarios">
+
+    <header class="panel-pagina__bloque panel-pagina__cabecera">
+        <h1 id="titulo-destinatarios">Contactos destinatarios</h1>
+        <p>
+            Gestiona las personas que recibirán tus comunicaciones
+            de despedida. Puedes preparar un mensaje personal para
+            cada destinatario.
+        </p>
+    </header>
+
+    <!-- LISTADO PRINCIPAL -->
+    @if (vistaActual() === 'listado') {
+
+    <section class="panel-pagina__bloque" aria-labelledby="titulo-listado-destinatarios">
+
+        <h2 id="titulo-listado-destinatarios">
+            Mis destinatarios
+        </h2>
+
+        <button class="panel__boton destinatarios__boton" type="button" (click)="abrirNuevo()">
+            Añadir destinatario
+        </button>
+
+        @if (!datosConectados()) {
+
+        <p class="panel-pagina__mensaje" role="status">
+            {{ cargando()
+            ? 'Cargando destinatarios...'
+            : 'No se han podido cargar los contactos destinatarios.' }}
+        </p>
+
+        } @else if (contactos().length === 0) {
+
+        <p class="panel-pagina__mensaje">
+            Todavía no has añadido ningún destinatario.
+        </p>
+
+        } @else {
+
+        <!-- TABLA ESCRITORIO: CINCO COLUMNAS -->
+        <div class="destinatarios__tabla-contenedor
+                            panel-pagina__tabla-responsive">
+
+            <table class="destinatarios__tabla">
+
+                <caption class="destinatarios__caption">
+                    Listado de contactos destinatarios
+                </caption>
+
+                <thead>
+                    <tr>
+                        <th scope="col">Nombre</th>
+                        <th scope="col">Correo electrónico</th>
+                        <th scope="col">Mensaje personalizado</th>
+                        <th scope="col">Editar mensaje</th>
+                        <th scope="col">Eliminar contacto</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @for (contacto of contactos(); track contacto.id) {
+
+                    <tr>
+                        <td>{{ contacto.nombre }}</td>
+
+                        <td class="destinatarios__correo">
+                            {{ contacto.correo }}
+                        </td>
+
+                        <td>
+                            <span [class.destinatarios__estado--si]="contacto.tieneMensaje"
+                                [class.destinatarios__estado--no]="!contacto.tieneMensaje">
+                                {{ contacto.tieneMensaje ? 'Sí' : 'No' }}
+                            </span>
+                        </td>
+
+                        <td>
+                            <button class="destinatarios__accion" type="button" [disabled]="cargando()"
+                                (click)="abrirFicha(contacto)">
+                                {{ contacto.tieneMensaje
+                                ? 'Editar mensaje'
+                                : 'Redactar mensaje' }}
+                            </button>
+                        </td>
+
+                        <td>
+                            <button class="destinatarios__accion destinatarios__accion--peligro" type="button"
+                                [disabled]="guardando()" (click)="solicitarEliminarContacto(contacto)">
+                                Eliminar
+                            </button>
+                        </td>
+                    </tr>
+
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- FICHAS SOLO MOBILE -->
+        <div class="destinatarios__fichas">
+
+            @for (contacto of contactos(); track contacto.id) {
+
+            <article class="destinatarios__ficha">
+                <h3>{{ contacto.nombre }}</h3>
+
+                <p class="destinatarios__correo">
+                    {{ contacto.correo }}
+                </p>
+
+                <p>
+                    Mensaje personalizado:
+                    <strong>
+                        {{ contacto.tieneMensaje ? 'Sí' : 'No' }}
+                    </strong>
+                </p>
+
+                <div class="destinatarios__acciones">
+                    <button class="panel__boton" type="button" [disabled]="cargando()" (click)="abrirFicha(contacto)">
+                        {{ contacto.tieneMensaje
+                        ? 'Editar mensaje'
+                        : 'Redactar mensaje' }}
+                    </button>
+
+                    <button class="panel__boton" type="button" [disabled]="guardando()"
+                        (click)="solicitarEliminarContacto(contacto)">
+                        Eliminar contacto
+                    </button>
+                </div>
+            </article>
+
+            }
+        </div>
+        }
+    </section>
+    }
+
+    <!-- CONFIRMACIÓN DE ELIMINACIÓN DEL CONTACTO -->
+    @if (contactoParaEliminar(); as contacto) {
+
+    <section class="panel-pagina__bloque" aria-labelledby="titulo-eliminar-destinatario">
+
+        <h2 id="titulo-eliminar-destinatario">
+            ¿Quieres eliminar este contacto destinatario?
+        </h2>
+
+        <p>
+            {{ contacto.nombre }} · {{ contacto.correo }}
+        </p>
+
+        <div class="destinatarios__advertencia" role="alert">
+            Se eliminará el contacto y su mensaje personal, si lo tiene. <br>
+            Esta acción no se puede deshacer.
+        </div>
+
+        <div class="destinatarios__acciones">
+            <button class="panel__boton destinatarios__boton--peligro" type="button" [disabled]="guardando()"
+                (click)="eliminarContacto()">
+                {{ guardando()
+                ? 'Eliminando...'
+                : 'Confirmar eliminación' }}
+            </button>
+
+            <button class="panel__boton" type="button" [disabled]="guardando()" (click)="cancelarEliminarContacto()">
+                Conservar contacto
+            </button>
+        </div>
+    </section>
+    }
+
+    <!-- ALTA Y FICHA INDIVIDUAL -->
+    @if (vistaActual() === 'nuevo' || vistaActual() === 'ficha') {
+
+    <section class="panel-pagina__bloque" aria-labelledby="titulo-ficha-destinatario">
+
+        <h2 id="titulo-ficha-destinatario">
+            {{ vistaActual() === 'nuevo'
+            ? 'Añadir destinatario'
+            : 'Ficha del destinatario' }}
+        </h2>
+
+        <p class="panel-pagina__texto-secundario">
+            Puedes modificar el nombre y el correo electrónico de este contacto.
+        </p>
+
+        <form class="destinatarios__formulario" [formGroup]="formularioContacto" (ngSubmit)="guardarContacto()"
+            novalidate>
+
+            <div class="destinatarios__campo">
+                <label for="destinatario-nombre">Nombre</label>
+
+                <input id="destinatario-nombre" type="text" formControlName="nombre" maxlength="100" autocomplete="off">
+
+                @if (formularioContacto.controls.nombre.invalid &&
+                formularioContacto.controls.nombre.touched) {
+                <p class="destinatarios__error" role="alert">
+                    Introduce un nombre válido.
+                </p>
+                }
+            </div>
+
+            <div class="destinatarios__campo">
+                <label for="destinatario-correo">
+                    Correo electrónico
+                </label>
+
+                <input id="destinatario-correo" type="email" formControlName="correo" autocomplete="off">
+
+                @if (formularioContacto.controls.correo.invalid &&
+                formularioContacto.controls.correo.touched) {
+                <p class="destinatarios__error" role="alert">
+                    Introduce una dirección de correo válida.
+                </p>
+                }
+            </div>
+
+            <p class="panel-pagina__texto-secundario">
+                Comprobamos el formato del correo, pero no podemos garantizar que la dirección exista.
+            </p>
+
+            <button class="panel__boton" type="submit" [disabled]="guardando()">
+                {{ guardando()
+                ? 'Guardando...'
+                : 'Guardar datos' }}
+            </button>
+        </form>
+    </section>
+
+    <!-- CARTA PERSONAL: SOLO EN LA FICHA -->
+    @if (vistaActual() === 'ficha') {
+
+    <section class="panel-pagina__bloque" aria-labelledby="titulo-carta-personal">
+
+        <h2 id="titulo-carta-personal">
+            Mensaje personal
+        </h2>
+
+        <p class="panel-pagina__texto-secundario">
+            Este mensaje es privado y se destinará únicamente a este contacto.
+        </p>
+
+        <form [formGroup]="formularioMensaje" (ngSubmit)="guardarMensaje()">
+
+            <div class="destinatarios__carta">
+                <p class="destinatarios__carta-destinatario">
+                    Para {{ contactoSeleccionado()?.nombre }}
+                </p>
+
+                <label for="destinatario-mensaje">
+                    Mensaje personalizado
+                </label>
+
+                <textarea id="destinatario-mensaje" formControlName="contenido" rows="12"
+                    placeholder="Escribe aquí tu mensaje personal..."></textarea>
+            </div>
+
+            <div class="destinatarios__acciones">
+                <button class="panel__boton" type="submit" [disabled]="guardando()">
+                    {{ guardando()
+                    ? 'Guardando...'
+                    : 'Guardar mensaje' }}
+                </button>
+
+                @if (contactoSeleccionado()?.tieneMensaje) {
+                <button class="panel__boton" type="button" [disabled]="guardando()"
+                    (click)="confirmarEliminarMensaje.set(true)">
+                    Eliminar mensaje
+                </button>
+                }
+            </div>
+        </form>
+
+        @if (confirmarEliminarMensaje()) {
+
+        <div class="destinatarios__advertencia" role="alert">
+            ¿Quieres eliminar el mensaje personal?
+            El destinatario permanecerá en el listado.
+        </div>
+
+        <div class="destinatarios__acciones">
+            <button class="panel__boton destinatarios__boton--peligro" type="button" [disabled]="guardando()"
+                (click)="eliminarMensaje()">
+                Confirmar eliminación del mensaje
+            </button>
+
+            <button class="panel__boton" type="button" [disabled]="guardando()"
+                (click)="confirmarEliminarMensaje.set(false)">
+                Conservar mensaje
+            </button>
+        </div>
+        }
+    </section>
+    }
+
+    <button class="panel__boton" type="button" [disabled]="guardando()" (click)="volverAlListado()">
+        Volver al listado
+    </button>
+    }
+
+    <!-- CONFIRMACIONES Y ERRORES -->
+    @if (mensajeCorrecto()) {
+    <div class="panel-pagina__bloque">
+        <p class="destinatarios__correcto" role="status" aria-live="polite">
+            {{ mensajeCorrecto() }}
+        </p>
+    </div>
+    }
+
+    @if (mensajeError()) {
+    <div class="panel-pagina__bloque">
+        <p class="panel__aviso-error" role="alert">
+            {{ mensajeError() }}
+        </p>
+    </div>
+    }
+
+</section>

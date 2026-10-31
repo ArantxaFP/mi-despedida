@@ -30,9 +30,15 @@
 
         @if (!datosConectados()) {
 
+        @if (cargandoLanzadores()) {
         <p class="lanzadores__aviso" role="status">
-            El recuento de lanzadores estará disponible cuando conectemos las asignaciones de tu cuenta.
+            Cargando el estado de las autorizaciones...
         </p>
+        } @else {
+        <p class="lanzadores__aviso" role="status">
+            No se ha podido consultar el estado de las autorizaciones.
+        </p>
+        }
 
         } @else {
 
@@ -79,9 +85,16 @@
 
         @if (!datosConectados()) {
 
-        <p>
-            El listado de asignaciones estará disponible cuando conectemos el backend.
+        @if (cargandoLanzadores()) {
+        <p class="lanzadores__aviso" role="status">
+            Cargando lanzadores...
         </p>
+        } @else {
+        <p class="lanzadores__aviso" role="status">
+            No se han podido cargar las asignaciones.
+        </p>
+        }
+
 
         } @else if (lanzadores().length === 0) {
 
@@ -141,9 +154,11 @@
                                 @if (lanzador.estado === 'pendiente' ||
                                 lanzador.estado === 'caducada') {
 
-                                <button type="button" disabled title="Pendiente de conexión con el backend">
-                                    Reenviar
+                                <button type="button" [disabled]="modificandoAsignacion()"
+                                    (click)="reenviarInvitacion(lanzador)">
+                                    {{ modificandoAsignacion() ? 'Procesando...' : 'Reenviar' }}
                                 </button>
+
                                 }
 
                                 @if (lanzador.estado === 'pendiente') {
@@ -205,19 +220,19 @@
 
                     @if (lanzador.estado === 'pendiente' ||
                     lanzador.estado === 'caducada') {
-                    <button type="button" disabled>
+
+                    <button type="button" [disabled]="modificandoAsignacion()" (click)="reenviarInvitacion(lanzador)">
                         Reenviar invitación
                     </button>
+
                     }
 
                     @if (lanzador.estado === 'pendiente') {
-                    <button class="lanzadores__boton lanzadores__boton--peligro" type="button"
-                        [disabled]="modificandoAsignacion()" (click)="confirmarRevocacion()">
 
-                        {{ modificandoAsignacion()
-                        ? 'Revocando...'
-                        : 'Revocar autorización' }}
+                    <button type="button" [disabled]="modificandoAsignacion()" (click)="retirarInvitacion(lanzador)">
+                        Retirar invitación
                     </button>
+
                     }
 
                     @if (lanzador.estado === 'aceptada' &&
@@ -342,23 +357,20 @@
             <input id="revision-correo" type="email" [value]="formularioInvitacion.controls.correo.value" readonly>
         </div>
 
-        @if (!mensajeError()) {
 
+        @if (!mensajeError()) {
         <p>
             Comprueba que la dirección es correcta antes de enviar la invitación.
         </p>
-
+        }
 
         <button class="panel__boton lanzadores__boton" type="button" [disabled]="enviandoInvitacion()"
             (click)="enviarInvitacion()">
 
-            {{ enviandoInvitacion() ? 'Enviando...' : 'Enviar invitación' }}
+            {{ enviandoInvitacion()
+            ? 'Enviando...'
+            : 'Enviar invitación' }}
         </button>
-
-
-
-
-        }
 
         <button class="lanzadores__volver" type="button" (click)="volverAInvitacion()">
             Corregir datos

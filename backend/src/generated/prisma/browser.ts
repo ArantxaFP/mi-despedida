@@ -220,3 +220,15 @@ export type cuentas = Prisma.cuentasModel
  * This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
  */
 export type historico_cierre_cuentas = Prisma.historico_cierre_cuentasModel
+/**
+ * Model contactos_destinatarios
+ * This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+ * This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+ */
+export type contactos_destinatarios = Prisma.contactos_destinatariosModel
+/**
+ * Model mensajes_destinatarios
+ * This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+ * This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+ */
+export type mensajes_destinatarios = Prisma.mensajes_destinatariosModel

@@ -430,7 +430,9 @@ export const ModelName = {
   invitaciones_lanzadores: 'invitaciones_lanzadores',
   verificaciones_invitaciones_lanzadores: 'verificaciones_invitaciones_lanzadores',
   cuentas: 'cuentas',
-  historico_cierre_cuentas: 'historico_cierre_cuentas'
+  historico_cierre_cuentas: 'historico_cierre_cuentas',
+  contactos_destinatarios: 'contactos_destinatarios',
+  mensajes_destinatarios: 'mensajes_destinatarios'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -446,7 +448,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "audit_log_entries" | "custom_oauth_providers" | "flow_state" | "identities" | "instances" | "mfa_amr_claims" | "mfa_challenges" | "mfa_factors" | "mfa_recovery_code_sets" | "mfa_recovery_codes" | "oauth_authorizations" | "oauth_client_states" | "oauth_clients" | "oauth_consents" | "one_time_tokens" | "refresh_tokens" | "saml_providers" | "saml_relay_states" | "schema_migrations" | "scim_tokens" | "scim_users" | "sessions" | "sso_domains" | "sso_providers" | "users" | "webauthn_challenges" | "webauthn_credentials" | "asignaciones_lanzadores" | "historial_asignaciones" | "lanzadores" | "invitaciones_lanzadores" | "verificaciones_invitaciones_lanzadores" | "cuentas" | "historico_cierre_cuentas"
+    modelProps: "audit_log_entries" | "custom_oauth_providers" | "flow_state" | "identities" | "instances" | "mfa_amr_claims" | "mfa_challenges" | "mfa_factors" | "mfa_recovery_code_sets" | "mfa_recovery_codes" | "oauth_authorizations" | "oauth_client_states" | "oauth_clients" | "oauth_consents" | "one_time_tokens" | "refresh_tokens" | "saml_providers" | "saml_relay_states" | "schema_migrations" | "scim_tokens" | "scim_users" | "sessions" | "sso_domains" | "sso_providers" | "users" | "webauthn_challenges" | "webauthn_credentials" | "asignaciones_lanzadores" | "historial_asignaciones" | "lanzadores" | "invitaciones_lanzadores" | "verificaciones_invitaciones_lanzadores" | "cuentas" | "historico_cierre_cuentas" | "contactos_destinatarios" | "mensajes_destinatarios"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -2966,6 +2968,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    contactos_destinatarios: {
+      payload: Prisma.$contactos_destinatariosPayload<ExtArgs>
+      fields: Prisma.contactos_destinatariosFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.contactos_destinatariosFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$contactos_destinatariosPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.contactos_destinatariosFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$contactos_destinatariosPayload>
+        }
+        findFirst: {
+          args: Prisma.contactos_destinatariosFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$contactos_destinatariosPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.contactos_destinatariosFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$contactos_destinatariosPayload>
+        }
+        findMany: {
+          args: Prisma.contactos_destinatariosFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$contactos_destinatariosPayload>[]
+        }
+        create: {
+          args: Prisma.contactos_destinatariosCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$contactos_destinatariosPayload>
+        }
+        createMany: {
+          args: Prisma.contactos_destinatariosCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.contactos_destinatariosCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$contactos_destinatariosPayload>[]
+        }
+        delete: {
+          args: Prisma.contactos_destinatariosDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$contactos_destinatariosPayload>
+        }
+        update: {
+          args: Prisma.contactos_destinatariosUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$contactos_destinatariosPayload>
+        }
+        deleteMany: {
+          args: Prisma.contactos_destinatariosDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.contactos_destinatariosUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.contactos_destinatariosUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$contactos_destinatariosPayload>[]
+        }
+        upsert: {
+          args: Prisma.contactos_destinatariosUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$contactos_destinatariosPayload>
+        }
+        aggregate: {
+          args: Prisma.Contactos_destinatariosAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateContactos_destinatarios>
+        }
+        groupBy: {
+          args: Prisma.contactos_destinatariosGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Contactos_destinatariosGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.contactos_destinatariosCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Contactos_destinatariosCountAggregateOutputType> | number
+        }
+      }
+    }
+    mensajes_destinatarios: {
+      payload: Prisma.$mensajes_destinatariosPayload<ExtArgs>
+      fields: Prisma.mensajes_destinatariosFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.mensajes_destinatariosFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$mensajes_destinatariosPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.mensajes_destinatariosFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$mensajes_destinatariosPayload>
+        }
+        findFirst: {
+          args: Prisma.mensajes_destinatariosFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$mensajes_destinatariosPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.mensajes_destinatariosFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$mensajes_destinatariosPayload>
+        }
+        findMany: {
+          args: Prisma.mensajes_destinatariosFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$mensajes_destinatariosPayload>[]
+        }
+        create: {
+          args: Prisma.mensajes_destinatariosCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$mensajes_destinatariosPayload>
+        }
+        createMany: {
+          args: Prisma.mensajes_destinatariosCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.mensajes_destinatariosCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$mensajes_destinatariosPayload>[]
+        }
+        delete: {
+          args: Prisma.mensajes_destinatariosDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$mensajes_destinatariosPayload>
+        }
+        update: {
+          args: Prisma.mensajes_destinatariosUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$mensajes_destinatariosPayload>
+        }
+        deleteMany: {
+          args: Prisma.mensajes_destinatariosDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.mensajes_destinatariosUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.mensajes_destinatariosUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$mensajes_destinatariosPayload>[]
+        }
+        upsert: {
+          args: Prisma.mensajes_destinatariosUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$mensajes_destinatariosPayload>
+        }
+        aggregate: {
+          args: Prisma.Mensajes_destinatariosAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateMensajes_destinatarios>
+        }
+        groupBy: {
+          args: Prisma.mensajes_destinatariosGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Mensajes_destinatariosGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.mensajes_destinatariosCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Mensajes_destinatariosCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -3544,6 +3694,29 @@ export const Historico_cierre_cuentasScalarFieldEnum = {
 export type Historico_cierre_cuentasScalarFieldEnum = (typeof Historico_cierre_cuentasScalarFieldEnum)[keyof typeof Historico_cierre_cuentasScalarFieldEnum]
 
 
+export const Contactos_destinatariosScalarFieldEnum = {
+  id: 'id',
+  administrador_id: 'administrador_id',
+  nombre: 'nombre',
+  correo: 'correo',
+  fecha_creacion: 'fecha_creacion',
+  fecha_actualizacion: 'fecha_actualizacion'
+} as const
+
+export type Contactos_destinatariosScalarFieldEnum = (typeof Contactos_destinatariosScalarFieldEnum)[keyof typeof Contactos_destinatariosScalarFieldEnum]
+
+
+export const Mensajes_destinatariosScalarFieldEnum = {
+  id: 'id',
+  destinatario_id: 'destinatario_id',
+  contenido: 'contenido',
+  fecha_creacion: 'fecha_creacion',
+  fecha_actualizacion: 'fecha_actualizacion'
+} as const
+
+export type Mensajes_destinatariosScalarFieldEnum = (typeof Mensajes_destinatariosScalarFieldEnum)[keyof typeof Mensajes_destinatariosScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -4013,6 +4186,8 @@ export type GlobalOmitConfig = {
   verificaciones_invitaciones_lanzadores?: Prisma.verificaciones_invitaciones_lanzadoresOmit
   cuentas?: Prisma.cuentasOmit
   historico_cierre_cuentas?: Prisma.historico_cierre_cuentasOmit
+  contactos_destinatarios?: Prisma.contactos_destinatariosOmit
+  mensajes_destinatarios?: Prisma.mensajes_destinatariosOmit
 }
 
 /* Types for Logging */

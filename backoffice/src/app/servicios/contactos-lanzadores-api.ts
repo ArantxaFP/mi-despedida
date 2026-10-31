@@ -149,4 +149,38 @@ export class ContactosLanzadoresApi {
         }
     }
 
+    // Reenviar una invitación pendiente o caducada
+    async reenviarInvitacion(asignacionId: string): Promise<void> {
+
+        const token = await this.obtenerToken();
+
+        const respuesta = await fetch(
+            `${configuracionBackend.url}/contactos-lanzadores/` +
+            `${encodeURIComponent(asignacionId)}/reenviar`,
+            {
+                method: 'POST',
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            }
+        );
+
+        if (!respuesta.ok) {
+            let mensaje = 'No se ha podido reenviar la invitación.';
+
+            try {
+                const datos = await respuesta.json();
+
+                if (typeof datos.message === 'string') {
+                    mensaje = datos.message;
+                }
+            } catch {
+                // Mantener el mensaje general
+            }
+
+            throw new Error(mensaje);
+        }
+    }
+
+
 }

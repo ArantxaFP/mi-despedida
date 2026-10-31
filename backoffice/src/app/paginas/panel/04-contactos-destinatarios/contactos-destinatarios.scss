@@ -1,2 +1,253 @@
-// Hay estilos compartidos para todos el panel
+// Hay estilos compartidos para todo el panel
 // Aquí los estilos específicos de la página de contactos destinatarios
+
+.destinatarios {
+
+    // Botones: utiliza la apariencia compartida del panel
+    &__boton {
+        width: 100%;
+    }
+
+    // TABLA
+    &__tabla-contenedor {
+        display: none;
+    }
+
+    &__tabla {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: auto;
+
+        th,
+        td {
+            padding: var(--espacio-md);
+            text-align: left;
+            vertical-align: middle;
+            border-bottom: 1px solid var(--color-boton-borde);
+        }
+
+        th {
+            font-weight: 600;
+            line-height: 1.4;
+        }
+
+        td {
+            overflow-wrap: anywhere;
+        }
+    }
+
+    &__caption {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip-path: inset(50%);
+        white-space: nowrap;
+    }
+
+    &__correo {
+        overflow-wrap: anywhere;
+    }
+
+    &__estado {
+        &--si {
+            color: var(--color-principal);
+            font-weight: 600;
+        }
+
+        &--no {
+            color: var(--color-secundario);
+        }
+    }
+
+    // Acciones de la tabla: discretas para que las cinco columnas puedan convivir
+    &__accion {
+        border: 0;
+        background: transparent;
+        color: var(--color-principal);
+        font: inherit;
+        text-decoration: underline;
+        text-underline-offset: 3px;
+        cursor: pointer;
+
+        &:hover:not(:disabled) {
+            color: var(--color-secundario);
+        }
+
+        &:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        &--peligro {
+            color: var(--color-error);
+        }
+    }
+
+    // MOBILE: ficha vertical de cada contacto
+    &__fichas {
+        display: flex;
+        flex-direction: column;
+        gap: var(--espacio-md);
+    }
+
+    &__ficha {
+        display: flex;
+        flex-direction: column;
+        gap: var(--espacio-sm);
+        min-width: 0;
+
+        padding: var(--espacio-md);
+        border: 1px solid var(--color-boton-borde);
+        border-radius: var(--radio-tarjeta);
+        background: var(--color-superficie);
+
+        h3,
+        p {
+            margin: 0;
+        }
+    }
+
+    // FICHA INDIVIDUAL
+    &__formulario {
+        display: flex;
+        flex-direction: column;
+        gap: var(--espacio-lg);
+        width: 100%;
+    }
+
+    &__campo {
+        display: flex;
+        flex-direction: column;
+        gap: var(--espacio-sm);
+        min-width: 0;
+
+        label {
+            font-weight: 500;
+        }
+
+        input {
+            width: 100%;
+            min-height: 3rem;
+            padding: var(--espacio-sm);
+
+            border: 1px solid var(--color-boton-borde);
+            border-radius: var(--radio-campo);
+
+            background: var(--color-superficie);
+            color: var(--color-principal);
+        }
+    }
+
+    &__error {
+        margin: 0;
+        color: var(--color-error);
+        font-size: var(--texto-secundario);
+    }
+
+    // CARTA PRIVADA
+    &__carta {
+        display: flex;
+        flex-direction: column;
+        gap: var(--espacio-md);
+        min-width: 0;
+
+        padding: var(--espacio-lg);
+        border: 1px solid var(--color-boton-borde);
+        border-radius: var(--radio-tarjeta);
+        background: var(--color-superficie);
+
+        box-shadow: 0 4px 18px rgba(0, 0, 0, 0.05);
+
+        &-destinatario {
+            margin: 0;
+            font-weight: 500;
+        }
+
+        label {
+            font-weight: 500;
+        }
+
+        textarea {
+            display: block;
+            width: 100%;
+            min-height: 18rem;
+            padding: var(--espacio-md);
+
+            border: 1px solid var(--color-boton-borde);
+            border-radius: var(--radio-campo);
+            background: transparent;
+
+            color: var(--color-principal);
+            line-height: 1.8;
+            resize: vertical;
+        }
+    }
+
+    &__acciones {
+        display: flex;
+        flex-direction: column;
+        gap: var(--espacio-md);
+        margin-top: var(--espacio-md);
+    }
+
+    &__advertencia {
+        padding: var(--espacio-md);
+        border-left: 4px solid var(--color-error);
+        border-radius: var(--radio-campo);
+        background: var(--color-error-fondo);
+        color: var(--color-error);
+    }
+
+    &__correcto {
+        margin: 0;
+        padding: var(--espacio-md);
+        border-radius: var(--radio-campo);
+        background: var(--color-fondo);
+        color: var(--color-principal);
+    }
+}
+
+// TABLET
+@media (min-width: 48rem) {
+    .destinatarios {
+
+        &__acciones {
+            flex-direction: row;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        &__carta {
+            padding: var(--espacio-xl);
+        }
+    }
+}
+
+// ESCRITORIO: SOLO TABLA, NO FICHAS
+@media (min-width: 64rem) {
+    .destinatarios {
+
+        &__tabla-contenedor {
+            display: block;
+        }
+
+        &__fichas {
+            display: none;
+        }
+
+        &__boton {
+            width: auto;
+            align-self: flex-start;
+        }
+
+        &__formulario {
+            max-width: 48rem;
+        }
+
+        &__carta {
+            max-width: 52rem;
+            margin-inline: auto;
+        }
+    }
+}

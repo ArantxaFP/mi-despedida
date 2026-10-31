@@ -223,6 +223,7 @@ export type cuentasWhereInput = {
   fecha_suspension?: Prisma.DateTimeNullableFilter<"cuentas"> | Date | string | null
   motivo_suspension?: Prisma.StringNullableFilter<"cuentas"> | string | null
   fecha_cierre?: Prisma.DateTimeNullableFilter<"cuentas"> | Date | string | null
+  contactos_destinatarios?: Prisma.Contactos_destinatariosListRelationFilter
   users?: Prisma.XOR<Prisma.UsersScalarRelationFilter, Prisma.usersWhereInput>
 }
 
@@ -237,6 +238,7 @@ export type cuentasOrderByWithRelationInput = {
   fecha_suspension?: Prisma.SortOrderInput | Prisma.SortOrder
   motivo_suspension?: Prisma.SortOrderInput | Prisma.SortOrder
   fecha_cierre?: Prisma.SortOrderInput | Prisma.SortOrder
+  contactos_destinatarios?: Prisma.contactos_destinatariosOrderByRelationAggregateInput
   users?: Prisma.usersOrderByWithRelationInput
 }
 
@@ -254,6 +256,7 @@ export type cuentasWhereUniqueInput = Prisma.AtLeast<{
   fecha_suspension?: Prisma.DateTimeNullableFilter<"cuentas"> | Date | string | null
   motivo_suspension?: Prisma.StringNullableFilter<"cuentas"> | string | null
   fecha_cierre?: Prisma.DateTimeNullableFilter<"cuentas"> | Date | string | null
+  contactos_destinatarios?: Prisma.Contactos_destinatariosListRelationFilter
   users?: Prisma.XOR<Prisma.UsersScalarRelationFilter, Prisma.usersWhereInput>
 }, "id" | "correo">
 
@@ -299,6 +302,7 @@ export type cuentasCreateInput = {
   fecha_suspension?: Date | string | null
   motivo_suspension?: string | null
   fecha_cierre?: Date | string | null
+  contactos_destinatarios?: Prisma.contactos_destinatariosCreateNestedManyWithoutCuentasInput
   users: Prisma.usersCreateNestedOneWithoutCuentasInput
 }
 
@@ -313,6 +317,7 @@ export type cuentasUncheckedCreateInput = {
   fecha_suspension?: Date | string | null
   motivo_suspension?: string | null
   fecha_cierre?: Date | string | null
+  contactos_destinatarios?: Prisma.contactos_destinatariosUncheckedCreateNestedManyWithoutCuentasInput
 }
 
 export type cuentasUpdateInput = {
@@ -325,6 +330,7 @@ export type cuentasUpdateInput = {
   fecha_suspension?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   motivo_suspension?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fecha_cierre?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  contactos_destinatarios?: Prisma.contactos_destinatariosUpdateManyWithoutCuentasNestedInput
   users?: Prisma.usersUpdateOneRequiredWithoutCuentasNestedInput
 }
 
@@ -339,6 +345,7 @@ export type cuentasUncheckedUpdateInput = {
   fecha_suspension?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   motivo_suspension?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fecha_cierre?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  contactos_destinatarios?: Prisma.contactos_destinatariosUncheckedUpdateManyWithoutCuentasNestedInput
 }
 
 export type cuentasCreateManyInput = {
@@ -423,6 +430,11 @@ export type cuentasMinOrderByAggregateInput = {
   fecha_cierre?: Prisma.SortOrder
 }
 
+export type CuentasScalarRelationFilter = {
+  is?: Prisma.cuentasWhereInput
+  isNot?: Prisma.cuentasWhereInput
+}
+
 export type cuentasCreateNestedOneWithoutUsersInput = {
   create?: Prisma.XOR<Prisma.cuentasCreateWithoutUsersInput, Prisma.cuentasUncheckedCreateWithoutUsersInput>
   connectOrCreate?: Prisma.cuentasCreateOrConnectWithoutUsersInput
@@ -455,6 +467,20 @@ export type cuentasUncheckedUpdateOneWithoutUsersNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.cuentasUpdateToOneWithWhereWithoutUsersInput, Prisma.cuentasUpdateWithoutUsersInput>, Prisma.cuentasUncheckedUpdateWithoutUsersInput>
 }
 
+export type cuentasCreateNestedOneWithoutContactos_destinatariosInput = {
+  create?: Prisma.XOR<Prisma.cuentasCreateWithoutContactos_destinatariosInput, Prisma.cuentasUncheckedCreateWithoutContactos_destinatariosInput>
+  connectOrCreate?: Prisma.cuentasCreateOrConnectWithoutContactos_destinatariosInput
+  connect?: Prisma.cuentasWhereUniqueInput
+}
+
+export type cuentasUpdateOneRequiredWithoutContactos_destinatariosNestedInput = {
+  create?: Prisma.XOR<Prisma.cuentasCreateWithoutContactos_destinatariosInput, Prisma.cuentasUncheckedCreateWithoutContactos_destinatariosInput>
+  connectOrCreate?: Prisma.cuentasCreateOrConnectWithoutContactos_destinatariosInput
+  upsert?: Prisma.cuentasUpsertWithoutContactos_destinatariosInput
+  connect?: Prisma.cuentasWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.cuentasUpdateToOneWithWhereWithoutContactos_destinatariosInput, Prisma.cuentasUpdateWithoutContactos_destinatariosInput>, Prisma.cuentasUncheckedUpdateWithoutContactos_destinatariosInput>
+}
+
 export type cuentasCreateWithoutUsersInput = {
   nombre: string
   apellidos?: string | null
@@ -465,6 +491,7 @@ export type cuentasCreateWithoutUsersInput = {
   fecha_suspension?: Date | string | null
   motivo_suspension?: string | null
   fecha_cierre?: Date | string | null
+  contactos_destinatarios?: Prisma.contactos_destinatariosCreateNestedManyWithoutCuentasInput
 }
 
 export type cuentasUncheckedCreateWithoutUsersInput = {
@@ -477,6 +504,7 @@ export type cuentasUncheckedCreateWithoutUsersInput = {
   fecha_suspension?: Date | string | null
   motivo_suspension?: string | null
   fecha_cierre?: Date | string | null
+  contactos_destinatarios?: Prisma.contactos_destinatariosUncheckedCreateNestedManyWithoutCuentasInput
 }
 
 export type cuentasCreateOrConnectWithoutUsersInput = {
@@ -505,6 +533,7 @@ export type cuentasUpdateWithoutUsersInput = {
   fecha_suspension?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   motivo_suspension?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fecha_cierre?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  contactos_destinatarios?: Prisma.contactos_destinatariosUpdateManyWithoutCuentasNestedInput
 }
 
 export type cuentasUncheckedUpdateWithoutUsersInput = {
@@ -517,8 +546,106 @@ export type cuentasUncheckedUpdateWithoutUsersInput = {
   fecha_suspension?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   motivo_suspension?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fecha_cierre?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  contactos_destinatarios?: Prisma.contactos_destinatariosUncheckedUpdateManyWithoutCuentasNestedInput
 }
 
+export type cuentasCreateWithoutContactos_destinatariosInput = {
+  nombre: string
+  apellidos?: string | null
+  correo: string
+  rol?: string
+  estado?: string
+  fecha_registro?: Date | string
+  fecha_suspension?: Date | string | null
+  motivo_suspension?: string | null
+  fecha_cierre?: Date | string | null
+  users: Prisma.usersCreateNestedOneWithoutCuentasInput
+}
+
+export type cuentasUncheckedCreateWithoutContactos_destinatariosInput = {
+  id: string
+  nombre: string
+  apellidos?: string | null
+  correo: string
+  rol?: string
+  estado?: string
+  fecha_registro?: Date | string
+  fecha_suspension?: Date | string | null
+  motivo_suspension?: string | null
+  fecha_cierre?: Date | string | null
+}
+
+export type cuentasCreateOrConnectWithoutContactos_destinatariosInput = {
+  where: Prisma.cuentasWhereUniqueInput
+  create: Prisma.XOR<Prisma.cuentasCreateWithoutContactos_destinatariosInput, Prisma.cuentasUncheckedCreateWithoutContactos_destinatariosInput>
+}
+
+export type cuentasUpsertWithoutContactos_destinatariosInput = {
+  update: Prisma.XOR<Prisma.cuentasUpdateWithoutContactos_destinatariosInput, Prisma.cuentasUncheckedUpdateWithoutContactos_destinatariosInput>
+  create: Prisma.XOR<Prisma.cuentasCreateWithoutContactos_destinatariosInput, Prisma.cuentasUncheckedCreateWithoutContactos_destinatariosInput>
+  where?: Prisma.cuentasWhereInput
+}
+
+export type cuentasUpdateToOneWithWhereWithoutContactos_destinatariosInput = {
+  where?: Prisma.cuentasWhereInput
+  data: Prisma.XOR<Prisma.cuentasUpdateWithoutContactos_destinatariosInput, Prisma.cuentasUncheckedUpdateWithoutContactos_destinatariosInput>
+}
+
+export type cuentasUpdateWithoutContactos_destinatariosInput = {
+  nombre?: Prisma.StringFieldUpdateOperationsInput | string
+  apellidos?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  correo?: Prisma.StringFieldUpdateOperationsInput | string
+  rol?: Prisma.StringFieldUpdateOperationsInput | string
+  estado?: Prisma.StringFieldUpdateOperationsInput | string
+  fecha_registro?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  fecha_suspension?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  motivo_suspension?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fecha_cierre?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  users?: Prisma.usersUpdateOneRequiredWithoutCuentasNestedInput
+}
+
+export type cuentasUncheckedUpdateWithoutContactos_destinatariosInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  nombre?: Prisma.StringFieldUpdateOperationsInput | string
+  apellidos?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  correo?: Prisma.StringFieldUpdateOperationsInput | string
+  rol?: Prisma.StringFieldUpdateOperationsInput | string
+  estado?: Prisma.StringFieldUpdateOperationsInput | string
+  fecha_registro?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  fecha_suspension?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  motivo_suspension?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fecha_cierre?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+}
+
+
+/**
+ * Count Type CuentasCountOutputType
+ */
+
+export type CuentasCountOutputType = {
+  contactos_destinatarios: number
+}
+
+export type CuentasCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  contactos_destinatarios?: boolean | CuentasCountOutputTypeCountContactos_destinatariosArgs
+}
+
+/**
+ * CuentasCountOutputType without action
+ */
+export type CuentasCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CuentasCountOutputType
+   */
+  select?: Prisma.CuentasCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * CuentasCountOutputType without action
+ */
+export type CuentasCountOutputTypeCountContactos_destinatariosArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.contactos_destinatariosWhereInput
+}
 
 
 export type cuentasSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -532,7 +659,9 @@ export type cuentasSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   fecha_suspension?: boolean
   motivo_suspension?: boolean
   fecha_cierre?: boolean
+  contactos_destinatarios?: boolean | Prisma.cuentas$contactos_destinatariosArgs<ExtArgs>
   users?: boolean | Prisma.usersDefaultArgs<ExtArgs>
+  _count?: boolean | Prisma.CuentasCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["cuentas"]>
 
 export type cuentasSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -578,7 +707,9 @@ export type cuentasSelectScalar = {
 
 export type cuentasOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "nombre" | "apellidos" | "correo" | "rol" | "estado" | "fecha_registro" | "fecha_suspension" | "motivo_suspension" | "fecha_cierre", ExtArgs["result"]["cuentas"]>
 export type cuentasInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  contactos_destinatarios?: boolean | Prisma.cuentas$contactos_destinatariosArgs<ExtArgs>
   users?: boolean | Prisma.usersDefaultArgs<ExtArgs>
+  _count?: boolean | Prisma.CuentasCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type cuentasIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   users?: boolean | Prisma.usersDefaultArgs<ExtArgs>
@@ -590,6 +721,7 @@ export type cuentasIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Exte
 export type $cuentasPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "cuentas"
   objects: {
+    contactos_destinatarios: Prisma.$contactos_destinatariosPayload<ExtArgs>[]
     users: Prisma.$usersPayload<ExtArgs>
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
@@ -997,6 +1129,7 @@ readonly fields: cuentasFieldRefs;
  */
 export interface Prisma__cuentasClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  contactos_destinatarios<T extends Prisma.cuentas$contactos_destinatariosArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.cuentas$contactos_destinatariosArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$contactos_destinatariosPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   users<T extends Prisma.usersDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.usersDefaultArgs<ExtArgs>>): Prisma.Prisma__usersClient<runtime.Types.Result.GetResult<Prisma.$usersPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -1435,6 +1568,30 @@ export type cuentasDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Inter
    * Limit how many cuentas to delete.
    */
   limit?: number
+}
+
+/**
+ * cuentas.contactos_destinatarios
+ */
+export type cuentas$contactos_destinatariosArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the contactos_destinatarios
+   */
+  select?: Prisma.contactos_destinatariosSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the contactos_destinatarios
+   */
+  omit?: Prisma.contactos_destinatariosOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.contactos_destinatariosInclude<ExtArgs> | null
+  where?: Prisma.contactos_destinatariosWhereInput
+  orderBy?: Prisma.contactos_destinatariosOrderByWithRelationInput | Prisma.contactos_destinatariosOrderByWithRelationInput[]
+  cursor?: Prisma.contactos_destinatariosWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.Contactos_destinatariosScalarFieldEnum | Prisma.Contactos_destinatariosScalarFieldEnum[]
 }
 
 /**

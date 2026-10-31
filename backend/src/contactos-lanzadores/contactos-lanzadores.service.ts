@@ -24,6 +24,9 @@ export class ContactosLanzadoresService {
     // --------------------------------------------------
 
     async obtenerLanzadores(administradorId: string) {
+
+        await this.actualizarCaducidades(administradorId);
+
         try {
             return await this.prisma.asignaciones_lanzadores.findMany({
                 where: {
@@ -68,7 +71,8 @@ export class ContactosLanzadoresService {
     async prepararInvitacion(
         administradorId: string,
         correoAdministrador: string,
-        datos: CrearInvitacionDto
+        datos: CrearInvitacionDto,
+        permitirReenvio = false
     ) {
         const nombre = datos.nombre.trim();
         const correo = datos.correo.trim().toLowerCase();
@@ -197,10 +201,38 @@ export class ContactosLanzadoresService {
                                     }
                                 });
 
+
                             if (tokenActivo) {
-                                throw new ConflictException(
-                                    'Ya existe una invitación pendiente para este lanzador.'
-                                );
+
+                                if (!permitirReenvio) {
+                                    throw new ConflictException(
+                                        'Ya existe una invitación pendiente para este lanzador.'
+                                    );
+                                }
+
+                                // El enlace anterior deja de funcionar.
+                                // También se invalidan sus verificaciones temporales.
+                                await tx.verificaciones_invitaciones_lanzadores.updateMany({
+                                    where: {
+                                        invitacion_id: tokenActivo.id,
+                                        fecha_utilizacion: null,
+                                        fecha_invalidacion: null
+                                    },
+                                    data: {
+                                        fecha_invalidacion: ahora
+                                    }
+                                });
+
+                                await tx.invitaciones_lanzadores.updateMany({
+                                    where: {
+                                        id: tokenActivo.id,
+                                        fecha_utilizacion: null,
+                                        fecha_invalidacion: null
+                                    },
+                                    data: {
+                                        fecha_invalidacion: ahora
+                                    }
+                                });
                             }
 
                             // Si el enlace anterior fue invalidado tras un problema de envío, se reutiliza la asignación pendiente
@@ -308,7 +340,8 @@ export class ContactosLanzadoresService {
         administradorId: string,
         correoAdministrador: string,
         datos: CrearInvitacionDto,
-        origen?: string
+        origen?: string,
+        permitirReenvio = false
     ) {
         // Impide crear invitaciones sin tener preparado el recorrido público de aceptación
         if (
@@ -329,7 +362,8 @@ export class ContactosLanzadoresService {
         const invitacion = await this.prepararInvitacion(
             administradorId,
             correoAdministrador,
-            datos
+            datos,
+            permitirReenvio
         );
 
         // OJO URL de la futura pantalla pública de invitaciones
@@ -568,6 +602,166 @@ export class ContactosLanzadoresService {
                 mensaje: 'La autorización se ha revocado correctamente.'
             };
         });
+    }
+
+    // --------------------------------------------------
+    // 6. Reenviar una invitación pendiente o caducada
+    // --------------------------------------------------
+
+    async reenviarInvitacion(
+        administradorId: string,
+        correoAdministrador: string,
+        asignacionId: string,
+        origen?: string
+    ) {
+        const asignacion =
+            await this.prisma.asignaciones_lanzadores.findFirst({
+                where: {
+                    id: asignacionId,
+                    administrador_id: administradorId
+                },
+                select: {
+                    estado: true,
+                    fecha_caducidad: true,
+                    lanzadores: {
+                        select: {
+                            nombre: true,
+                            correo: true
+                        }
+                    }
+                }
+            });
+
+        if (!asignacion) {
+            throw new NotFoundException(
+                'No se ha encontrado la asignación.'
+            );
+        }
+
+        if (
+            !['pendiente', 'caducada'].includes(asignacion.estado)
+        ) {
+            throw new ConflictException(
+                'Esta asignación no permite reenviar invitaciones.'
+            );
+        }
+
+        const permitirReenvio =
+            asignacion.estado === 'pendiente' &&
+            asignacion.fecha_caducidad > new Date();
+
+        return this.crearYEnviarInvitacion(
+            administradorId,
+            correoAdministrador,
+            {
+                nombre: asignacion.lanzadores.nombre,
+                correo: asignacion.lanzadores.correo
+            },
+            origen,
+            permitirReenvio
+        );
+    }
+
+    // --------------------------------------------------
+    // 7. Actualizar invitaciones que han caducado
+    // --------------------------------------------------
+
+    private async actualizarCaducidades(
+        administradorId: string
+    ): Promise<void> {
+
+        const ahora = new Date();
+
+        const pendientesCaducadas =
+            await this.prisma.asignaciones_lanzadores.findMany({
+                where: {
+                    administrador_id: administradorId,
+                    estado: 'pendiente',
+                    fecha_caducidad: {
+                        lte: ahora
+                    }
+                },
+                select: {
+                    id: true
+                }
+            });
+
+        for (const asignacion of pendientesCaducadas) {
+
+            await this.prisma.$transaction(async (tx) => {
+
+                // Actualización condicionada para evitar registrar dos veces la misma caducidad
+                const resultado =
+                    await tx.asignaciones_lanzadores.updateMany({
+                        where: {
+                            id: asignacion.id,
+                            administrador_id: administradorId,
+                            estado: 'pendiente',
+                            fecha_caducidad: {
+                                lte: ahora
+                            }
+                        },
+                        data: {
+                            estado: 'caducada',
+                            updated_at: ahora
+                        }
+                    });
+
+                if (resultado.count !== 1) {
+                    return;
+                }
+
+                const invitaciones =
+                    await tx.invitaciones_lanzadores.findMany({
+                        where: {
+                            asignacion_id: asignacion.id
+                        },
+                        select: {
+                            id: true
+                        }
+                    });
+
+                const ids = invitaciones.map(
+                    invitacion => invitacion.id
+                );
+
+                if (ids.length > 0) {
+                    await tx.verificaciones_invitaciones_lanzadores.updateMany({
+                        where: {
+                            invitacion_id: { in: ids },
+                            fecha_utilizacion: null,
+                            fecha_invalidacion: null
+                        },
+                        data: {
+                            fecha_invalidacion: ahora
+                        }
+                    });
+                }
+
+                await tx.invitaciones_lanzadores.updateMany({
+                    where: {
+                        asignacion_id: asignacion.id,
+                        fecha_utilizacion: null,
+                        fecha_invalidacion: null
+                    },
+                    data: {
+                        fecha_invalidacion: ahora
+                    }
+                });
+
+                await tx.historial_asignaciones.create({
+                    data: {
+                        asignacion_id: asignacion.id,
+                        actor_usuario_id: null,
+                        evento: 'invitacion_caducada',
+                        estado_anterior: 'pendiente',
+                        estado_nuevo: 'caducada',
+                        descripcion:
+                            'La invitación ha superado los siete días de validez.'
+                    }
+                });
+            });
+        }
     }
 
 

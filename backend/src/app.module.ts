@@ -8,6 +8,7 @@ import { PrismaModule } from './prisma/prisma.module';
 import { CorreoModule } from './correo/correo.module';
 import { InvitacionesLanzadoresModule } from './invitaciones-lanzadores/invitaciones-lanzadores.module';
 import { CuentasModule } from './cuentas/cuentas.module';
+import { ContactosDestinatariosModule } from './contactos-destinatarios/contactos-destinatarios.module';
 
 @Module({
   imports: [
@@ -19,7 +20,8 @@ import { CuentasModule } from './cuentas/cuentas.module';
     PrismaModule,
     CorreoModule,
     InvitacionesLanzadoresModule,
-    CuentasModule
+    CuentasModule,
+    ContactosDestinatariosModule
   ],
   controllers: [AppController],
   providers: [AppService]

@@ -1,4 +1,4 @@
-import { BadRequestException, ConflictException, Injectable, InternalServerErrorException, Logger, ServiceUnavailableException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, InternalServerErrorException, Logger, ServiceUnavailableException, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { randomBytes, createHash } from 'node:crypto';
 import { PrismaService } from '../prisma/prisma.service';
@@ -418,6 +418,158 @@ export class ContactosLanzadoresService {
             messageId
         };
     }
+
+
+
+    // --------------------------------------------------
+    // 4. Retirar una invitación pendiente
+    // --------------------------------------------------
+
+    async retirarInvitacion(
+        administradorId: string,
+        asignacionId: string
+    ) {
+        return this.prisma.$transaction(async (tx) => {
+
+            const ahora = new Date();
+
+            // Modificar exclusivamente una asignación pendiente que pertenezca al administrador
+            const resultado =
+                await tx.asignaciones_lanzadores.updateMany({
+                    where: {
+                        id: asignacionId,
+                        administrador_id: administradorId,
+                        estado: 'pendiente'
+                    },
+                    data: {
+                        estado: 'revocada',
+                        fecha_revocacion: ahora,
+                        updated_at: ahora
+                    }
+                });
+
+            if (resultado.count !== 1) {
+                throw new ConflictException(
+                    'La invitación ya no está pendiente o no existe.'
+                );
+            }
+
+            // Localizar las invitaciones de esta asignación
+            const invitaciones =
+                await tx.invitaciones_lanzadores.findMany({
+                    where: {
+                        asignacion_id: asignacionId
+                    },
+                    select: {
+                        id: true
+                    }
+                });
+
+            const ids = invitaciones.map(
+                invitacion => invitacion.id
+            );
+
+            // Invalidar los códigos y las credenciales temporales todavía disponibles
+            if (ids.length > 0) {
+                await tx.verificaciones_invitaciones_lanzadores.updateMany({
+                    where: {
+                        invitacion_id: {
+                            in: ids
+                        },
+                        fecha_utilizacion: null,
+                        fecha_invalidacion: null
+                    },
+                    data: {
+                        fecha_invalidacion: ahora
+                    }
+                });
+            }
+
+            // Invalidar los enlaces pendientes de uso
+            await tx.invitaciones_lanzadores.updateMany({
+                where: {
+                    asignacion_id: asignacionId,
+                    fecha_utilizacion: null,
+                    fecha_invalidacion: null
+                },
+                data: {
+                    fecha_invalidacion: ahora
+                }
+            });
+
+            // Conservar la trazabilidad de la retirada
+            await tx.historial_asignaciones.create({
+                data: {
+                    asignacion_id: asignacionId,
+                    actor_usuario_id: administradorId,
+                    evento: 'invitacion_retirada',
+                    estado_anterior: 'pendiente',
+                    estado_nuevo: 'revocada',
+                    descripcion:
+                        'El administrador ha retirado la invitación.'
+                }
+            });
+
+            return {
+                estado: 'revocada',
+                mensaje: 'La invitación se ha retirado correctamente.'
+            };
+        });
+    }
+
+    // --------------------------------------------------
+    // 5. Revocar una autorización aceptada
+    // --------------------------------------------------
+
+    async revocarAutorizacion(
+        administradorId: string,
+        asignacionId: string
+    ) {
+        return this.prisma.$transaction(async (tx) => {
+
+            const ahora = new Date();
+
+            // El administrador solo puede revocar autorizaciones aceptadas de su propia cuenta
+            const resultado =
+                await tx.asignaciones_lanzadores.updateMany({
+                    where: {
+                        id: asignacionId,
+                        administrador_id: administradorId,
+                        estado: 'aceptada'
+                    },
+                    data: {
+                        estado: 'revocada',
+                        fecha_revocacion: ahora,
+                        updated_at: ahora
+                    }
+                });
+
+            if (resultado.count !== 1) {
+                throw new ConflictException(
+                    'La autorización ya no está aceptada o no existe.'
+                );
+            }
+
+            // Registrar el cambio sin eliminar la asignación
+            await tx.historial_asignaciones.create({
+                data: {
+                    asignacion_id: asignacionId,
+                    actor_usuario_id: administradorId,
+                    evento: 'autorizacion_revocada',
+                    estado_anterior: 'aceptada',
+                    estado_nuevo: 'revocada',
+                    descripcion:
+                        'El administrador ha revocado la autorización.'
+                }
+            });
+
+            return {
+                estado: 'revocada',
+                mensaje: 'La autorización se ha revocado correctamente.'
+            };
+        });
+    }
+
 
 }
 

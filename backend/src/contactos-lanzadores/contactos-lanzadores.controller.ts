@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Headers, Post, UnauthorizedException } from '@nestjs/common';
+import { Body, Controller, Get, Headers, Post, UnauthorizedException, Param, Patch, } from '@nestjs/common';
 import { ContactosLanzadoresService } from './contactos-lanzadores.service';
 import { SupabaseService } from '../supabase/supabase.service';
 import { CrearInvitacionDto } from './dto/crear-invitacion.dto';
@@ -87,4 +87,43 @@ export class ContactosLanzadoresController {
             origen
         );
     }
+
+    // Retirar una invitación pendiente.
+    @Patch(':id/retirar')
+    async retirarInvitacion(
+        @Param('id') asignacionId: string,
+        @Headers('authorization') autorizacion?: string
+    ) {
+        const usuario =
+            await this.verificarSesion(autorizacion);
+
+        await this.cuentasService.comprobarCuentaActiva(
+            usuario.id
+        );
+
+        return this.contactosLanzadoresService.retirarInvitacion(
+            usuario.id,
+            asignacionId
+        );
+    }
+
+    // Revocar una autorización aceptada
+    @Patch(':id/revocar')
+    async revocarAutorizacion(
+        @Param('id') asignacionId: string,
+        @Headers('authorization') autorizacion?: string
+    ) {
+        const usuario =
+            await this.verificarSesion(autorizacion);
+
+        await this.cuentasService.comprobarCuentaActiva(
+            usuario.id
+        );
+
+        return this.contactosLanzadoresService.revocarAutorizacion(
+            usuario.id,
+            asignacionId
+        );
+    }
+
 }

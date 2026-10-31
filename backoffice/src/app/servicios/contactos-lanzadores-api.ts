@@ -103,4 +103,50 @@ export class ContactosLanzadoresApi {
             throw new Error(mensaje);
         }
     }
+
+    // Retirar una invitación pendiente
+    async retirarInvitacion(asignacionId: string): Promise<void> {
+        await this.modificarAsignacion(asignacionId, 'retirar');
+    }
+
+    // Revocar una autorización aceptada
+    async revocarAutorizacion(asignacionId: string): Promise<void> {
+        await this.modificarAsignacion(asignacionId, 'revocar');
+    }
+
+    private async modificarAsignacion(
+        asignacionId: string,
+        accion: 'retirar' | 'revocar'
+    ): Promise<void> {
+
+        const token = await this.obtenerToken();
+
+        const respuesta = await fetch(
+            `${configuracionBackend.url}/contactos-lanzadores/` +
+            `${encodeURIComponent(asignacionId)}/${accion}`,
+            {
+                method: 'PATCH',
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            }
+        );
+
+        if (!respuesta.ok) {
+            let mensaje = 'No se ha podido realizar la operación.';
+
+            try {
+                const datos = await respuesta.json();
+
+                if (typeof datos.message === 'string') {
+                    mensaje = datos.message;
+                }
+            } catch {
+                // Conservar el mensaje general
+            }
+
+            throw new Error(mensaje);
+        }
+    }
+
 }

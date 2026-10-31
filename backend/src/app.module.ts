@@ -6,6 +6,8 @@ import { SupabaseModule } from './supabase/supabase.module';
 import { ContactosLanzadoresModule } from './contactos-lanzadores/contactos-lanzadores.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { CorreoModule } from './correo/correo.module';
+import { InvitacionesLanzadoresModule } from './invitaciones-lanzadores/invitaciones-lanzadores.module';
+import { CuentasModule } from './cuentas/cuentas.module';
 
 @Module({
   imports: [
@@ -15,7 +17,9 @@ import { CorreoModule } from './correo/correo.module';
     SupabaseModule,
     ContactosLanzadoresModule,
     PrismaModule,
-    CorreoModule
+    CorreoModule,
+    InvitacionesLanzadoresModule,
+    CuentasModule
   ],
   controllers: [AppController],
   providers: [AppService]

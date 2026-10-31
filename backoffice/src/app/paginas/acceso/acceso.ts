@@ -11,6 +11,7 @@ import { Autenticacion } from '../../servicios/autenticacion';
   styleUrl: './acceso.scss'
 })
 export class Acceso {
+
   private autenticacion = inject(Autenticacion);
   private constructorFormulario = inject(FormBuilder);
   private router = inject(Router);
@@ -62,11 +63,37 @@ export class Acceso {
         return;
       }
 
-      // Inicio de sesión correcto: acceder al panel privado
-      const navegacionCorrecta = await this.router.navigateByUrl(
-        '/panel/dashboard',
-        { replaceUrl: true }
-      );
+      // Comprobar que NestJS reconoce la cuenta y que su estado permite acceder al backoffice.
+      let estadoCuenta: string;
+
+      try {
+        estadoCuenta =
+          await this.autenticacion.sincronizarCuenta();
+      } catch {
+        await this.autenticacion.cerrarSesion();
+
+        this.mensajeAcceso.set(
+          'No se ha podido verificar el estado de tu cuenta. Inténtalo de nuevo más tarde.'
+        );
+        return;
+      }
+
+      if (estadoCuenta !== 'activa') {
+        await this.autenticacion.cerrarSesion();
+
+        this.mensajeAcceso.set(
+          'Tu cuenta no está habilitada para acceder al panel.'
+        );
+        return;
+      }
+
+      // Inicio de sesión correcto y cuenta activa:
+      // acceder al panel privado.
+      const navegacionCorrecta =
+        await this.router.navigateByUrl(
+          '/panel/dashboard',
+          { replaceUrl: true }
+        );
 
       if (!navegacionCorrecta) {
         this.mensajeAcceso.set(
@@ -78,6 +105,7 @@ export class Acceso {
       this.mensajeAcceso.set(
         'No se ha podido conectar con el servicio. Vuelve a intentarlo dentro de un rato.'
       );
+
     } finally {
       this.accediendo.set(false);
     }

@@ -532,6 +532,7 @@ model users {
   webauthn_challenges         webauthn_challenges[]
   webauthn_credentials        webauthn_credentials[]
   asignaciones_lanzadores     asignaciones_lanzadores[]
+  cuentas                     cuentas?
   historial_asignaciones      historial_asignaciones[]
   lanzadores                  lanzadores?
 
@@ -641,17 +642,74 @@ model lanzadores {
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model invitaciones_lanzadores {
-  id                      String                  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  asignacion_id           String                  @unique(map: "invitaciones_token_vigente_idx", where: raw("((fecha_utilizacion IS NULL) AND (fecha_invalidacion IS NULL))")) @db.Uuid
-  token_hash              String                  @unique @db.VarChar(64)
-  fecha_creacion          DateTime                @default(now()) @db.Timestamptz(6)
-  fecha_caducidad         DateTime                @default(dbgenerated("(now() + '7 days'::interval)")) @db.Timestamptz(6)
-  fecha_utilizacion       DateTime?               @db.Timestamptz(6)
-  fecha_invalidacion      DateTime?               @db.Timestamptz(6)
-  estado_envio            String                  @default("preparado") @db.VarChar(30)
-  asignaciones_lanzadores asignaciones_lanzadores @relation(fields: [asignacion_id], references: [id], onUpdate: NoAction)
+  id                                     String                                  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  asignacion_id                          String                                  @unique(map: "invitaciones_token_vigente_idx", where: raw("((fecha_utilizacion IS NULL) AND (fecha_invalidacion IS NULL))")) @db.Uuid
+  token_hash                             String                                  @unique @db.VarChar(64)
+  fecha_creacion                         DateTime                                @default(now()) @db.Timestamptz(6)
+  fecha_caducidad                        DateTime                                @default(dbgenerated("(now() + '7 days'::interval)")) @db.Timestamptz(6)
+  fecha_utilizacion                      DateTime?                               @db.Timestamptz(6)
+  fecha_invalidacion                     DateTime?                               @db.Timestamptz(6)
+  estado_envio                           String                                  @default("preparado") @db.VarChar(30)
+  intentos_verificacion                  Int                                     @default(0)
+  asignaciones_lanzadores                asignaciones_lanzadores                 @relation(fields: [asignacion_id], references: [id], onUpdate: NoAction)
+  verificaciones_invitaciones_lanzadores verificaciones_invitaciones_lanzadores?
 
   @@index([fecha_caducidad], map: "invitaciones_fecha_caducidad_idx", where: raw("((fecha_utilizacion IS NULL) AND (fecha_invalidacion IS NULL))"))
+  @@schema("public")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model verificaciones_invitaciones_lanzadores {
+  id                         String                  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  invitacion_id              String                  @unique(map: "verificaciones_invitaciones_activas_idx", where: raw("((fecha_utilizacion IS NULL) AND (fecha_invalidacion IS NULL))")) @db.Uuid
+  codigo_hash                String                  @db.VarChar(64)
+  intentos_fallidos          Int                     @default(0)
+  fecha_creacion             DateTime                @default(now()) @db.Timestamptz(6)
+  fecha_caducidad            DateTime                @db.Timestamptz(6)
+  fecha_verificacion         DateTime?               @db.Timestamptz(6)
+  credencial_hash            String?                 @db.VarChar(64)
+  fecha_caducidad_credencial DateTime?               @db.Timestamptz(6)
+  fecha_utilizacion          DateTime?               @db.Timestamptz(6)
+  fecha_invalidacion         DateTime?               @db.Timestamptz(6)
+  invitaciones_lanzadores    invitaciones_lanzadores @relation(fields: [invitacion_id], references: [id], onUpdate: NoAction)
+
+  @@index([invitacion_id, fecha_creacion(sort: Desc)], map: "verificaciones_invitaciones_fecha_idx")
+  @@schema("public")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model cuentas {
+  id                String    @id @db.Uuid
+  nombre            String    @db.VarChar
+  apellidos         String?   @db.VarChar
+  correo            String    @unique(map: "cuentas_correo_unico") @db.VarChar
+  rol               String    @default("administrador") @db.VarChar
+  estado            String    @default("pendiente_verificacion") @db.VarChar
+  fecha_registro    DateTime  @default(now()) @db.Timestamptz(6)
+  fecha_suspension  DateTime? @db.Timestamptz(6)
+  motivo_suspension String?
+  fecha_cierre      DateTime? @db.Timestamptz(6)
+  users             users     @relation(fields: [id], references: [id], onUpdate: NoAction, map: "cuentas_usuario_id_fkey")
+
+  @@schema("public")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model historico_cierre_cuentas {
+  id                          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  nombre_administrador        String   @db.VarChar
+  correo_administrador        String   @db.VarChar
+  nombre_lanzador_solicitante String   @db.VarChar
+  correo_lanzador_solicitante String   @db.VarChar
+  nombre_lanzador_validador   String   @db.VarChar
+  correo_lanzador_validador   String   @db.VarChar
+  estado_final                String   @db.VarChar
+  fecha_cierre                DateTime @db.Timestamptz(6)
+  fecha_eliminacion_datos     DateTime @db.Timestamptz(6)
+
   @@schema("public")
 }
 

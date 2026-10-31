@@ -462,6 +462,7 @@ export type usersWhereInput = {
   webauthn_challenges?: Prisma.Webauthn_challengesListRelationFilter
   webauthn_credentials?: Prisma.Webauthn_credentialsListRelationFilter
   asignaciones_lanzadores?: Prisma.Asignaciones_lanzadoresListRelationFilter
+  cuentas?: Prisma.XOR<Prisma.CuentasNullableScalarRelationFilter, Prisma.cuentasWhereInput> | null
   historial_asignaciones?: Prisma.Historial_asignacionesListRelationFilter
   lanzadores?: Prisma.XOR<Prisma.LanzadoresNullableScalarRelationFilter, Prisma.lanzadoresWhereInput> | null
 }
@@ -513,6 +514,7 @@ export type usersOrderByWithRelationInput = {
   webauthn_challenges?: Prisma.webauthn_challengesOrderByRelationAggregateInput
   webauthn_credentials?: Prisma.webauthn_credentialsOrderByRelationAggregateInput
   asignaciones_lanzadores?: Prisma.asignaciones_lanzadoresOrderByRelationAggregateInput
+  cuentas?: Prisma.cuentasOrderByWithRelationInput
   historial_asignaciones?: Prisma.historial_asignacionesOrderByRelationAggregateInput
   lanzadores?: Prisma.lanzadoresOrderByWithRelationInput
 }
@@ -567,6 +569,7 @@ export type usersWhereUniqueInput = Prisma.AtLeast<{
   webauthn_challenges?: Prisma.Webauthn_challengesListRelationFilter
   webauthn_credentials?: Prisma.Webauthn_credentialsListRelationFilter
   asignaciones_lanzadores?: Prisma.Asignaciones_lanzadoresListRelationFilter
+  cuentas?: Prisma.XOR<Prisma.CuentasNullableScalarRelationFilter, Prisma.cuentasWhereInput> | null
   historial_asignaciones?: Prisma.Historial_asignacionesListRelationFilter
   lanzadores?: Prisma.XOR<Prisma.LanzadoresNullableScalarRelationFilter, Prisma.lanzadoresWhereInput> | null
 }, "id" | "email" | "confirmation_token" | "recovery_token" | "email_change_token_new" | "phone" | "email_change_token_current" | "reauthentication_token">
@@ -702,6 +705,7 @@ export type usersCreateInput = {
   webauthn_challenges?: Prisma.webauthn_challengesCreateNestedManyWithoutUsersInput
   webauthn_credentials?: Prisma.webauthn_credentialsCreateNestedManyWithoutUsersInput
   asignaciones_lanzadores?: Prisma.asignaciones_lanzadoresCreateNestedManyWithoutUsersInput
+  cuentas?: Prisma.cuentasCreateNestedOneWithoutUsersInput
   historial_asignaciones?: Prisma.historial_asignacionesCreateNestedManyWithoutUsersInput
   lanzadores?: Prisma.lanzadoresCreateNestedOneWithoutUsersInput
 }
@@ -753,6 +757,7 @@ export type usersUncheckedCreateInput = {
   webauthn_challenges?: Prisma.webauthn_challengesUncheckedCreateNestedManyWithoutUsersInput
   webauthn_credentials?: Prisma.webauthn_credentialsUncheckedCreateNestedManyWithoutUsersInput
   asignaciones_lanzadores?: Prisma.asignaciones_lanzadoresUncheckedCreateNestedManyWithoutUsersInput
+  cuentas?: Prisma.cuentasUncheckedCreateNestedOneWithoutUsersInput
   historial_asignaciones?: Prisma.historial_asignacionesUncheckedCreateNestedManyWithoutUsersInput
   lanzadores?: Prisma.lanzadoresUncheckedCreateNestedOneWithoutUsersInput
 }
@@ -804,6 +809,7 @@ export type usersUpdateInput = {
   webauthn_challenges?: Prisma.webauthn_challengesUpdateManyWithoutUsersNestedInput
   webauthn_credentials?: Prisma.webauthn_credentialsUpdateManyWithoutUsersNestedInput
   asignaciones_lanzadores?: Prisma.asignaciones_lanzadoresUpdateManyWithoutUsersNestedInput
+  cuentas?: Prisma.cuentasUpdateOneWithoutUsersNestedInput
   historial_asignaciones?: Prisma.historial_asignacionesUpdateManyWithoutUsersNestedInput
   lanzadores?: Prisma.lanzadoresUpdateOneWithoutUsersNestedInput
 }
@@ -855,6 +861,7 @@ export type usersUncheckedUpdateInput = {
   webauthn_challenges?: Prisma.webauthn_challengesUncheckedUpdateManyWithoutUsersNestedInput
   webauthn_credentials?: Prisma.webauthn_credentialsUncheckedUpdateManyWithoutUsersNestedInput
   asignaciones_lanzadores?: Prisma.asignaciones_lanzadoresUncheckedUpdateManyWithoutUsersNestedInput
+  cuentas?: Prisma.cuentasUncheckedUpdateOneWithoutUsersNestedInput
   historial_asignaciones?: Prisma.historial_asignacionesUncheckedUpdateManyWithoutUsersNestedInput
   lanzadores?: Prisma.lanzadoresUncheckedUpdateOneWithoutUsersNestedInput
 }
@@ -1301,6 +1308,20 @@ export type usersUpdateOneWithoutLanzadoresNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.usersUpdateToOneWithWhereWithoutLanzadoresInput, Prisma.usersUpdateWithoutLanzadoresInput>, Prisma.usersUncheckedUpdateWithoutLanzadoresInput>
 }
 
+export type usersCreateNestedOneWithoutCuentasInput = {
+  create?: Prisma.XOR<Prisma.usersCreateWithoutCuentasInput, Prisma.usersUncheckedCreateWithoutCuentasInput>
+  connectOrCreate?: Prisma.usersCreateOrConnectWithoutCuentasInput
+  connect?: Prisma.usersWhereUniqueInput
+}
+
+export type usersUpdateOneRequiredWithoutCuentasNestedInput = {
+  create?: Prisma.XOR<Prisma.usersCreateWithoutCuentasInput, Prisma.usersUncheckedCreateWithoutCuentasInput>
+  connectOrCreate?: Prisma.usersCreateOrConnectWithoutCuentasInput
+  upsert?: Prisma.usersUpsertWithoutCuentasInput
+  connect?: Prisma.usersWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.usersUpdateToOneWithWhereWithoutCuentasInput, Prisma.usersUpdateWithoutCuentasInput>, Prisma.usersUncheckedUpdateWithoutCuentasInput>
+}
+
 export type usersCreateWithoutIdentitiesInput = {
   instance_id?: string | null
   id: string
@@ -1347,6 +1368,7 @@ export type usersCreateWithoutIdentitiesInput = {
   webauthn_challenges?: Prisma.webauthn_challengesCreateNestedManyWithoutUsersInput
   webauthn_credentials?: Prisma.webauthn_credentialsCreateNestedManyWithoutUsersInput
   asignaciones_lanzadores?: Prisma.asignaciones_lanzadoresCreateNestedManyWithoutUsersInput
+  cuentas?: Prisma.cuentasCreateNestedOneWithoutUsersInput
   historial_asignaciones?: Prisma.historial_asignacionesCreateNestedManyWithoutUsersInput
   lanzadores?: Prisma.lanzadoresCreateNestedOneWithoutUsersInput
 }
@@ -1397,6 +1419,7 @@ export type usersUncheckedCreateWithoutIdentitiesInput = {
   webauthn_challenges?: Prisma.webauthn_challengesUncheckedCreateNestedManyWithoutUsersInput
   webauthn_credentials?: Prisma.webauthn_credentialsUncheckedCreateNestedManyWithoutUsersInput
   asignaciones_lanzadores?: Prisma.asignaciones_lanzadoresUncheckedCreateNestedManyWithoutUsersInput
+  cuentas?: Prisma.cuentasUncheckedCreateNestedOneWithoutUsersInput
   historial_asignaciones?: Prisma.historial_asignacionesUncheckedCreateNestedManyWithoutUsersInput
   lanzadores?: Prisma.lanzadoresUncheckedCreateNestedOneWithoutUsersInput
 }
@@ -1463,6 +1486,7 @@ export type usersUpdateWithoutIdentitiesInput = {
   webauthn_challenges?: Prisma.webauthn_challengesUpdateManyWithoutUsersNestedInput
   webauthn_credentials?: Prisma.webauthn_credentialsUpdateManyWithoutUsersNestedInput
   asignaciones_lanzadores?: Prisma.asignaciones_lanzadoresUpdateManyWithoutUsersNestedInput
+  cuentas?: Prisma.cuentasUpdateOneWithoutUsersNestedInput
   historial_asignaciones?: Prisma.historial_asignacionesUpdateManyWithoutUsersNestedInput
   lanzadores?: Prisma.lanzadoresUpdateOneWithoutUsersNestedInput
 }
@@ -1513,6 +1537,7 @@ export type usersUncheckedUpdateWithoutIdentitiesInput = {
   webauthn_challenges?: Prisma.webauthn_challengesUncheckedUpdateManyWithoutUsersNestedInput
   webauthn_credentials?: Prisma.webauthn_credentialsUncheckedUpdateManyWithoutUsersNestedInput
   asignaciones_lanzadores?: Prisma.asignaciones_lanzadoresUncheckedUpdateManyWithoutUsersNestedInput
+  cuentas?: Prisma.cuentasUncheckedUpdateOneWithoutUsersNestedInput
   historial_asignaciones?: Prisma.historial_asignacionesUncheckedUpdateManyWithoutUsersNestedInput
   lanzadores?: Prisma.lanzadoresUncheckedUpdateOneWithoutUsersNestedInput
 }
@@ -1563,6 +1588,7 @@ export type usersCreateWithoutMfa_factorsInput = {
   webauthn_challenges?: Prisma.webauthn_challengesCreateNestedManyWithoutUsersInput
   webauthn_credentials?: Prisma.webauthn_credentialsCreateNestedManyWithoutUsersInput
   asignaciones_lanzadores?: Prisma.asignaciones_lanzadoresCreateNestedManyWithoutUsersInput
+  cuentas?: Prisma.cuentasCreateNestedOneWithoutUsersInput
   historial_asignaciones?: Prisma.historial_asignacionesCreateNestedManyWithoutUsersInput
   lanzadores?: Prisma.lanzadoresCreateNestedOneWithoutUsersInput
 }
@@ -1613,6 +1639,7 @@ export type usersUncheckedCreateWithoutMfa_factorsInput = {
   webauthn_challenges?: Prisma.webauthn_challengesUncheckedCreateNestedManyWithoutUsersInput
   webauthn_credentials?: Prisma.webauthn_credentialsUncheckedCreateNestedManyWithoutUsersInput
   asignaciones_lanzadores?: Prisma.asignaciones_lanzadoresUncheckedCreateNestedManyWithoutUsersInput
+  cuentas?: Prisma.cuentasUncheckedCreateNestedOneWithoutUsersInput
   historial_asignaciones?: Prisma.historial_asignacionesUncheckedCreateNestedManyWithoutUsersInput
   lanzadores?: Prisma.lanzadoresUncheckedCreateNestedOneWithoutUsersInput
 }
@@ -1679,6 +1706,7 @@ export type usersUpdateWithoutMfa_factorsInput = {
   webauthn_challenges?: Prisma.webauthn_challengesUpdateManyWithoutUsersNestedInput
   webauthn_credentials?: Prisma.webauthn_credentialsUpdateManyWithoutUsersNestedInput
   asignaciones_lanzadores?: Prisma.asignaciones_lanzadoresUpdateManyWithoutUsersNestedInput
+  cuentas?: Prisma.cuentasUpdateOneWithoutUsersNestedInput
   historial_asignaciones?: Prisma.historial_asignacionesUpdateManyWithoutUsersNestedInput
   lanzadores?: Prisma.lanzadoresUpdateOneWithoutUsersNestedInput
 }
@@ -1729,6 +1757,7 @@ export type usersUncheckedUpdateWithoutMfa_factorsInput = {
   webauthn_challenges?: Prisma.webauthn_challengesUncheckedUpdateManyWithoutUsersNestedInput
   webauthn_credentials?: Prisma.webauthn_credentialsUncheckedUpdateManyWithoutUsersNestedInput
   asignaciones_lanzadores?: Prisma.asignaciones_lanzadoresUncheckedUpdateManyWithoutUsersNestedInput
+  cuentas?: Prisma.cuentasUncheckedUpdateOneWithoutUsersNestedInput
   historial_asignaciones?: Prisma.historial_asignacionesUncheckedUpdateManyWithoutUsersNestedInput
   lanzadores?: Prisma.lanzadoresUncheckedUpdateOneWithoutUsersNestedInput
 }
@@ -1779,6 +1808,7 @@ export type usersCreateWithoutMfa_recovery_code_setsInput = {
   webauthn_challenges?: Prisma.webauthn_challengesCreateNestedManyWithoutUsersInput
   webauthn_credentials?: Prisma.webauthn_credentialsCreateNestedManyWithoutUsersInput
   asignaciones_lanzadores?: Prisma.asignaciones_lanzadoresCreateNestedManyWithoutUsersInput
+  cuentas?: Prisma.cuentasCreateNestedOneWithoutUsersInput
   historial_asignaciones?: Prisma.historial_asignacionesCreateNestedManyWithoutUsersInput
   lanzadores?: Prisma.lanzadoresCreateNestedOneWithoutUsersInput
 }
@@ -1829,6 +1859,7 @@ export type usersUncheckedCreateWithoutMfa_recovery_code_setsInput = {
   webauthn_challenges?: Prisma.webauthn_challengesUncheckedCreateNestedManyWithoutUsersInput
   webauthn_credentials?: Prisma.webauthn_credentialsUncheckedCreateNestedManyWithoutUsersInput
   asignaciones_lanzadores?: Prisma.asignaciones_lanzadoresUncheckedCreateNestedManyWithoutUsersInput
+  cuentas?: Prisma.cuentasUncheckedCreateNestedOneWithoutUsersInput
   historial_asignaciones?: Prisma.historial_asignacionesUncheckedCreateNestedManyWithoutUsersInput
   lanzadores?: Prisma.lanzadoresUncheckedCreateNestedOneWithoutUsersInput
 }
@@ -1895,6 +1926,7 @@ export type usersUpdateWithoutMfa_recovery_code_setsInput = {
   webauthn_challenges?: Prisma.webauthn_challengesUpdateManyWithoutUsersNestedInput
   webauthn_credentials?: Prisma.webauthn_credentialsUpdateManyWithoutUsersNestedInput
   asignaciones_lanzadores?: Prisma.asignaciones_lanzadoresUpdateManyWithoutUsersNestedInput
+  cuentas?: Prisma.cuentasUpdateOneWithoutUsersNestedInput
   historial_asignaciones?: Prisma.historial_asignacionesUpdateManyWithoutUsersNestedInput
   lanzadores?: Prisma.lanzadoresUpdateOneWithoutUsersNestedInput
 }
@@ -1945,6 +1977,7 @@ export type usersUncheckedUpdateWithoutMfa_recovery_code_setsInput = {
   webauthn_challenges?: Prisma.webauthn_challengesUncheckedUpdateManyWithoutUsersNestedInput
   webauthn_credentials?: Prisma.webauthn_credentialsUncheckedUpdateManyWithoutUsersNestedInput
   asignaciones_lanzadores?: Prisma.asignaciones_lanzadoresUncheckedUpdateManyWithoutUsersNestedInput
+  cuentas?: Prisma.cuentasUncheckedUpdateOneWithoutUsersNestedInput
   historial_asignaciones?: Prisma.historial_asignacionesUncheckedUpdateManyWithoutUsersNestedInput
   lanzadores?: Prisma.lanzadoresUncheckedUpdateOneWithoutUsersNestedInput
 }
@@ -1995,6 +2028,7 @@ export type usersCreateWithoutOauth_authorizationsInput = {
   webauthn_challenges?: Prisma.webauthn_challengesCreateNestedManyWithoutUsersInput
   webauthn_credentials?: Prisma.webauthn_credentialsCreateNestedManyWithoutUsersInput
   asignaciones_lanzadores?: Prisma.asignaciones_lanzadoresCreateNestedManyWithoutUsersInput
+  cuentas?: Prisma.cuentasCreateNestedOneWithoutUsersInput
   historial_asignaciones?: Prisma.historial_asignacionesCreateNestedManyWithoutUsersInput
   lanzadores?: Prisma.lanzadoresCreateNestedOneWithoutUsersInput
 }
@@ -2045,6 +2079,7 @@ export type usersUncheckedCreateWithoutOauth_authorizationsInput = {
   webauthn_challenges?: Prisma.webauthn_challengesUncheckedCreateNestedManyWithoutUsersInput
   webauthn_credentials?: Prisma.webauthn_credentialsUncheckedCreateNestedManyWithoutUsersInput
   asignaciones_lanzadores?: Prisma.asignaciones_lanzadoresUncheckedCreateNestedManyWithoutUsersInput
+  cuentas?: Prisma.cuentasUncheckedCreateNestedOneWithoutUsersInput
   historial_asignaciones?: Prisma.historial_asignacionesUncheckedCreateNestedManyWithoutUsersInput
   lanzadores?: Prisma.lanzadoresUncheckedCreateNestedOneWithoutUsersInput
 }
@@ -2111,6 +2146,7 @@ export type usersUpdateWithoutOauth_authorizationsInput = {
   webauthn_challenges?: Prisma.webauthn_challengesUpdateManyWithoutUsersNestedInput
   webauthn_credentials?: Prisma.webauthn_credentialsUpdateManyWithoutUsersNestedInput
   asignaciones_lanzadores?: Prisma.asignaciones_lanzadoresUpdateManyWithoutUsersNestedInput
+  cuentas?: Prisma.cuentasUpdateOneWithoutUsersNestedInput
   historial_asignaciones?: Prisma.historial_asignacionesUpdateManyWithoutUsersNestedInput
   lanzadores?: Prisma.lanzadoresUpdateOneWithoutUsersNestedInput
 }
@@ -2161,6 +2197,7 @@ export type usersUncheckedUpdateWithoutOauth_authorizationsInput = {
   webauthn_challenges?: Prisma.webauthn_challengesUncheckedUpdateManyWithoutUsersNestedInput
   webauthn_credentials?: Prisma.webauthn_credentialsUncheckedUpdateManyWithoutUsersNestedInput
   asignaciones_lanzadores?: Prisma.asignaciones_lanzadoresUncheckedUpdateManyWithoutUsersNestedInput
+  cuentas?: Prisma.cuentasUncheckedUpdateOneWithoutUsersNestedInput
   historial_asignaciones?: Prisma.historial_asignacionesUncheckedUpdateManyWithoutUsersNestedInput
   lanzadores?: Prisma.lanzadoresUncheckedUpdateOneWithoutUsersNestedInput
 }
@@ -2211,6 +2248,7 @@ export type usersCreateWithoutOauth_consentsInput = {
   webauthn_challenges?: Prisma.webauthn_challengesCreateNestedManyWithoutUsersInput
   webauthn_credentials?: Prisma.webauthn_credentialsCreateNestedManyWithoutUsersInput
   asignaciones_lanzadores?: Prisma.asignaciones_lanzadoresCreateNestedManyWithoutUsersInput
+  cuentas?: Prisma.cuentasCreateNestedOneWithoutUsersInput
   historial_asignaciones?: Prisma.historial_asignacionesCreateNestedManyWithoutUsersInput
   lanzadores?: Prisma.lanzadoresCreateNestedOneWithoutUsersInput
 }
@@ -2261,6 +2299,7 @@ export type usersUncheckedCreateWithoutOauth_consentsInput = {
   webauthn_challenges?: Prisma.webauthn_challengesUncheckedCreateNestedManyWithoutUsersInput
   webauthn_credentials?: Prisma.webauthn_credentialsUncheckedCreateNestedManyWithoutUsersInput
   asignaciones_lanzadores?: Prisma.asignaciones_lanzadoresUncheckedCreateNestedManyWithoutUsersInput
+  cuentas?: Prisma.cuentasUncheckedCreateNestedOneWithoutUsersInput
   historial_asignaciones?: Prisma.historial_asignacionesUncheckedCreateNestedManyWithoutUsersInput
   lanzadores?: Prisma.lanzadoresUncheckedCreateNestedOneWithoutUsersInput
 }
@@ -2327,6 +2366,7 @@ export type usersUpdateWithoutOauth_consentsInput = {
   webauthn_challenges?: Prisma.webauthn_challengesUpdateManyWithoutUsersNestedInput
   webauthn_credentials?: Prisma.webauthn_credentialsUpdateManyWithoutUsersNestedInput
   asignaciones_lanzadores?: Prisma.asignaciones_lanzadoresUpdateManyWithoutUsersNestedInput
+  cuentas?: Prisma.cuentasUpdateOneWithoutUsersNestedInput
   historial_asignaciones?: Prisma.historial_asignacionesUpdateManyWithoutUsersNestedInput
   lanzadores?: Prisma.lanzadoresUpdateOneWithoutUsersNestedInput
 }
@@ -2377,6 +2417,7 @@ export type usersUncheckedUpdateWithoutOauth_consentsInput = {
   webauthn_challenges?: Prisma.webauthn_challengesUncheckedUpdateManyWithoutUsersNestedInput
   webauthn_credentials?: Prisma.webauthn_credentialsUncheckedUpdateManyWithoutUsersNestedInput
   asignaciones_lanzadores?: Prisma.asignaciones_lanzadoresUncheckedUpdateManyWithoutUsersNestedInput
+  cuentas?: Prisma.cuentasUncheckedUpdateOneWithoutUsersNestedInput
   historial_asignaciones?: Prisma.historial_asignacionesUncheckedUpdateManyWithoutUsersNestedInput
   lanzadores?: Prisma.lanzadoresUncheckedUpdateOneWithoutUsersNestedInput
 }
@@ -2427,6 +2468,7 @@ export type usersCreateWithoutOne_time_tokensInput = {
   webauthn_challenges?: Prisma.webauthn_challengesCreateNestedManyWithoutUsersInput
   webauthn_credentials?: Prisma.webauthn_credentialsCreateNestedManyWithoutUsersInput
   asignaciones_lanzadores?: Prisma.asignaciones_lanzadoresCreateNestedManyWithoutUsersInput
+  cuentas?: Prisma.cuentasCreateNestedOneWithoutUsersInput
   historial_asignaciones?: Prisma.historial_asignacionesCreateNestedManyWithoutUsersInput
   lanzadores?: Prisma.lanzadoresCreateNestedOneWithoutUsersInput
 }
@@ -2477,6 +2519,7 @@ export type usersUncheckedCreateWithoutOne_time_tokensInput = {
   webauthn_challenges?: Prisma.webauthn_challengesUncheckedCreateNestedManyWithoutUsersInput
   webauthn_credentials?: Prisma.webauthn_credentialsUncheckedCreateNestedManyWithoutUsersInput
   asignaciones_lanzadores?: Prisma.asignaciones_lanzadoresUncheckedCreateNestedManyWithoutUsersInput
+  cuentas?: Prisma.cuentasUncheckedCreateNestedOneWithoutUsersInput
   historial_asignaciones?: Prisma.historial_asignacionesUncheckedCreateNestedManyWithoutUsersInput
   lanzadores?: Prisma.lanzadoresUncheckedCreateNestedOneWithoutUsersInput
 }
@@ -2543,6 +2586,7 @@ export type usersUpdateWithoutOne_time_tokensInput = {
   webauthn_challenges?: Prisma.webauthn_challengesUpdateManyWithoutUsersNestedInput
   webauthn_credentials?: Prisma.webauthn_credentialsUpdateManyWithoutUsersNestedInput
   asignaciones_lanzadores?: Prisma.asignaciones_lanzadoresUpdateManyWithoutUsersNestedInput
+  cuentas?: Prisma.cuentasUpdateOneWithoutUsersNestedInput
   historial_asignaciones?: Prisma.historial_asignacionesUpdateManyWithoutUsersNestedInput
   lanzadores?: Prisma.lanzadoresUpdateOneWithoutUsersNestedInput
 }
@@ -2593,6 +2637,7 @@ export type usersUncheckedUpdateWithoutOne_time_tokensInput = {
   webauthn_challenges?: Prisma.webauthn_challengesUncheckedUpdateManyWithoutUsersNestedInput
   webauthn_credentials?: Prisma.webauthn_credentialsUncheckedUpdateManyWithoutUsersNestedInput
   asignaciones_lanzadores?: Prisma.asignaciones_lanzadoresUncheckedUpdateManyWithoutUsersNestedInput
+  cuentas?: Prisma.cuentasUncheckedUpdateOneWithoutUsersNestedInput
   historial_asignaciones?: Prisma.historial_asignacionesUncheckedUpdateManyWithoutUsersNestedInput
   lanzadores?: Prisma.lanzadoresUncheckedUpdateOneWithoutUsersNestedInput
 }
@@ -2643,6 +2688,7 @@ export type usersCreateWithoutScim_usersInput = {
   webauthn_challenges?: Prisma.webauthn_challengesCreateNestedManyWithoutUsersInput
   webauthn_credentials?: Prisma.webauthn_credentialsCreateNestedManyWithoutUsersInput
   asignaciones_lanzadores?: Prisma.asignaciones_lanzadoresCreateNestedManyWithoutUsersInput
+  cuentas?: Prisma.cuentasCreateNestedOneWithoutUsersInput
   historial_asignaciones?: Prisma.historial_asignacionesCreateNestedManyWithoutUsersInput
   lanzadores?: Prisma.lanzadoresCreateNestedOneWithoutUsersInput
 }
@@ -2693,6 +2739,7 @@ export type usersUncheckedCreateWithoutScim_usersInput = {
   webauthn_challenges?: Prisma.webauthn_challengesUncheckedCreateNestedManyWithoutUsersInput
   webauthn_credentials?: Prisma.webauthn_credentialsUncheckedCreateNestedManyWithoutUsersInput
   asignaciones_lanzadores?: Prisma.asignaciones_lanzadoresUncheckedCreateNestedManyWithoutUsersInput
+  cuentas?: Prisma.cuentasUncheckedCreateNestedOneWithoutUsersInput
   historial_asignaciones?: Prisma.historial_asignacionesUncheckedCreateNestedManyWithoutUsersInput
   lanzadores?: Prisma.lanzadoresUncheckedCreateNestedOneWithoutUsersInput
 }
@@ -2759,6 +2806,7 @@ export type usersUpdateWithoutScim_usersInput = {
   webauthn_challenges?: Prisma.webauthn_challengesUpdateManyWithoutUsersNestedInput
   webauthn_credentials?: Prisma.webauthn_credentialsUpdateManyWithoutUsersNestedInput
   asignaciones_lanzadores?: Prisma.asignaciones_lanzadoresUpdateManyWithoutUsersNestedInput
+  cuentas?: Prisma.cuentasUpdateOneWithoutUsersNestedInput
   historial_asignaciones?: Prisma.historial_asignacionesUpdateManyWithoutUsersNestedInput
   lanzadores?: Prisma.lanzadoresUpdateOneWithoutUsersNestedInput
 }
@@ -2809,6 +2857,7 @@ export type usersUncheckedUpdateWithoutScim_usersInput = {
   webauthn_challenges?: Prisma.webauthn_challengesUncheckedUpdateManyWithoutUsersNestedInput
   webauthn_credentials?: Prisma.webauthn_credentialsUncheckedUpdateManyWithoutUsersNestedInput
   asignaciones_lanzadores?: Prisma.asignaciones_lanzadoresUncheckedUpdateManyWithoutUsersNestedInput
+  cuentas?: Prisma.cuentasUncheckedUpdateOneWithoutUsersNestedInput
   historial_asignaciones?: Prisma.historial_asignacionesUncheckedUpdateManyWithoutUsersNestedInput
   lanzadores?: Prisma.lanzadoresUncheckedUpdateOneWithoutUsersNestedInput
 }
@@ -2859,6 +2908,7 @@ export type usersCreateWithoutSessionsInput = {
   webauthn_challenges?: Prisma.webauthn_challengesCreateNestedManyWithoutUsersInput
   webauthn_credentials?: Prisma.webauthn_credentialsCreateNestedManyWithoutUsersInput
   asignaciones_lanzadores?: Prisma.asignaciones_lanzadoresCreateNestedManyWithoutUsersInput
+  cuentas?: Prisma.cuentasCreateNestedOneWithoutUsersInput
   historial_asignaciones?: Prisma.historial_asignacionesCreateNestedManyWithoutUsersInput
   lanzadores?: Prisma.lanzadoresCreateNestedOneWithoutUsersInput
 }
@@ -2909,6 +2959,7 @@ export type usersUncheckedCreateWithoutSessionsInput = {
   webauthn_challenges?: Prisma.webauthn_challengesUncheckedCreateNestedManyWithoutUsersInput
   webauthn_credentials?: Prisma.webauthn_credentialsUncheckedCreateNestedManyWithoutUsersInput
   asignaciones_lanzadores?: Prisma.asignaciones_lanzadoresUncheckedCreateNestedManyWithoutUsersInput
+  cuentas?: Prisma.cuentasUncheckedCreateNestedOneWithoutUsersInput
   historial_asignaciones?: Prisma.historial_asignacionesUncheckedCreateNestedManyWithoutUsersInput
   lanzadores?: Prisma.lanzadoresUncheckedCreateNestedOneWithoutUsersInput
 }
@@ -2975,6 +3026,7 @@ export type usersUpdateWithoutSessionsInput = {
   webauthn_challenges?: Prisma.webauthn_challengesUpdateManyWithoutUsersNestedInput
   webauthn_credentials?: Prisma.webauthn_credentialsUpdateManyWithoutUsersNestedInput
   asignaciones_lanzadores?: Prisma.asignaciones_lanzadoresUpdateManyWithoutUsersNestedInput
+  cuentas?: Prisma.cuentasUpdateOneWithoutUsersNestedInput
   historial_asignaciones?: Prisma.historial_asignacionesUpdateManyWithoutUsersNestedInput
   lanzadores?: Prisma.lanzadoresUpdateOneWithoutUsersNestedInput
 }
@@ -3025,6 +3077,7 @@ export type usersUncheckedUpdateWithoutSessionsInput = {
   webauthn_challenges?: Prisma.webauthn_challengesUncheckedUpdateManyWithoutUsersNestedInput
   webauthn_credentials?: Prisma.webauthn_credentialsUncheckedUpdateManyWithoutUsersNestedInput
   asignaciones_lanzadores?: Prisma.asignaciones_lanzadoresUncheckedUpdateManyWithoutUsersNestedInput
+  cuentas?: Prisma.cuentasUncheckedUpdateOneWithoutUsersNestedInput
   historial_asignaciones?: Prisma.historial_asignacionesUncheckedUpdateManyWithoutUsersNestedInput
   lanzadores?: Prisma.lanzadoresUncheckedUpdateOneWithoutUsersNestedInput
 }
@@ -3075,6 +3128,7 @@ export type usersCreateWithoutWebauthn_challengesInput = {
   sessions?: Prisma.sessionsCreateNestedManyWithoutUsersInput
   webauthn_credentials?: Prisma.webauthn_credentialsCreateNestedManyWithoutUsersInput
   asignaciones_lanzadores?: Prisma.asignaciones_lanzadoresCreateNestedManyWithoutUsersInput
+  cuentas?: Prisma.cuentasCreateNestedOneWithoutUsersInput
   historial_asignaciones?: Prisma.historial_asignacionesCreateNestedManyWithoutUsersInput
   lanzadores?: Prisma.lanzadoresCreateNestedOneWithoutUsersInput
 }
@@ -3125,6 +3179,7 @@ export type usersUncheckedCreateWithoutWebauthn_challengesInput = {
   sessions?: Prisma.sessionsUncheckedCreateNestedManyWithoutUsersInput
   webauthn_credentials?: Prisma.webauthn_credentialsUncheckedCreateNestedManyWithoutUsersInput
   asignaciones_lanzadores?: Prisma.asignaciones_lanzadoresUncheckedCreateNestedManyWithoutUsersInput
+  cuentas?: Prisma.cuentasUncheckedCreateNestedOneWithoutUsersInput
   historial_asignaciones?: Prisma.historial_asignacionesUncheckedCreateNestedManyWithoutUsersInput
   lanzadores?: Prisma.lanzadoresUncheckedCreateNestedOneWithoutUsersInput
 }
@@ -3191,6 +3246,7 @@ export type usersUpdateWithoutWebauthn_challengesInput = {
   sessions?: Prisma.sessionsUpdateManyWithoutUsersNestedInput
   webauthn_credentials?: Prisma.webauthn_credentialsUpdateManyWithoutUsersNestedInput
   asignaciones_lanzadores?: Prisma.asignaciones_lanzadoresUpdateManyWithoutUsersNestedInput
+  cuentas?: Prisma.cuentasUpdateOneWithoutUsersNestedInput
   historial_asignaciones?: Prisma.historial_asignacionesUpdateManyWithoutUsersNestedInput
   lanzadores?: Prisma.lanzadoresUpdateOneWithoutUsersNestedInput
 }
@@ -3241,6 +3297,7 @@ export type usersUncheckedUpdateWithoutWebauthn_challengesInput = {
   sessions?: Prisma.sessionsUncheckedUpdateManyWithoutUsersNestedInput
   webauthn_credentials?: Prisma.webauthn_credentialsUncheckedUpdateManyWithoutUsersNestedInput
   asignaciones_lanzadores?: Prisma.asignaciones_lanzadoresUncheckedUpdateManyWithoutUsersNestedInput
+  cuentas?: Prisma.cuentasUncheckedUpdateOneWithoutUsersNestedInput
   historial_asignaciones?: Prisma.historial_asignacionesUncheckedUpdateManyWithoutUsersNestedInput
   lanzadores?: Prisma.lanzadoresUncheckedUpdateOneWithoutUsersNestedInput
 }
@@ -3291,6 +3348,7 @@ export type usersCreateWithoutWebauthn_credentialsInput = {
   sessions?: Prisma.sessionsCreateNestedManyWithoutUsersInput
   webauthn_challenges?: Prisma.webauthn_challengesCreateNestedManyWithoutUsersInput
   asignaciones_lanzadores?: Prisma.asignaciones_lanzadoresCreateNestedManyWithoutUsersInput
+  cuentas?: Prisma.cuentasCreateNestedOneWithoutUsersInput
   historial_asignaciones?: Prisma.historial_asignacionesCreateNestedManyWithoutUsersInput
   lanzadores?: Prisma.lanzadoresCreateNestedOneWithoutUsersInput
 }
@@ -3341,6 +3399,7 @@ export type usersUncheckedCreateWithoutWebauthn_credentialsInput = {
   sessions?: Prisma.sessionsUncheckedCreateNestedManyWithoutUsersInput
   webauthn_challenges?: Prisma.webauthn_challengesUncheckedCreateNestedManyWithoutUsersInput
   asignaciones_lanzadores?: Prisma.asignaciones_lanzadoresUncheckedCreateNestedManyWithoutUsersInput
+  cuentas?: Prisma.cuentasUncheckedCreateNestedOneWithoutUsersInput
   historial_asignaciones?: Prisma.historial_asignacionesUncheckedCreateNestedManyWithoutUsersInput
   lanzadores?: Prisma.lanzadoresUncheckedCreateNestedOneWithoutUsersInput
 }
@@ -3407,6 +3466,7 @@ export type usersUpdateWithoutWebauthn_credentialsInput = {
   sessions?: Prisma.sessionsUpdateManyWithoutUsersNestedInput
   webauthn_challenges?: Prisma.webauthn_challengesUpdateManyWithoutUsersNestedInput
   asignaciones_lanzadores?: Prisma.asignaciones_lanzadoresUpdateManyWithoutUsersNestedInput
+  cuentas?: Prisma.cuentasUpdateOneWithoutUsersNestedInput
   historial_asignaciones?: Prisma.historial_asignacionesUpdateManyWithoutUsersNestedInput
   lanzadores?: Prisma.lanzadoresUpdateOneWithoutUsersNestedInput
 }
@@ -3457,6 +3517,7 @@ export type usersUncheckedUpdateWithoutWebauthn_credentialsInput = {
   sessions?: Prisma.sessionsUncheckedUpdateManyWithoutUsersNestedInput
   webauthn_challenges?: Prisma.webauthn_challengesUncheckedUpdateManyWithoutUsersNestedInput
   asignaciones_lanzadores?: Prisma.asignaciones_lanzadoresUncheckedUpdateManyWithoutUsersNestedInput
+  cuentas?: Prisma.cuentasUncheckedUpdateOneWithoutUsersNestedInput
   historial_asignaciones?: Prisma.historial_asignacionesUncheckedUpdateManyWithoutUsersNestedInput
   lanzadores?: Prisma.lanzadoresUncheckedUpdateOneWithoutUsersNestedInput
 }
@@ -3507,6 +3568,7 @@ export type usersCreateWithoutAsignaciones_lanzadoresInput = {
   sessions?: Prisma.sessionsCreateNestedManyWithoutUsersInput
   webauthn_challenges?: Prisma.webauthn_challengesCreateNestedManyWithoutUsersInput
   webauthn_credentials?: Prisma.webauthn_credentialsCreateNestedManyWithoutUsersInput
+  cuentas?: Prisma.cuentasCreateNestedOneWithoutUsersInput
   historial_asignaciones?: Prisma.historial_asignacionesCreateNestedManyWithoutUsersInput
   lanzadores?: Prisma.lanzadoresCreateNestedOneWithoutUsersInput
 }
@@ -3557,6 +3619,7 @@ export type usersUncheckedCreateWithoutAsignaciones_lanzadoresInput = {
   sessions?: Prisma.sessionsUncheckedCreateNestedManyWithoutUsersInput
   webauthn_challenges?: Prisma.webauthn_challengesUncheckedCreateNestedManyWithoutUsersInput
   webauthn_credentials?: Prisma.webauthn_credentialsUncheckedCreateNestedManyWithoutUsersInput
+  cuentas?: Prisma.cuentasUncheckedCreateNestedOneWithoutUsersInput
   historial_asignaciones?: Prisma.historial_asignacionesUncheckedCreateNestedManyWithoutUsersInput
   lanzadores?: Prisma.lanzadoresUncheckedCreateNestedOneWithoutUsersInput
 }
@@ -3623,6 +3686,7 @@ export type usersUpdateWithoutAsignaciones_lanzadoresInput = {
   sessions?: Prisma.sessionsUpdateManyWithoutUsersNestedInput
   webauthn_challenges?: Prisma.webauthn_challengesUpdateManyWithoutUsersNestedInput
   webauthn_credentials?: Prisma.webauthn_credentialsUpdateManyWithoutUsersNestedInput
+  cuentas?: Prisma.cuentasUpdateOneWithoutUsersNestedInput
   historial_asignaciones?: Prisma.historial_asignacionesUpdateManyWithoutUsersNestedInput
   lanzadores?: Prisma.lanzadoresUpdateOneWithoutUsersNestedInput
 }
@@ -3673,6 +3737,7 @@ export type usersUncheckedUpdateWithoutAsignaciones_lanzadoresInput = {
   sessions?: Prisma.sessionsUncheckedUpdateManyWithoutUsersNestedInput
   webauthn_challenges?: Prisma.webauthn_challengesUncheckedUpdateManyWithoutUsersNestedInput
   webauthn_credentials?: Prisma.webauthn_credentialsUncheckedUpdateManyWithoutUsersNestedInput
+  cuentas?: Prisma.cuentasUncheckedUpdateOneWithoutUsersNestedInput
   historial_asignaciones?: Prisma.historial_asignacionesUncheckedUpdateManyWithoutUsersNestedInput
   lanzadores?: Prisma.lanzadoresUncheckedUpdateOneWithoutUsersNestedInput
 }
@@ -3724,6 +3789,7 @@ export type usersCreateWithoutHistorial_asignacionesInput = {
   webauthn_challenges?: Prisma.webauthn_challengesCreateNestedManyWithoutUsersInput
   webauthn_credentials?: Prisma.webauthn_credentialsCreateNestedManyWithoutUsersInput
   asignaciones_lanzadores?: Prisma.asignaciones_lanzadoresCreateNestedManyWithoutUsersInput
+  cuentas?: Prisma.cuentasCreateNestedOneWithoutUsersInput
   lanzadores?: Prisma.lanzadoresCreateNestedOneWithoutUsersInput
 }
 
@@ -3774,6 +3840,7 @@ export type usersUncheckedCreateWithoutHistorial_asignacionesInput = {
   webauthn_challenges?: Prisma.webauthn_challengesUncheckedCreateNestedManyWithoutUsersInput
   webauthn_credentials?: Prisma.webauthn_credentialsUncheckedCreateNestedManyWithoutUsersInput
   asignaciones_lanzadores?: Prisma.asignaciones_lanzadoresUncheckedCreateNestedManyWithoutUsersInput
+  cuentas?: Prisma.cuentasUncheckedCreateNestedOneWithoutUsersInput
   lanzadores?: Prisma.lanzadoresUncheckedCreateNestedOneWithoutUsersInput
 }
 
@@ -3840,6 +3907,7 @@ export type usersUpdateWithoutHistorial_asignacionesInput = {
   webauthn_challenges?: Prisma.webauthn_challengesUpdateManyWithoutUsersNestedInput
   webauthn_credentials?: Prisma.webauthn_credentialsUpdateManyWithoutUsersNestedInput
   asignaciones_lanzadores?: Prisma.asignaciones_lanzadoresUpdateManyWithoutUsersNestedInput
+  cuentas?: Prisma.cuentasUpdateOneWithoutUsersNestedInput
   lanzadores?: Prisma.lanzadoresUpdateOneWithoutUsersNestedInput
 }
 
@@ -3890,6 +3958,7 @@ export type usersUncheckedUpdateWithoutHistorial_asignacionesInput = {
   webauthn_challenges?: Prisma.webauthn_challengesUncheckedUpdateManyWithoutUsersNestedInput
   webauthn_credentials?: Prisma.webauthn_credentialsUncheckedUpdateManyWithoutUsersNestedInput
   asignaciones_lanzadores?: Prisma.asignaciones_lanzadoresUncheckedUpdateManyWithoutUsersNestedInput
+  cuentas?: Prisma.cuentasUncheckedUpdateOneWithoutUsersNestedInput
   lanzadores?: Prisma.lanzadoresUncheckedUpdateOneWithoutUsersNestedInput
 }
 
@@ -3940,6 +4009,7 @@ export type usersCreateWithoutLanzadoresInput = {
   webauthn_challenges?: Prisma.webauthn_challengesCreateNestedManyWithoutUsersInput
   webauthn_credentials?: Prisma.webauthn_credentialsCreateNestedManyWithoutUsersInput
   asignaciones_lanzadores?: Prisma.asignaciones_lanzadoresCreateNestedManyWithoutUsersInput
+  cuentas?: Prisma.cuentasCreateNestedOneWithoutUsersInput
   historial_asignaciones?: Prisma.historial_asignacionesCreateNestedManyWithoutUsersInput
 }
 
@@ -3990,6 +4060,7 @@ export type usersUncheckedCreateWithoutLanzadoresInput = {
   webauthn_challenges?: Prisma.webauthn_challengesUncheckedCreateNestedManyWithoutUsersInput
   webauthn_credentials?: Prisma.webauthn_credentialsUncheckedCreateNestedManyWithoutUsersInput
   asignaciones_lanzadores?: Prisma.asignaciones_lanzadoresUncheckedCreateNestedManyWithoutUsersInput
+  cuentas?: Prisma.cuentasUncheckedCreateNestedOneWithoutUsersInput
   historial_asignaciones?: Prisma.historial_asignacionesUncheckedCreateNestedManyWithoutUsersInput
 }
 
@@ -4056,6 +4127,7 @@ export type usersUpdateWithoutLanzadoresInput = {
   webauthn_challenges?: Prisma.webauthn_challengesUpdateManyWithoutUsersNestedInput
   webauthn_credentials?: Prisma.webauthn_credentialsUpdateManyWithoutUsersNestedInput
   asignaciones_lanzadores?: Prisma.asignaciones_lanzadoresUpdateManyWithoutUsersNestedInput
+  cuentas?: Prisma.cuentasUpdateOneWithoutUsersNestedInput
   historial_asignaciones?: Prisma.historial_asignacionesUpdateManyWithoutUsersNestedInput
 }
 
@@ -4106,7 +4178,228 @@ export type usersUncheckedUpdateWithoutLanzadoresInput = {
   webauthn_challenges?: Prisma.webauthn_challengesUncheckedUpdateManyWithoutUsersNestedInput
   webauthn_credentials?: Prisma.webauthn_credentialsUncheckedUpdateManyWithoutUsersNestedInput
   asignaciones_lanzadores?: Prisma.asignaciones_lanzadoresUncheckedUpdateManyWithoutUsersNestedInput
+  cuentas?: Prisma.cuentasUncheckedUpdateOneWithoutUsersNestedInput
   historial_asignaciones?: Prisma.historial_asignacionesUncheckedUpdateManyWithoutUsersNestedInput
+}
+
+export type usersCreateWithoutCuentasInput = {
+  instance_id?: string | null
+  id: string
+  aud?: string | null
+  role?: string | null
+  email?: string | null
+  encrypted_password?: string | null
+  email_confirmed_at?: Date | string | null
+  invited_at?: Date | string | null
+  confirmation_token?: string | null
+  confirmation_sent_at?: Date | string | null
+  recovery_token?: string | null
+  recovery_sent_at?: Date | string | null
+  email_change_token_new?: string | null
+  email_change?: string | null
+  email_change_sent_at?: Date | string | null
+  last_sign_in_at?: Date | string | null
+  raw_app_meta_data?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  raw_user_meta_data?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  is_super_admin?: boolean | null
+  created_at?: Date | string | null
+  updated_at?: Date | string | null
+  phone?: string | null
+  phone_confirmed_at?: Date | string | null
+  phone_change?: string | null
+  phone_change_token?: string | null
+  phone_change_sent_at?: Date | string | null
+  confirmed_at?: Date | string | null
+  email_change_token_current?: string | null
+  email_change_confirm_status?: number | null
+  banned_until?: Date | string | null
+  reauthentication_token?: string | null
+  reauthentication_sent_at?: Date | string | null
+  is_sso_user?: boolean
+  deleted_at?: Date | string | null
+  is_anonymous?: boolean
+  identities?: Prisma.identitiesCreateNestedManyWithoutUsersInput
+  mfa_factors?: Prisma.mfa_factorsCreateNestedManyWithoutUsersInput
+  mfa_recovery_code_sets?: Prisma.mfa_recovery_code_setsCreateNestedOneWithoutUsersInput
+  oauth_authorizations?: Prisma.oauth_authorizationsCreateNestedManyWithoutUsersInput
+  oauth_consents?: Prisma.oauth_consentsCreateNestedManyWithoutUsersInput
+  one_time_tokens?: Prisma.one_time_tokensCreateNestedManyWithoutUsersInput
+  scim_users?: Prisma.scim_usersCreateNestedManyWithoutUsersInput
+  sessions?: Prisma.sessionsCreateNestedManyWithoutUsersInput
+  webauthn_challenges?: Prisma.webauthn_challengesCreateNestedManyWithoutUsersInput
+  webauthn_credentials?: Prisma.webauthn_credentialsCreateNestedManyWithoutUsersInput
+  asignaciones_lanzadores?: Prisma.asignaciones_lanzadoresCreateNestedManyWithoutUsersInput
+  historial_asignaciones?: Prisma.historial_asignacionesCreateNestedManyWithoutUsersInput
+  lanzadores?: Prisma.lanzadoresCreateNestedOneWithoutUsersInput
+}
+
+export type usersUncheckedCreateWithoutCuentasInput = {
+  instance_id?: string | null
+  id: string
+  aud?: string | null
+  role?: string | null
+  email?: string | null
+  encrypted_password?: string | null
+  email_confirmed_at?: Date | string | null
+  invited_at?: Date | string | null
+  confirmation_token?: string | null
+  confirmation_sent_at?: Date | string | null
+  recovery_token?: string | null
+  recovery_sent_at?: Date | string | null
+  email_change_token_new?: string | null
+  email_change?: string | null
+  email_change_sent_at?: Date | string | null
+  last_sign_in_at?: Date | string | null
+  raw_app_meta_data?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  raw_user_meta_data?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  is_super_admin?: boolean | null
+  created_at?: Date | string | null
+  updated_at?: Date | string | null
+  phone?: string | null
+  phone_confirmed_at?: Date | string | null
+  phone_change?: string | null
+  phone_change_token?: string | null
+  phone_change_sent_at?: Date | string | null
+  confirmed_at?: Date | string | null
+  email_change_token_current?: string | null
+  email_change_confirm_status?: number | null
+  banned_until?: Date | string | null
+  reauthentication_token?: string | null
+  reauthentication_sent_at?: Date | string | null
+  is_sso_user?: boolean
+  deleted_at?: Date | string | null
+  is_anonymous?: boolean
+  identities?: Prisma.identitiesUncheckedCreateNestedManyWithoutUsersInput
+  mfa_factors?: Prisma.mfa_factorsUncheckedCreateNestedManyWithoutUsersInput
+  mfa_recovery_code_sets?: Prisma.mfa_recovery_code_setsUncheckedCreateNestedOneWithoutUsersInput
+  oauth_authorizations?: Prisma.oauth_authorizationsUncheckedCreateNestedManyWithoutUsersInput
+  oauth_consents?: Prisma.oauth_consentsUncheckedCreateNestedManyWithoutUsersInput
+  one_time_tokens?: Prisma.one_time_tokensUncheckedCreateNestedManyWithoutUsersInput
+  scim_users?: Prisma.scim_usersUncheckedCreateNestedManyWithoutUsersInput
+  sessions?: Prisma.sessionsUncheckedCreateNestedManyWithoutUsersInput
+  webauthn_challenges?: Prisma.webauthn_challengesUncheckedCreateNestedManyWithoutUsersInput
+  webauthn_credentials?: Prisma.webauthn_credentialsUncheckedCreateNestedManyWithoutUsersInput
+  asignaciones_lanzadores?: Prisma.asignaciones_lanzadoresUncheckedCreateNestedManyWithoutUsersInput
+  historial_asignaciones?: Prisma.historial_asignacionesUncheckedCreateNestedManyWithoutUsersInput
+  lanzadores?: Prisma.lanzadoresUncheckedCreateNestedOneWithoutUsersInput
+}
+
+export type usersCreateOrConnectWithoutCuentasInput = {
+  where: Prisma.usersWhereUniqueInput
+  create: Prisma.XOR<Prisma.usersCreateWithoutCuentasInput, Prisma.usersUncheckedCreateWithoutCuentasInput>
+}
+
+export type usersUpsertWithoutCuentasInput = {
+  update: Prisma.XOR<Prisma.usersUpdateWithoutCuentasInput, Prisma.usersUncheckedUpdateWithoutCuentasInput>
+  create: Prisma.XOR<Prisma.usersCreateWithoutCuentasInput, Prisma.usersUncheckedCreateWithoutCuentasInput>
+  where?: Prisma.usersWhereInput
+}
+
+export type usersUpdateToOneWithWhereWithoutCuentasInput = {
+  where?: Prisma.usersWhereInput
+  data: Prisma.XOR<Prisma.usersUpdateWithoutCuentasInput, Prisma.usersUncheckedUpdateWithoutCuentasInput>
+}
+
+export type usersUpdateWithoutCuentasInput = {
+  instance_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  aud?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  encrypted_password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email_confirmed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  invited_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  confirmation_token?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confirmation_sent_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  recovery_token?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  recovery_sent_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  email_change_token_new?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email_change?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email_change_sent_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  last_sign_in_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  raw_app_meta_data?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  raw_user_meta_data?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  is_super_admin?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone_confirmed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  phone_change?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone_change_token?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone_change_sent_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  confirmed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  email_change_token_current?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email_change_confirm_status?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  banned_until?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reauthentication_token?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reauthentication_sent_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  is_sso_user?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  is_anonymous?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  identities?: Prisma.identitiesUpdateManyWithoutUsersNestedInput
+  mfa_factors?: Prisma.mfa_factorsUpdateManyWithoutUsersNestedInput
+  mfa_recovery_code_sets?: Prisma.mfa_recovery_code_setsUpdateOneWithoutUsersNestedInput
+  oauth_authorizations?: Prisma.oauth_authorizationsUpdateManyWithoutUsersNestedInput
+  oauth_consents?: Prisma.oauth_consentsUpdateManyWithoutUsersNestedInput
+  one_time_tokens?: Prisma.one_time_tokensUpdateManyWithoutUsersNestedInput
+  scim_users?: Prisma.scim_usersUpdateManyWithoutUsersNestedInput
+  sessions?: Prisma.sessionsUpdateManyWithoutUsersNestedInput
+  webauthn_challenges?: Prisma.webauthn_challengesUpdateManyWithoutUsersNestedInput
+  webauthn_credentials?: Prisma.webauthn_credentialsUpdateManyWithoutUsersNestedInput
+  asignaciones_lanzadores?: Prisma.asignaciones_lanzadoresUpdateManyWithoutUsersNestedInput
+  historial_asignaciones?: Prisma.historial_asignacionesUpdateManyWithoutUsersNestedInput
+  lanzadores?: Prisma.lanzadoresUpdateOneWithoutUsersNestedInput
+}
+
+export type usersUncheckedUpdateWithoutCuentasInput = {
+  instance_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  aud?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  encrypted_password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email_confirmed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  invited_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  confirmation_token?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  confirmation_sent_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  recovery_token?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  recovery_sent_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  email_change_token_new?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email_change?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email_change_sent_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  last_sign_in_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  raw_app_meta_data?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  raw_user_meta_data?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  is_super_admin?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  created_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  updated_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone_confirmed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  phone_change?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone_change_token?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone_change_sent_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  confirmed_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  email_change_token_current?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email_change_confirm_status?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  banned_until?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reauthentication_token?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reauthentication_sent_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  is_sso_user?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  deleted_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  is_anonymous?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  identities?: Prisma.identitiesUncheckedUpdateManyWithoutUsersNestedInput
+  mfa_factors?: Prisma.mfa_factorsUncheckedUpdateManyWithoutUsersNestedInput
+  mfa_recovery_code_sets?: Prisma.mfa_recovery_code_setsUncheckedUpdateOneWithoutUsersNestedInput
+  oauth_authorizations?: Prisma.oauth_authorizationsUncheckedUpdateManyWithoutUsersNestedInput
+  oauth_consents?: Prisma.oauth_consentsUncheckedUpdateManyWithoutUsersNestedInput
+  one_time_tokens?: Prisma.one_time_tokensUncheckedUpdateManyWithoutUsersNestedInput
+  scim_users?: Prisma.scim_usersUncheckedUpdateManyWithoutUsersNestedInput
+  sessions?: Prisma.sessionsUncheckedUpdateManyWithoutUsersNestedInput
+  webauthn_challenges?: Prisma.webauthn_challengesUncheckedUpdateManyWithoutUsersNestedInput
+  webauthn_credentials?: Prisma.webauthn_credentialsUncheckedUpdateManyWithoutUsersNestedInput
+  asignaciones_lanzadores?: Prisma.asignaciones_lanzadoresUncheckedUpdateManyWithoutUsersNestedInput
+  historial_asignaciones?: Prisma.historial_asignacionesUncheckedUpdateManyWithoutUsersNestedInput
+  lanzadores?: Prisma.lanzadoresUncheckedUpdateOneWithoutUsersNestedInput
 }
 
 
@@ -4277,6 +4570,7 @@ export type usersSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   webauthn_challenges?: boolean | Prisma.users$webauthn_challengesArgs<ExtArgs>
   webauthn_credentials?: boolean | Prisma.users$webauthn_credentialsArgs<ExtArgs>
   asignaciones_lanzadores?: boolean | Prisma.users$asignaciones_lanzadoresArgs<ExtArgs>
+  cuentas?: boolean | Prisma.users$cuentasArgs<ExtArgs>
   historial_asignaciones?: boolean | Prisma.users$historial_asignacionesArgs<ExtArgs>
   lanzadores?: boolean | Prisma.users$lanzadoresArgs<ExtArgs>
   _count?: boolean | Prisma.UsersCountOutputTypeDefaultArgs<ExtArgs>
@@ -4409,6 +4703,7 @@ export type usersInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   webauthn_challenges?: boolean | Prisma.users$webauthn_challengesArgs<ExtArgs>
   webauthn_credentials?: boolean | Prisma.users$webauthn_credentialsArgs<ExtArgs>
   asignaciones_lanzadores?: boolean | Prisma.users$asignaciones_lanzadoresArgs<ExtArgs>
+  cuentas?: boolean | Prisma.users$cuentasArgs<ExtArgs>
   historial_asignaciones?: boolean | Prisma.users$historial_asignacionesArgs<ExtArgs>
   lanzadores?: boolean | Prisma.users$lanzadoresArgs<ExtArgs>
   _count?: boolean | Prisma.UsersCountOutputTypeDefaultArgs<ExtArgs>
@@ -4430,6 +4725,7 @@ export type $usersPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     webauthn_challenges: Prisma.$webauthn_challengesPayload<ExtArgs>[]
     webauthn_credentials: Prisma.$webauthn_credentialsPayload<ExtArgs>[]
     asignaciones_lanzadores: Prisma.$asignaciones_lanzadoresPayload<ExtArgs>[]
+    cuentas: Prisma.$cuentasPayload<ExtArgs> | null
     historial_asignaciones: Prisma.$historial_asignacionesPayload<ExtArgs>[]
     lanzadores: Prisma.$lanzadoresPayload<ExtArgs> | null
   }
@@ -4874,6 +5170,7 @@ export interface Prisma__usersClient<T, Null = never, ExtArgs extends runtime.Ty
   webauthn_challenges<T extends Prisma.users$webauthn_challengesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.users$webauthn_challengesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$webauthn_challengesPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   webauthn_credentials<T extends Prisma.users$webauthn_credentialsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.users$webauthn_credentialsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$webauthn_credentialsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   asignaciones_lanzadores<T extends Prisma.users$asignaciones_lanzadoresArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.users$asignaciones_lanzadoresArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$asignaciones_lanzadoresPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  cuentas<T extends Prisma.users$cuentasArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.users$cuentasArgs<ExtArgs>>): Prisma.Prisma__cuentasClient<runtime.Types.Result.GetResult<Prisma.$cuentasPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   historial_asignaciones<T extends Prisma.users$historial_asignacionesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.users$historial_asignacionesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$historial_asignacionesPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   lanzadores<T extends Prisma.users$lanzadoresArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.users$lanzadoresArgs<ExtArgs>>): Prisma.Prisma__lanzadoresClient<runtime.Types.Result.GetResult<Prisma.$lanzadoresPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
@@ -5589,6 +5886,25 @@ export type users$asignaciones_lanzadoresArgs<ExtArgs extends runtime.Types.Exte
   take?: number
   skip?: number
   distinct?: Prisma.Asignaciones_lanzadoresScalarFieldEnum | Prisma.Asignaciones_lanzadoresScalarFieldEnum[]
+}
+
+/**
+ * users.cuentas
+ */
+export type users$cuentasArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the cuentas
+   */
+  select?: Prisma.cuentasSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the cuentas
+   */
+  omit?: Prisma.cuentasOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.cuentasInclude<ExtArgs> | null
+  where?: Prisma.cuentasWhereInput
 }
 
 /**

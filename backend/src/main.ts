@@ -3,11 +3,14 @@ import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
+
   const app = await NestFactory.create(AppModule);
 
+  // Permitir peticiones desde el backoffice en desarrollo y en prod
   app.enableCors({
     origin: [
       'http://localhost:4200',
+      'http://localhost:4201',
       'https://gestion-mi-despedida.netlify.app'
     ],
     methods: ['GET', 'POST', 'PATCH', 'DELETE'],

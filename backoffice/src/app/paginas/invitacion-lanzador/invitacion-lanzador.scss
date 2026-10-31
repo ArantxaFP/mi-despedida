@@ -1,0 +1,88 @@
+:host {
+    display: block;
+    min-height: 100vh;
+}
+
+.invitacion {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 1.5rem;
+
+    &__contenido {
+        width: 100%;
+        max-width: 38rem;
+        padding: 2rem 1.5rem;
+        border: 1px solid #d9d9d9;
+        border-radius: 1rem;
+    }
+
+    &__titulo {
+        margin: 0 0 1.5rem;
+        font-size: 1.75rem;
+        font-weight: 700;
+    }
+
+    &__texto,
+    &__mensaje,
+    &__caducidad {
+        margin: 0 0 1rem;
+        line-height: 1.6;
+    }
+
+    &__acciones {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        margin: 2rem 0;
+    }
+
+    &__boton {
+        width: 100%;
+        padding: 0.875rem 1.25rem;
+        border: 1px solid transparent;
+        border-radius: 0.5rem;
+        cursor: pointer;
+        font: inherit;
+        font-weight: 600;
+
+        background: #001741;
+        color: #fff;
+
+        &:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        &--secundario {
+            background: transparent;
+            color: #001741;
+            border-color: #001741;
+        }
+    }
+
+    &__enlace {
+        display: inline-block;
+        margin-top: 1rem;
+    }
+}
+
+@media (min-width: 768px) {
+    .invitacion {
+        padding: 3rem;
+
+        &__contenido {
+            padding: 3rem;
+        }
+
+        &__acciones {
+            flex-direction: row;
+        }
+
+        &__boton {
+            width: auto;
+            flex: 1;
+        }
+    }
+}

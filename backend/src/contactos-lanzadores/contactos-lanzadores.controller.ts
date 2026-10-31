@@ -2,6 +2,7 @@ import { Body, Controller, Get, Headers, Post, UnauthorizedException } from '@ne
 import { ContactosLanzadoresService } from './contactos-lanzadores.service';
 import { SupabaseService } from '../supabase/supabase.service';
 import { CrearInvitacionDto } from './dto/crear-invitacion.dto';
+import { CuentasService } from '../cuentas/cuentas.service';
 
 @Controller('contactos-lanzadores')
 export class ContactosLanzadoresController {
@@ -9,7 +10,8 @@ export class ContactosLanzadoresController {
     constructor(
         private readonly contactosLanzadoresService:
             ContactosLanzadoresService,
-        private readonly supabaseService: SupabaseService
+        private readonly supabaseService: SupabaseService,
+        private readonly cuentasService: CuentasService
     ) { }
 
     private async verificarSesion(
@@ -46,6 +48,11 @@ export class ContactosLanzadoresController {
             autorizacion
         );
 
+        // El administrador debe tener una cuenta activa
+        await this.cuentasService.comprobarCuentaActiva(
+            usuario.id
+        );
+
         return this.contactosLanzadoresService.obtenerLanzadores(
             usuario.id
         );
@@ -66,6 +73,11 @@ export class ContactosLanzadoresController {
             );
         }
 
+        // El administrador debe tener una cuenta activa
+        await this.cuentasService.comprobarCuentaActiva(
+            usuario.id
+        );
+
         return this.contactosLanzadoresService.crearYEnviarInvitacion(
             usuario.id,
             usuario.email,
@@ -73,3 +85,6 @@ export class ContactosLanzadoresController {
         );
     }
 }
+
+
+

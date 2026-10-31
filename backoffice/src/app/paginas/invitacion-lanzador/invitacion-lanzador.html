@@ -1,0 +1,139 @@
+<main class="invitacion">
+
+    <section class="invitacion__contenido">
+
+        <h1 class="invitacion__titulo">
+            Invitación como lanzador
+        </h1>
+
+        @if (cargando()) {
+
+            <p class="invitacion__texto">
+                Comprobando tu invitación...
+            </p>
+
+        } @else if (resuelta()) {
+
+            <p class="invitacion__mensaje" role="status">
+                {{ mensaje() }}
+            </p>
+
+            <p class="invitacion__texto">
+                No necesitas realizar ninguna otra acción.
+            </p>
+
+        } @else if (valida()) {
+
+            <p class="invitacion__texto">
+                Has recibido una invitación para participar como lanzador en Mi despedida.
+            </p>
+
+            <p class="invitacion__texto">
+                Como lanzador podrás intervenir en el proceso de activación de las comunicaciones
+                del administrador que te ha invitado, pero no tendrás acceso a sus contactos ni a sus mensajes privados.
+            </p>
+
+            <p class="invitacion__texto">
+                Para aceptar o rechazar esta invitación, primero tendremos que comprobar que tienes acceso a la dirección de correo electrónico a la que se ha enviado.
+                No necesitas registrarte ni crear una cuenta.
+            </p>
+
+            @if (fechaCaducidad()) {
+                <p class="invitacion__caducidad">
+                    Fecha límite:
+                    {{ fechaCaducidad() }}
+                </p>
+            }
+
+            <div class="invitacion__verificacion">
+
+                <p class="invitacion__texto">
+                    Te enviaremos un código de verificación a la dirección de correo asociada a la invitación.
+                </p>
+
+                <button
+                    type="button"
+                    class="invitacion__boton"
+                    [disabled]="procesando()"
+                    (click)="solicitarCodigo()">
+                    Enviar código de verificación
+                </button>
+
+                @if (codigoSolicitado()) {
+
+                    <div class="invitacion__campo">
+
+                        <label for="codigo-verificacion">
+                            Código de verificación
+                        </label>
+
+                        <input
+                            id="codigo-verificacion"
+                            type="text"
+                            inputmode="numeric"
+                            autocomplete="one-time-code"
+                            maxlength="8"
+                            [value]="codigoVerificacion()"
+                            (input)="actualizarCodigo($event)"
+                            [disabled]="procesando()">
+
+                    </div>
+
+                    <button
+                        type="button"
+                        class="invitacion__boton"
+                        [disabled]="procesando() || !codigoVerificacion()"
+                        (click)="verificarCodigo()">
+                        Verificar código
+                    </button>
+
+                }
+
+            </div>
+
+            @if (correoVerificado()) {
+
+                <p class="invitacion__mensaje" role="status">
+                    Correo electrónico verificado correctamente.
+                    Ya puedes aceptar o rechazar la invitación.
+                </p>
+
+                <div class="invitacion__acciones">
+
+                    <button
+                        type="button"
+                        class="invitacion__boton"
+                        [disabled]="procesando()"
+                        (click)="responder('aceptar')">
+                        Aceptar invitación
+                    </button>
+
+                    <button
+                        type="button"
+                        class="invitacion__boton invitacion__boton--secundario"
+                        [disabled]="procesando()"
+                        (click)="responder('rechazar')">
+                        Rechazar invitación
+                    </button>
+
+                </div>
+
+            }
+
+            @if (mensaje()) {
+                <p class="invitacion__mensaje" role="status">
+                    {{ mensaje() }}
+                </p>
+            }
+
+        } @else {
+
+            <p class="invitacion__mensaje" role="status">
+                {{ mensaje() }}
+            </p>
+
+        }
+
+    </section>
+
+</main>

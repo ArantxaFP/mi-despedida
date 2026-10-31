@@ -224,3 +224,21 @@ export type lanzadores = Prisma.lanzadoresModel
  * This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
  */
 export type invitaciones_lanzadores = Prisma.invitaciones_lanzadoresModel
+/**
+ * Model verificaciones_invitaciones_lanzadores
+ * This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+ * This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+ */
+export type verificaciones_invitaciones_lanzadores = Prisma.verificaciones_invitaciones_lanzadoresModel
+/**
+ * Model cuentas
+ * This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+ * This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+ */
+export type cuentas = Prisma.cuentasModel
+/**
+ * Model historico_cierre_cuentas
+ * This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+ * This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+ */
+export type historico_cierre_cuentas = Prisma.historico_cierre_cuentasModel

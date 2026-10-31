@@ -4,6 +4,7 @@ import { Registro } from './paginas/registro/registro';
 import { RecuperarContrasena } from './paginas/recuperar-contrasena/recuperar-contrasena';
 import { AccesoLanzador } from './paginas/acceso-lanzador/acceso-lanzador';
 import { NuevaContrasena } from './paginas/nueva-contrasena/nueva-contrasena';
+import { InvitacionLanzador } from './paginas/invitacion-lanzador/invitacion-lanzador';
 
 import { EstructuraPanel } from './paginas/panel/componentes/estructura-panel/estructura-panel';
 import { Dashboard } from './paginas/panel/01-dashboard/dashboard';
@@ -67,5 +68,11 @@ export const routes: Routes = [
         component: ContactosDestinatarios
       }
     ]
+  },
+
+  {
+    path: 'invitacion-lanzador',
+    component: InvitacionLanzador
   }
+
 ];

@@ -81,7 +81,10 @@ export const ModelName = {
   asignaciones_lanzadores: 'asignaciones_lanzadores',
   historial_asignaciones: 'historial_asignaciones',
   lanzadores: 'lanzadores',
-  invitaciones_lanzadores: 'invitaciones_lanzadores'
+  invitaciones_lanzadores: 'invitaciones_lanzadores',
+  verificaciones_invitaciones_lanzadores: 'verificaciones_invitaciones_lanzadores',
+  cuentas: 'cuentas',
+  historico_cierre_cuentas: 'historico_cierre_cuentas'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -583,10 +586,60 @@ export const Invitaciones_lanzadoresScalarFieldEnum = {
   fecha_caducidad: 'fecha_caducidad',
   fecha_utilizacion: 'fecha_utilizacion',
   fecha_invalidacion: 'fecha_invalidacion',
-  estado_envio: 'estado_envio'
+  estado_envio: 'estado_envio',
+  intentos_verificacion: 'intentos_verificacion'
 } as const
 
 export type Invitaciones_lanzadoresScalarFieldEnum = (typeof Invitaciones_lanzadoresScalarFieldEnum)[keyof typeof Invitaciones_lanzadoresScalarFieldEnum]
+
+
+export const Verificaciones_invitaciones_lanzadoresScalarFieldEnum = {
+  id: 'id',
+  invitacion_id: 'invitacion_id',
+  codigo_hash: 'codigo_hash',
+  intentos_fallidos: 'intentos_fallidos',
+  fecha_creacion: 'fecha_creacion',
+  fecha_caducidad: 'fecha_caducidad',
+  fecha_verificacion: 'fecha_verificacion',
+  credencial_hash: 'credencial_hash',
+  fecha_caducidad_credencial: 'fecha_caducidad_credencial',
+  fecha_utilizacion: 'fecha_utilizacion',
+  fecha_invalidacion: 'fecha_invalidacion'
+} as const
+
+export type Verificaciones_invitaciones_lanzadoresScalarFieldEnum = (typeof Verificaciones_invitaciones_lanzadoresScalarFieldEnum)[keyof typeof Verificaciones_invitaciones_lanzadoresScalarFieldEnum]
+
+
+export const CuentasScalarFieldEnum = {
+  id: 'id',
+  nombre: 'nombre',
+  apellidos: 'apellidos',
+  correo: 'correo',
+  rol: 'rol',
+  estado: 'estado',
+  fecha_registro: 'fecha_registro',
+  fecha_suspension: 'fecha_suspension',
+  motivo_suspension: 'motivo_suspension',
+  fecha_cierre: 'fecha_cierre'
+} as const
+
+export type CuentasScalarFieldEnum = (typeof CuentasScalarFieldEnum)[keyof typeof CuentasScalarFieldEnum]
+
+
+export const Historico_cierre_cuentasScalarFieldEnum = {
+  id: 'id',
+  nombre_administrador: 'nombre_administrador',
+  correo_administrador: 'correo_administrador',
+  nombre_lanzador_solicitante: 'nombre_lanzador_solicitante',
+  correo_lanzador_solicitante: 'correo_lanzador_solicitante',
+  nombre_lanzador_validador: 'nombre_lanzador_validador',
+  correo_lanzador_validador: 'correo_lanzador_validador',
+  estado_final: 'estado_final',
+  fecha_cierre: 'fecha_cierre',
+  fecha_eliminacion_datos: 'fecha_eliminacion_datos'
+} as const
+
+export type Historico_cierre_cuentasScalarFieldEnum = (typeof Historico_cierre_cuentasScalarFieldEnum)[keyof typeof Historico_cierre_cuentasScalarFieldEnum]
 
 
 export const SortOrder = {

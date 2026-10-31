@@ -427,7 +427,10 @@ export const ModelName = {
   asignaciones_lanzadores: 'asignaciones_lanzadores',
   historial_asignaciones: 'historial_asignaciones',
   lanzadores: 'lanzadores',
-  invitaciones_lanzadores: 'invitaciones_lanzadores'
+  invitaciones_lanzadores: 'invitaciones_lanzadores',
+  verificaciones_invitaciones_lanzadores: 'verificaciones_invitaciones_lanzadores',
+  cuentas: 'cuentas',
+  historico_cierre_cuentas: 'historico_cierre_cuentas'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -443,7 +446,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "audit_log_entries" | "custom_oauth_providers" | "flow_state" | "identities" | "instances" | "mfa_amr_claims" | "mfa_challenges" | "mfa_factors" | "mfa_recovery_code_sets" | "mfa_recovery_codes" | "oauth_authorizations" | "oauth_client_states" | "oauth_clients" | "oauth_consents" | "one_time_tokens" | "refresh_tokens" | "saml_providers" | "saml_relay_states" | "schema_migrations" | "scim_tokens" | "scim_users" | "sessions" | "sso_domains" | "sso_providers" | "users" | "webauthn_challenges" | "webauthn_credentials" | "asignaciones_lanzadores" | "historial_asignaciones" | "lanzadores" | "invitaciones_lanzadores"
+    modelProps: "audit_log_entries" | "custom_oauth_providers" | "flow_state" | "identities" | "instances" | "mfa_amr_claims" | "mfa_challenges" | "mfa_factors" | "mfa_recovery_code_sets" | "mfa_recovery_codes" | "oauth_authorizations" | "oauth_client_states" | "oauth_clients" | "oauth_consents" | "one_time_tokens" | "refresh_tokens" | "saml_providers" | "saml_relay_states" | "schema_migrations" | "scim_tokens" | "scim_users" | "sessions" | "sso_domains" | "sso_providers" | "users" | "webauthn_challenges" | "webauthn_credentials" | "asignaciones_lanzadores" | "historial_asignaciones" | "lanzadores" | "invitaciones_lanzadores" | "verificaciones_invitaciones_lanzadores" | "cuentas" | "historico_cierre_cuentas"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -2741,6 +2744,228 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    verificaciones_invitaciones_lanzadores: {
+      payload: Prisma.$verificaciones_invitaciones_lanzadoresPayload<ExtArgs>
+      fields: Prisma.verificaciones_invitaciones_lanzadoresFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.verificaciones_invitaciones_lanzadoresFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$verificaciones_invitaciones_lanzadoresPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.verificaciones_invitaciones_lanzadoresFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$verificaciones_invitaciones_lanzadoresPayload>
+        }
+        findFirst: {
+          args: Prisma.verificaciones_invitaciones_lanzadoresFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$verificaciones_invitaciones_lanzadoresPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.verificaciones_invitaciones_lanzadoresFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$verificaciones_invitaciones_lanzadoresPayload>
+        }
+        findMany: {
+          args: Prisma.verificaciones_invitaciones_lanzadoresFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$verificaciones_invitaciones_lanzadoresPayload>[]
+        }
+        create: {
+          args: Prisma.verificaciones_invitaciones_lanzadoresCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$verificaciones_invitaciones_lanzadoresPayload>
+        }
+        createMany: {
+          args: Prisma.verificaciones_invitaciones_lanzadoresCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.verificaciones_invitaciones_lanzadoresCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$verificaciones_invitaciones_lanzadoresPayload>[]
+        }
+        delete: {
+          args: Prisma.verificaciones_invitaciones_lanzadoresDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$verificaciones_invitaciones_lanzadoresPayload>
+        }
+        update: {
+          args: Prisma.verificaciones_invitaciones_lanzadoresUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$verificaciones_invitaciones_lanzadoresPayload>
+        }
+        deleteMany: {
+          args: Prisma.verificaciones_invitaciones_lanzadoresDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.verificaciones_invitaciones_lanzadoresUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.verificaciones_invitaciones_lanzadoresUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$verificaciones_invitaciones_lanzadoresPayload>[]
+        }
+        upsert: {
+          args: Prisma.verificaciones_invitaciones_lanzadoresUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$verificaciones_invitaciones_lanzadoresPayload>
+        }
+        aggregate: {
+          args: Prisma.Verificaciones_invitaciones_lanzadoresAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateVerificaciones_invitaciones_lanzadores>
+        }
+        groupBy: {
+          args: Prisma.verificaciones_invitaciones_lanzadoresGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Verificaciones_invitaciones_lanzadoresGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.verificaciones_invitaciones_lanzadoresCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Verificaciones_invitaciones_lanzadoresCountAggregateOutputType> | number
+        }
+      }
+    }
+    cuentas: {
+      payload: Prisma.$cuentasPayload<ExtArgs>
+      fields: Prisma.cuentasFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.cuentasFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$cuentasPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.cuentasFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$cuentasPayload>
+        }
+        findFirst: {
+          args: Prisma.cuentasFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$cuentasPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.cuentasFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$cuentasPayload>
+        }
+        findMany: {
+          args: Prisma.cuentasFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$cuentasPayload>[]
+        }
+        create: {
+          args: Prisma.cuentasCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$cuentasPayload>
+        }
+        createMany: {
+          args: Prisma.cuentasCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.cuentasCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$cuentasPayload>[]
+        }
+        delete: {
+          args: Prisma.cuentasDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$cuentasPayload>
+        }
+        update: {
+          args: Prisma.cuentasUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$cuentasPayload>
+        }
+        deleteMany: {
+          args: Prisma.cuentasDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.cuentasUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.cuentasUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$cuentasPayload>[]
+        }
+        upsert: {
+          args: Prisma.cuentasUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$cuentasPayload>
+        }
+        aggregate: {
+          args: Prisma.CuentasAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateCuentas>
+        }
+        groupBy: {
+          args: Prisma.cuentasGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CuentasGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.cuentasCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CuentasCountAggregateOutputType> | number
+        }
+      }
+    }
+    historico_cierre_cuentas: {
+      payload: Prisma.$historico_cierre_cuentasPayload<ExtArgs>
+      fields: Prisma.historico_cierre_cuentasFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.historico_cierre_cuentasFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$historico_cierre_cuentasPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.historico_cierre_cuentasFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$historico_cierre_cuentasPayload>
+        }
+        findFirst: {
+          args: Prisma.historico_cierre_cuentasFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$historico_cierre_cuentasPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.historico_cierre_cuentasFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$historico_cierre_cuentasPayload>
+        }
+        findMany: {
+          args: Prisma.historico_cierre_cuentasFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$historico_cierre_cuentasPayload>[]
+        }
+        create: {
+          args: Prisma.historico_cierre_cuentasCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$historico_cierre_cuentasPayload>
+        }
+        createMany: {
+          args: Prisma.historico_cierre_cuentasCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.historico_cierre_cuentasCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$historico_cierre_cuentasPayload>[]
+        }
+        delete: {
+          args: Prisma.historico_cierre_cuentasDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$historico_cierre_cuentasPayload>
+        }
+        update: {
+          args: Prisma.historico_cierre_cuentasUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$historico_cierre_cuentasPayload>
+        }
+        deleteMany: {
+          args: Prisma.historico_cierre_cuentasDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.historico_cierre_cuentasUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.historico_cierre_cuentasUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$historico_cierre_cuentasPayload>[]
+        }
+        upsert: {
+          args: Prisma.historico_cierre_cuentasUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$historico_cierre_cuentasPayload>
+        }
+        aggregate: {
+          args: Prisma.Historico_cierre_cuentasAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateHistorico_cierre_cuentas>
+        }
+        groupBy: {
+          args: Prisma.historico_cierre_cuentasGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Historico_cierre_cuentasGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.historico_cierre_cuentasCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Historico_cierre_cuentasCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -3263,10 +3488,60 @@ export const Invitaciones_lanzadoresScalarFieldEnum = {
   fecha_caducidad: 'fecha_caducidad',
   fecha_utilizacion: 'fecha_utilizacion',
   fecha_invalidacion: 'fecha_invalidacion',
-  estado_envio: 'estado_envio'
+  estado_envio: 'estado_envio',
+  intentos_verificacion: 'intentos_verificacion'
 } as const
 
 export type Invitaciones_lanzadoresScalarFieldEnum = (typeof Invitaciones_lanzadoresScalarFieldEnum)[keyof typeof Invitaciones_lanzadoresScalarFieldEnum]
+
+
+export const Verificaciones_invitaciones_lanzadoresScalarFieldEnum = {
+  id: 'id',
+  invitacion_id: 'invitacion_id',
+  codigo_hash: 'codigo_hash',
+  intentos_fallidos: 'intentos_fallidos',
+  fecha_creacion: 'fecha_creacion',
+  fecha_caducidad: 'fecha_caducidad',
+  fecha_verificacion: 'fecha_verificacion',
+  credencial_hash: 'credencial_hash',
+  fecha_caducidad_credencial: 'fecha_caducidad_credencial',
+  fecha_utilizacion: 'fecha_utilizacion',
+  fecha_invalidacion: 'fecha_invalidacion'
+} as const
+
+export type Verificaciones_invitaciones_lanzadoresScalarFieldEnum = (typeof Verificaciones_invitaciones_lanzadoresScalarFieldEnum)[keyof typeof Verificaciones_invitaciones_lanzadoresScalarFieldEnum]
+
+
+export const CuentasScalarFieldEnum = {
+  id: 'id',
+  nombre: 'nombre',
+  apellidos: 'apellidos',
+  correo: 'correo',
+  rol: 'rol',
+  estado: 'estado',
+  fecha_registro: 'fecha_registro',
+  fecha_suspension: 'fecha_suspension',
+  motivo_suspension: 'motivo_suspension',
+  fecha_cierre: 'fecha_cierre'
+} as const
+
+export type CuentasScalarFieldEnum = (typeof CuentasScalarFieldEnum)[keyof typeof CuentasScalarFieldEnum]
+
+
+export const Historico_cierre_cuentasScalarFieldEnum = {
+  id: 'id',
+  nombre_administrador: 'nombre_administrador',
+  correo_administrador: 'correo_administrador',
+  nombre_lanzador_solicitante: 'nombre_lanzador_solicitante',
+  correo_lanzador_solicitante: 'correo_lanzador_solicitante',
+  nombre_lanzador_validador: 'nombre_lanzador_validador',
+  correo_lanzador_validador: 'correo_lanzador_validador',
+  estado_final: 'estado_final',
+  fecha_cierre: 'fecha_cierre',
+  fecha_eliminacion_datos: 'fecha_eliminacion_datos'
+} as const
+
+export type Historico_cierre_cuentasScalarFieldEnum = (typeof Historico_cierre_cuentasScalarFieldEnum)[keyof typeof Historico_cierre_cuentasScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -3735,6 +4010,9 @@ export type GlobalOmitConfig = {
   historial_asignaciones?: Prisma.historial_asignacionesOmit
   lanzadores?: Prisma.lanzadoresOmit
   invitaciones_lanzadores?: Prisma.invitaciones_lanzadoresOmit
+  verificaciones_invitaciones_lanzadores?: Prisma.verificaciones_invitaciones_lanzadoresOmit
+  cuentas?: Prisma.cuentasOmit
+  historico_cierre_cuentas?: Prisma.historico_cierre_cuentasOmit
 }
 
 /* Types for Logging */

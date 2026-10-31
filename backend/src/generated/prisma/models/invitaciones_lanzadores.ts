@@ -21,8 +21,18 @@ export type invitaciones_lanzadoresModel = runtime.Types.Result.DefaultSelection
 
 export type AggregateInvitaciones_lanzadores = {
   _count: Invitaciones_lanzadoresCountAggregateOutputType | null
+  _avg: Invitaciones_lanzadoresAvgAggregateOutputType | null
+  _sum: Invitaciones_lanzadoresSumAggregateOutputType | null
   _min: Invitaciones_lanzadoresMinAggregateOutputType | null
   _max: Invitaciones_lanzadoresMaxAggregateOutputType | null
+}
+
+export type Invitaciones_lanzadoresAvgAggregateOutputType = {
+  intentos_verificacion: number | null
+}
+
+export type Invitaciones_lanzadoresSumAggregateOutputType = {
+  intentos_verificacion: number | null
 }
 
 export type Invitaciones_lanzadoresMinAggregateOutputType = {
@@ -34,6 +44,7 @@ export type Invitaciones_lanzadoresMinAggregateOutputType = {
   fecha_utilizacion: Date | null
   fecha_invalidacion: Date | null
   estado_envio: string | null
+  intentos_verificacion: number | null
 }
 
 export type Invitaciones_lanzadoresMaxAggregateOutputType = {
@@ -45,6 +56,7 @@ export type Invitaciones_lanzadoresMaxAggregateOutputType = {
   fecha_utilizacion: Date | null
   fecha_invalidacion: Date | null
   estado_envio: string | null
+  intentos_verificacion: number | null
 }
 
 export type Invitaciones_lanzadoresCountAggregateOutputType = {
@@ -56,9 +68,18 @@ export type Invitaciones_lanzadoresCountAggregateOutputType = {
   fecha_utilizacion: number
   fecha_invalidacion: number
   estado_envio: number
+  intentos_verificacion: number
   _all: number
 }
 
+
+export type Invitaciones_lanzadoresAvgAggregateInputType = {
+  intentos_verificacion?: true
+}
+
+export type Invitaciones_lanzadoresSumAggregateInputType = {
+  intentos_verificacion?: true
+}
 
 export type Invitaciones_lanzadoresMinAggregateInputType = {
   id?: true
@@ -69,6 +90,7 @@ export type Invitaciones_lanzadoresMinAggregateInputType = {
   fecha_utilizacion?: true
   fecha_invalidacion?: true
   estado_envio?: true
+  intentos_verificacion?: true
 }
 
 export type Invitaciones_lanzadoresMaxAggregateInputType = {
@@ -80,6 +102,7 @@ export type Invitaciones_lanzadoresMaxAggregateInputType = {
   fecha_utilizacion?: true
   fecha_invalidacion?: true
   estado_envio?: true
+  intentos_verificacion?: true
 }
 
 export type Invitaciones_lanzadoresCountAggregateInputType = {
@@ -91,6 +114,7 @@ export type Invitaciones_lanzadoresCountAggregateInputType = {
   fecha_utilizacion?: true
   fecha_invalidacion?: true
   estado_envio?: true
+  intentos_verificacion?: true
   _all?: true
 }
 
@@ -132,6 +156,18 @@ export type Invitaciones_lanzadoresAggregateArgs<ExtArgs extends runtime.Types.E
   /**
    * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
    * 
+   * Select which fields to average
+  **/
+  _avg?: Invitaciones_lanzadoresAvgAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
+   * Select which fields to sum
+  **/
+  _sum?: Invitaciones_lanzadoresSumAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
    * Select which fields to find the minimum value
   **/
   _min?: Invitaciones_lanzadoresMinAggregateInputType
@@ -162,6 +198,8 @@ export type invitaciones_lanzadoresGroupByArgs<ExtArgs extends runtime.Types.Ext
   take?: number
   skip?: number
   _count?: Invitaciones_lanzadoresCountAggregateInputType | true
+  _avg?: Invitaciones_lanzadoresAvgAggregateInputType
+  _sum?: Invitaciones_lanzadoresSumAggregateInputType
   _min?: Invitaciones_lanzadoresMinAggregateInputType
   _max?: Invitaciones_lanzadoresMaxAggregateInputType
 }
@@ -175,7 +213,10 @@ export type Invitaciones_lanzadoresGroupByOutputType = {
   fecha_utilizacion: Date | null
   fecha_invalidacion: Date | null
   estado_envio: string
+  intentos_verificacion: number
   _count: Invitaciones_lanzadoresCountAggregateOutputType | null
+  _avg: Invitaciones_lanzadoresAvgAggregateOutputType | null
+  _sum: Invitaciones_lanzadoresSumAggregateOutputType | null
   _min: Invitaciones_lanzadoresMinAggregateOutputType | null
   _max: Invitaciones_lanzadoresMaxAggregateOutputType | null
 }
@@ -207,7 +248,9 @@ export type invitaciones_lanzadoresWhereInput = {
   fecha_utilizacion?: Prisma.DateTimeNullableFilter<"invitaciones_lanzadores"> | Date | string | null
   fecha_invalidacion?: Prisma.DateTimeNullableFilter<"invitaciones_lanzadores"> | Date | string | null
   estado_envio?: Prisma.StringFilter<"invitaciones_lanzadores"> | string
+  intentos_verificacion?: Prisma.IntFilter<"invitaciones_lanzadores"> | number
   asignaciones_lanzadores?: Prisma.XOR<Prisma.Asignaciones_lanzadoresScalarRelationFilter, Prisma.asignaciones_lanzadoresWhereInput>
+  verificaciones_invitaciones_lanzadores?: Prisma.XOR<Prisma.Verificaciones_invitaciones_lanzadoresNullableScalarRelationFilter, Prisma.verificaciones_invitaciones_lanzadoresWhereInput> | null
 }
 
 export type invitaciones_lanzadoresOrderByWithRelationInput = {
@@ -219,7 +262,9 @@ export type invitaciones_lanzadoresOrderByWithRelationInput = {
   fecha_utilizacion?: Prisma.SortOrderInput | Prisma.SortOrder
   fecha_invalidacion?: Prisma.SortOrderInput | Prisma.SortOrder
   estado_envio?: Prisma.SortOrder
+  intentos_verificacion?: Prisma.SortOrder
   asignaciones_lanzadores?: Prisma.asignaciones_lanzadoresOrderByWithRelationInput
+  verificaciones_invitaciones_lanzadores?: Prisma.verificaciones_invitaciones_lanzadoresOrderByWithRelationInput
 }
 
 export type invitaciones_lanzadoresWhereUniqueInput = Prisma.AtLeast<{
@@ -234,7 +279,9 @@ export type invitaciones_lanzadoresWhereUniqueInput = Prisma.AtLeast<{
   fecha_utilizacion?: Prisma.DateTimeNullableFilter<"invitaciones_lanzadores"> | Date | string | null
   fecha_invalidacion?: Prisma.DateTimeNullableFilter<"invitaciones_lanzadores"> | Date | string | null
   estado_envio?: Prisma.StringFilter<"invitaciones_lanzadores"> | string
+  intentos_verificacion?: Prisma.IntFilter<"invitaciones_lanzadores"> | number
   asignaciones_lanzadores?: Prisma.XOR<Prisma.Asignaciones_lanzadoresScalarRelationFilter, Prisma.asignaciones_lanzadoresWhereInput>
+  verificaciones_invitaciones_lanzadores?: Prisma.XOR<Prisma.Verificaciones_invitaciones_lanzadoresNullableScalarRelationFilter, Prisma.verificaciones_invitaciones_lanzadoresWhereInput> | null
 }, "id" | "asignacion_id" | "token_hash">
 
 export type invitaciones_lanzadoresOrderByWithAggregationInput = {
@@ -246,9 +293,12 @@ export type invitaciones_lanzadoresOrderByWithAggregationInput = {
   fecha_utilizacion?: Prisma.SortOrderInput | Prisma.SortOrder
   fecha_invalidacion?: Prisma.SortOrderInput | Prisma.SortOrder
   estado_envio?: Prisma.SortOrder
+  intentos_verificacion?: Prisma.SortOrder
   _count?: Prisma.invitaciones_lanzadoresCountOrderByAggregateInput
+  _avg?: Prisma.invitaciones_lanzadoresAvgOrderByAggregateInput
   _max?: Prisma.invitaciones_lanzadoresMaxOrderByAggregateInput
   _min?: Prisma.invitaciones_lanzadoresMinOrderByAggregateInput
+  _sum?: Prisma.invitaciones_lanzadoresSumOrderByAggregateInput
 }
 
 export type invitaciones_lanzadoresScalarWhereWithAggregatesInput = {
@@ -263,6 +313,7 @@ export type invitaciones_lanzadoresScalarWhereWithAggregatesInput = {
   fecha_utilizacion?: Prisma.DateTimeNullableWithAggregatesFilter<"invitaciones_lanzadores"> | Date | string | null
   fecha_invalidacion?: Prisma.DateTimeNullableWithAggregatesFilter<"invitaciones_lanzadores"> | Date | string | null
   estado_envio?: Prisma.StringWithAggregatesFilter<"invitaciones_lanzadores"> | string
+  intentos_verificacion?: Prisma.IntWithAggregatesFilter<"invitaciones_lanzadores"> | number
 }
 
 export type invitaciones_lanzadoresCreateInput = {
@@ -273,7 +324,9 @@ export type invitaciones_lanzadoresCreateInput = {
   fecha_utilizacion?: Date | string | null
   fecha_invalidacion?: Date | string | null
   estado_envio?: string
+  intentos_verificacion?: number
   asignaciones_lanzadores: Prisma.asignaciones_lanzadoresCreateNestedOneWithoutInvitaciones_lanzadoresInput
+  verificaciones_invitaciones_lanzadores?: Prisma.verificaciones_invitaciones_lanzadoresCreateNestedOneWithoutInvitaciones_lanzadoresInput
 }
 
 export type invitaciones_lanzadoresUncheckedCreateInput = {
@@ -285,6 +338,8 @@ export type invitaciones_lanzadoresUncheckedCreateInput = {
   fecha_utilizacion?: Date | string | null
   fecha_invalidacion?: Date | string | null
   estado_envio?: string
+  intentos_verificacion?: number
+  verificaciones_invitaciones_lanzadores?: Prisma.verificaciones_invitaciones_lanzadoresUncheckedCreateNestedOneWithoutInvitaciones_lanzadoresInput
 }
 
 export type invitaciones_lanzadoresUpdateInput = {
@@ -295,7 +350,9 @@ export type invitaciones_lanzadoresUpdateInput = {
   fecha_utilizacion?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   fecha_invalidacion?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   estado_envio?: Prisma.StringFieldUpdateOperationsInput | string
+  intentos_verificacion?: Prisma.IntFieldUpdateOperationsInput | number
   asignaciones_lanzadores?: Prisma.asignaciones_lanzadoresUpdateOneRequiredWithoutInvitaciones_lanzadoresNestedInput
+  verificaciones_invitaciones_lanzadores?: Prisma.verificaciones_invitaciones_lanzadoresUpdateOneWithoutInvitaciones_lanzadoresNestedInput
 }
 
 export type invitaciones_lanzadoresUncheckedUpdateInput = {
@@ -307,6 +364,8 @@ export type invitaciones_lanzadoresUncheckedUpdateInput = {
   fecha_utilizacion?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   fecha_invalidacion?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   estado_envio?: Prisma.StringFieldUpdateOperationsInput | string
+  intentos_verificacion?: Prisma.IntFieldUpdateOperationsInput | number
+  verificaciones_invitaciones_lanzadores?: Prisma.verificaciones_invitaciones_lanzadoresUncheckedUpdateOneWithoutInvitaciones_lanzadoresNestedInput
 }
 
 export type invitaciones_lanzadoresCreateManyInput = {
@@ -318,6 +377,7 @@ export type invitaciones_lanzadoresCreateManyInput = {
   fecha_utilizacion?: Date | string | null
   fecha_invalidacion?: Date | string | null
   estado_envio?: string
+  intentos_verificacion?: number
 }
 
 export type invitaciones_lanzadoresUpdateManyMutationInput = {
@@ -328,6 +388,7 @@ export type invitaciones_lanzadoresUpdateManyMutationInput = {
   fecha_utilizacion?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   fecha_invalidacion?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   estado_envio?: Prisma.StringFieldUpdateOperationsInput | string
+  intentos_verificacion?: Prisma.IntFieldUpdateOperationsInput | number
 }
 
 export type invitaciones_lanzadoresUncheckedUpdateManyInput = {
@@ -339,6 +400,7 @@ export type invitaciones_lanzadoresUncheckedUpdateManyInput = {
   fecha_utilizacion?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   fecha_invalidacion?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   estado_envio?: Prisma.StringFieldUpdateOperationsInput | string
+  intentos_verificacion?: Prisma.IntFieldUpdateOperationsInput | number
 }
 
 export type Invitaciones_lanzadoresNullableScalarRelationFilter = {
@@ -355,6 +417,11 @@ export type invitaciones_lanzadoresCountOrderByAggregateInput = {
   fecha_utilizacion?: Prisma.SortOrder
   fecha_invalidacion?: Prisma.SortOrder
   estado_envio?: Prisma.SortOrder
+  intentos_verificacion?: Prisma.SortOrder
+}
+
+export type invitaciones_lanzadoresAvgOrderByAggregateInput = {
+  intentos_verificacion?: Prisma.SortOrder
 }
 
 export type invitaciones_lanzadoresMaxOrderByAggregateInput = {
@@ -366,6 +433,7 @@ export type invitaciones_lanzadoresMaxOrderByAggregateInput = {
   fecha_utilizacion?: Prisma.SortOrder
   fecha_invalidacion?: Prisma.SortOrder
   estado_envio?: Prisma.SortOrder
+  intentos_verificacion?: Prisma.SortOrder
 }
 
 export type invitaciones_lanzadoresMinOrderByAggregateInput = {
@@ -377,6 +445,16 @@ export type invitaciones_lanzadoresMinOrderByAggregateInput = {
   fecha_utilizacion?: Prisma.SortOrder
   fecha_invalidacion?: Prisma.SortOrder
   estado_envio?: Prisma.SortOrder
+  intentos_verificacion?: Prisma.SortOrder
+}
+
+export type invitaciones_lanzadoresSumOrderByAggregateInput = {
+  intentos_verificacion?: Prisma.SortOrder
+}
+
+export type Invitaciones_lanzadoresScalarRelationFilter = {
+  is?: Prisma.invitaciones_lanzadoresWhereInput
+  isNot?: Prisma.invitaciones_lanzadoresWhereInput
 }
 
 export type invitaciones_lanzadoresCreateNestedOneWithoutAsignaciones_lanzadoresInput = {
@@ -411,6 +489,20 @@ export type invitaciones_lanzadoresUncheckedUpdateOneWithoutAsignaciones_lanzado
   update?: Prisma.XOR<Prisma.XOR<Prisma.invitaciones_lanzadoresUpdateToOneWithWhereWithoutAsignaciones_lanzadoresInput, Prisma.invitaciones_lanzadoresUpdateWithoutAsignaciones_lanzadoresInput>, Prisma.invitaciones_lanzadoresUncheckedUpdateWithoutAsignaciones_lanzadoresInput>
 }
 
+export type invitaciones_lanzadoresCreateNestedOneWithoutVerificaciones_invitaciones_lanzadoresInput = {
+  create?: Prisma.XOR<Prisma.invitaciones_lanzadoresCreateWithoutVerificaciones_invitaciones_lanzadoresInput, Prisma.invitaciones_lanzadoresUncheckedCreateWithoutVerificaciones_invitaciones_lanzadoresInput>
+  connectOrCreate?: Prisma.invitaciones_lanzadoresCreateOrConnectWithoutVerificaciones_invitaciones_lanzadoresInput
+  connect?: Prisma.invitaciones_lanzadoresWhereUniqueInput
+}
+
+export type invitaciones_lanzadoresUpdateOneRequiredWithoutVerificaciones_invitaciones_lanzadoresNestedInput = {
+  create?: Prisma.XOR<Prisma.invitaciones_lanzadoresCreateWithoutVerificaciones_invitaciones_lanzadoresInput, Prisma.invitaciones_lanzadoresUncheckedCreateWithoutVerificaciones_invitaciones_lanzadoresInput>
+  connectOrCreate?: Prisma.invitaciones_lanzadoresCreateOrConnectWithoutVerificaciones_invitaciones_lanzadoresInput
+  upsert?: Prisma.invitaciones_lanzadoresUpsertWithoutVerificaciones_invitaciones_lanzadoresInput
+  connect?: Prisma.invitaciones_lanzadoresWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.invitaciones_lanzadoresUpdateToOneWithWhereWithoutVerificaciones_invitaciones_lanzadoresInput, Prisma.invitaciones_lanzadoresUpdateWithoutVerificaciones_invitaciones_lanzadoresInput>, Prisma.invitaciones_lanzadoresUncheckedUpdateWithoutVerificaciones_invitaciones_lanzadoresInput>
+}
+
 export type invitaciones_lanzadoresCreateWithoutAsignaciones_lanzadoresInput = {
   id?: string
   token_hash: string
@@ -419,6 +511,8 @@ export type invitaciones_lanzadoresCreateWithoutAsignaciones_lanzadoresInput = {
   fecha_utilizacion?: Date | string | null
   fecha_invalidacion?: Date | string | null
   estado_envio?: string
+  intentos_verificacion?: number
+  verificaciones_invitaciones_lanzadores?: Prisma.verificaciones_invitaciones_lanzadoresCreateNestedOneWithoutInvitaciones_lanzadoresInput
 }
 
 export type invitaciones_lanzadoresUncheckedCreateWithoutAsignaciones_lanzadoresInput = {
@@ -429,6 +523,8 @@ export type invitaciones_lanzadoresUncheckedCreateWithoutAsignaciones_lanzadores
   fecha_utilizacion?: Date | string | null
   fecha_invalidacion?: Date | string | null
   estado_envio?: string
+  intentos_verificacion?: number
+  verificaciones_invitaciones_lanzadores?: Prisma.verificaciones_invitaciones_lanzadoresUncheckedCreateNestedOneWithoutInvitaciones_lanzadoresInput
 }
 
 export type invitaciones_lanzadoresCreateOrConnectWithoutAsignaciones_lanzadoresInput = {
@@ -455,6 +551,8 @@ export type invitaciones_lanzadoresUpdateWithoutAsignaciones_lanzadoresInput = {
   fecha_utilizacion?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   fecha_invalidacion?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   estado_envio?: Prisma.StringFieldUpdateOperationsInput | string
+  intentos_verificacion?: Prisma.IntFieldUpdateOperationsInput | number
+  verificaciones_invitaciones_lanzadores?: Prisma.verificaciones_invitaciones_lanzadoresUpdateOneWithoutInvitaciones_lanzadoresNestedInput
 }
 
 export type invitaciones_lanzadoresUncheckedUpdateWithoutAsignaciones_lanzadoresInput = {
@@ -465,6 +563,72 @@ export type invitaciones_lanzadoresUncheckedUpdateWithoutAsignaciones_lanzadores
   fecha_utilizacion?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   fecha_invalidacion?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   estado_envio?: Prisma.StringFieldUpdateOperationsInput | string
+  intentos_verificacion?: Prisma.IntFieldUpdateOperationsInput | number
+  verificaciones_invitaciones_lanzadores?: Prisma.verificaciones_invitaciones_lanzadoresUncheckedUpdateOneWithoutInvitaciones_lanzadoresNestedInput
+}
+
+export type invitaciones_lanzadoresCreateWithoutVerificaciones_invitaciones_lanzadoresInput = {
+  id?: string
+  token_hash: string
+  fecha_creacion?: Date | string
+  fecha_caducidad?: Date | string
+  fecha_utilizacion?: Date | string | null
+  fecha_invalidacion?: Date | string | null
+  estado_envio?: string
+  intentos_verificacion?: number
+  asignaciones_lanzadores: Prisma.asignaciones_lanzadoresCreateNestedOneWithoutInvitaciones_lanzadoresInput
+}
+
+export type invitaciones_lanzadoresUncheckedCreateWithoutVerificaciones_invitaciones_lanzadoresInput = {
+  id?: string
+  asignacion_id: string
+  token_hash: string
+  fecha_creacion?: Date | string
+  fecha_caducidad?: Date | string
+  fecha_utilizacion?: Date | string | null
+  fecha_invalidacion?: Date | string | null
+  estado_envio?: string
+  intentos_verificacion?: number
+}
+
+export type invitaciones_lanzadoresCreateOrConnectWithoutVerificaciones_invitaciones_lanzadoresInput = {
+  where: Prisma.invitaciones_lanzadoresWhereUniqueInput
+  create: Prisma.XOR<Prisma.invitaciones_lanzadoresCreateWithoutVerificaciones_invitaciones_lanzadoresInput, Prisma.invitaciones_lanzadoresUncheckedCreateWithoutVerificaciones_invitaciones_lanzadoresInput>
+}
+
+export type invitaciones_lanzadoresUpsertWithoutVerificaciones_invitaciones_lanzadoresInput = {
+  update: Prisma.XOR<Prisma.invitaciones_lanzadoresUpdateWithoutVerificaciones_invitaciones_lanzadoresInput, Prisma.invitaciones_lanzadoresUncheckedUpdateWithoutVerificaciones_invitaciones_lanzadoresInput>
+  create: Prisma.XOR<Prisma.invitaciones_lanzadoresCreateWithoutVerificaciones_invitaciones_lanzadoresInput, Prisma.invitaciones_lanzadoresUncheckedCreateWithoutVerificaciones_invitaciones_lanzadoresInput>
+  where?: Prisma.invitaciones_lanzadoresWhereInput
+}
+
+export type invitaciones_lanzadoresUpdateToOneWithWhereWithoutVerificaciones_invitaciones_lanzadoresInput = {
+  where?: Prisma.invitaciones_lanzadoresWhereInput
+  data: Prisma.XOR<Prisma.invitaciones_lanzadoresUpdateWithoutVerificaciones_invitaciones_lanzadoresInput, Prisma.invitaciones_lanzadoresUncheckedUpdateWithoutVerificaciones_invitaciones_lanzadoresInput>
+}
+
+export type invitaciones_lanzadoresUpdateWithoutVerificaciones_invitaciones_lanzadoresInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  token_hash?: Prisma.StringFieldUpdateOperationsInput | string
+  fecha_creacion?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  fecha_caducidad?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  fecha_utilizacion?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  fecha_invalidacion?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  estado_envio?: Prisma.StringFieldUpdateOperationsInput | string
+  intentos_verificacion?: Prisma.IntFieldUpdateOperationsInput | number
+  asignaciones_lanzadores?: Prisma.asignaciones_lanzadoresUpdateOneRequiredWithoutInvitaciones_lanzadoresNestedInput
+}
+
+export type invitaciones_lanzadoresUncheckedUpdateWithoutVerificaciones_invitaciones_lanzadoresInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  asignacion_id?: Prisma.StringFieldUpdateOperationsInput | string
+  token_hash?: Prisma.StringFieldUpdateOperationsInput | string
+  fecha_creacion?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  fecha_caducidad?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  fecha_utilizacion?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  fecha_invalidacion?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  estado_envio?: Prisma.StringFieldUpdateOperationsInput | string
+  intentos_verificacion?: Prisma.IntFieldUpdateOperationsInput | number
 }
 
 
@@ -478,7 +642,9 @@ export type invitaciones_lanzadoresSelect<ExtArgs extends runtime.Types.Extensio
   fecha_utilizacion?: boolean
   fecha_invalidacion?: boolean
   estado_envio?: boolean
+  intentos_verificacion?: boolean
   asignaciones_lanzadores?: boolean | Prisma.asignaciones_lanzadoresDefaultArgs<ExtArgs>
+  verificaciones_invitaciones_lanzadores?: boolean | Prisma.invitaciones_lanzadores$verificaciones_invitaciones_lanzadoresArgs<ExtArgs>
 }, ExtArgs["result"]["invitaciones_lanzadores"]>
 
 export type invitaciones_lanzadoresSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -490,6 +656,7 @@ export type invitaciones_lanzadoresSelectCreateManyAndReturn<ExtArgs extends run
   fecha_utilizacion?: boolean
   fecha_invalidacion?: boolean
   estado_envio?: boolean
+  intentos_verificacion?: boolean
   asignaciones_lanzadores?: boolean | Prisma.asignaciones_lanzadoresDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["invitaciones_lanzadores"]>
 
@@ -502,6 +669,7 @@ export type invitaciones_lanzadoresSelectUpdateManyAndReturn<ExtArgs extends run
   fecha_utilizacion?: boolean
   fecha_invalidacion?: boolean
   estado_envio?: boolean
+  intentos_verificacion?: boolean
   asignaciones_lanzadores?: boolean | Prisma.asignaciones_lanzadoresDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["invitaciones_lanzadores"]>
 
@@ -514,11 +682,13 @@ export type invitaciones_lanzadoresSelectScalar = {
   fecha_utilizacion?: boolean
   fecha_invalidacion?: boolean
   estado_envio?: boolean
+  intentos_verificacion?: boolean
 }
 
-export type invitaciones_lanzadoresOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "asignacion_id" | "token_hash" | "fecha_creacion" | "fecha_caducidad" | "fecha_utilizacion" | "fecha_invalidacion" | "estado_envio", ExtArgs["result"]["invitaciones_lanzadores"]>
+export type invitaciones_lanzadoresOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "asignacion_id" | "token_hash" | "fecha_creacion" | "fecha_caducidad" | "fecha_utilizacion" | "fecha_invalidacion" | "estado_envio" | "intentos_verificacion", ExtArgs["result"]["invitaciones_lanzadores"]>
 export type invitaciones_lanzadoresInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   asignaciones_lanzadores?: boolean | Prisma.asignaciones_lanzadoresDefaultArgs<ExtArgs>
+  verificaciones_invitaciones_lanzadores?: boolean | Prisma.invitaciones_lanzadores$verificaciones_invitaciones_lanzadoresArgs<ExtArgs>
 }
 export type invitaciones_lanzadoresIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   asignaciones_lanzadores?: boolean | Prisma.asignaciones_lanzadoresDefaultArgs<ExtArgs>
@@ -531,6 +701,7 @@ export type $invitaciones_lanzadoresPayload<ExtArgs extends runtime.Types.Extens
   name: "invitaciones_lanzadores"
   objects: {
     asignaciones_lanzadores: Prisma.$asignaciones_lanzadoresPayload<ExtArgs>
+    verificaciones_invitaciones_lanzadores: Prisma.$verificaciones_invitaciones_lanzadoresPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -541,6 +712,7 @@ export type $invitaciones_lanzadoresPayload<ExtArgs extends runtime.Types.Extens
     fecha_utilizacion: Date | null
     fecha_invalidacion: Date | null
     estado_envio: string
+    intentos_verificacion: number
   }, ExtArgs["result"]["invitaciones_lanzadores"]>
   composites: {}
 }
@@ -936,6 +1108,7 @@ readonly fields: invitaciones_lanzadoresFieldRefs;
 export interface Prisma__invitaciones_lanzadoresClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   asignaciones_lanzadores<T extends Prisma.asignaciones_lanzadoresDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.asignaciones_lanzadoresDefaultArgs<ExtArgs>>): Prisma.Prisma__asignaciones_lanzadoresClient<runtime.Types.Result.GetResult<Prisma.$asignaciones_lanzadoresPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  verificaciones_invitaciones_lanzadores<T extends Prisma.invitaciones_lanzadores$verificaciones_invitaciones_lanzadoresArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.invitaciones_lanzadores$verificaciones_invitaciones_lanzadoresArgs<ExtArgs>>): Prisma.Prisma__verificaciones_invitaciones_lanzadoresClient<runtime.Types.Result.GetResult<Prisma.$verificaciones_invitaciones_lanzadoresPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -973,6 +1146,7 @@ export interface invitaciones_lanzadoresFieldRefs {
   readonly fecha_utilizacion: Prisma.FieldRef<"invitaciones_lanzadores", 'DateTime'>
   readonly fecha_invalidacion: Prisma.FieldRef<"invitaciones_lanzadores", 'DateTime'>
   readonly estado_envio: Prisma.FieldRef<"invitaciones_lanzadores", 'String'>
+  readonly intentos_verificacion: Prisma.FieldRef<"invitaciones_lanzadores", 'Int'>
 }
     
 
@@ -1371,6 +1545,25 @@ export type invitaciones_lanzadoresDeleteManyArgs<ExtArgs extends runtime.Types.
    * Limit how many invitaciones_lanzadores to delete.
    */
   limit?: number
+}
+
+/**
+ * invitaciones_lanzadores.verificaciones_invitaciones_lanzadores
+ */
+export type invitaciones_lanzadores$verificaciones_invitaciones_lanzadoresArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the verificaciones_invitaciones_lanzadores
+   */
+  select?: Prisma.verificaciones_invitaciones_lanzadoresSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the verificaciones_invitaciones_lanzadores
+   */
+  omit?: Prisma.verificaciones_invitaciones_lanzadoresOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.verificaciones_invitaciones_lanzadoresInclude<ExtArgs> | null
+  where?: Prisma.verificaciones_invitaciones_lanzadoresWhereInput
 }
 
 /**

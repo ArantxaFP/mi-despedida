@@ -4,535 +4,450 @@
 
         <h1 id="titulo-perfil">
             @switch (vistaActual()) {
-                @case ('datos') { Mi perfil }
-                @case ('correo') { Cambiar correo }
-                @case ('contrasena') { Cambiar contraseña }
-                @case ('baja') { ¿Solicitar la baja? }
+            @case ('datos') { Mi perfil }
+            @case ('correo') { Cambiar correo }
+            @case ('contrasena') { Cambiar contraseña }
+            @case ('baja') { ¿Solicitar la baja? }
             }
         </h1>
 
         @if (vistaActual() === 'datos') {
-            <p>
-                Desde aquí podrás gestionar tus datos personales, cambiar tu correo electrónico y modificar tu contraseña.
-            </p>
+        <p>
+            Desde aquí podrás gestionar tus datos personales, cambiar tu correo electrónico y modificar tu contraseña.
+        </p>
         }
 
         @if (vistaActual() === 'correo') {
-            <p>
-                La nueva dirección deberá verificarse antes de quedar confirmada.
-            </p>
+        <p>
+            La nueva dirección deberá verificarse antes de quedar confirmada.
+        </p>
         }
 
         @if (vistaActual() === 'contrasena') {
-            <p>
-                Utiliza una contraseña de al menos 10 caracteres, con mayúsculas, minúsculas, números y símbolos.
-            </p>
+        <p>
+            Utiliza una contraseña de al menos 10 caracteres, con mayúsculas, minúsculas, números y símbolos.
+        </p>
         }
 
     </header>
 
     @if (cargando()) {
 
-        <div class="panel-pagina__bloque">
-            <p role="status">
-                Cargando los datos de tu perfil...
-            </p>
-        </div>
+    <div class="panel-pagina__bloque">
+        <p role="status">
+            Cargando los datos de tu perfil...
+        </p>
+    </div>
 
     } @else {
 
 
-        <!-- Sección Datos personales -->
+    <!-- Sección Datos personales -->
 
-        @if (vistaActual() === 'datos') {
+    @if (vistaActual() === 'datos') {
 
-            <section class="panel-pagina__bloque"
-                     aria-labelledby="titulo-datos">
+    <section class="panel-pagina__bloque" aria-labelledby="titulo-datos">
 
-                <h2 id="titulo-datos">Datos personales</h2>
+        <h2 id="titulo-datos">Datos personales</h2>
 
-                <form
-                    class="perfil__formulario"
-                    [formGroup]="formularioDatos"
-                    (ngSubmit)="guardarDatos()"
-                    novalidate>
+        <form class="perfil__formulario" [formGroup]="formularioDatos" (ngSubmit)="guardarDatos()" novalidate>
 
-                    <div class="perfil__campo">
+            <div class="perfil__campo">
 
-                        <label for="nombre-perfil">
-                            Nombre
-                        </label>
+                <label for="nombre-perfil">
+                    Nombre
+                </label>
 
-                        <input
-                            id="nombre-perfil"
-                            type="text"
-                            formControlName="nombre"
-                            autocomplete="given-name"
-                            maxlength="100"
-                            [attr.aria-invalid]="formularioDatos.controls.nombre.invalid && formularioDatos.controls.nombre.touched"
-                            [attr.aria-describedby]="formularioDatos.controls.nombre.invalid && formularioDatos.controls.nombre.touched ? 'error-nombre-perfil' : null">
+                <input id="nombre-perfil" type="text" formControlName="nombre" autocomplete="given-name" maxlength="100"
+                    [attr.aria-invalid]="formularioDatos.controls.nombre.invalid && formularioDatos.controls.nombre.touched"
+                    [attr.aria-describedby]="formularioDatos.controls.nombre.invalid && formularioDatos.controls.nombre.touched ? 'error-nombre-perfil' : null">
 
-                        @if (formularioDatos.controls.nombre.invalid &&
-                             formularioDatos.controls.nombre.touched) {
+                @if (formularioDatos.controls.nombre.invalid &&
+                formularioDatos.controls.nombre.touched) {
 
-                            <p id="error-nombre-perfil"
-                               class="perfil__error">
-                                Introduce tu nombre (máximo 100 caracteres).
-                            </p>
-                        }
-
-                    </div>
-
-                    <div class="perfil__campo">
-
-                        <label for="apellidos-perfil">
-                            Apellidos
-                            <span class="perfil__opcional">
-                                (opcional)
-                            </span>
-                        </label>
-
-                        <input
-                            id="apellidos-perfil"
-                            type="text"
-                            formControlName="apellidos"
-                            autocomplete="family-name"
-                            maxlength="150">
-
-                        @if (formularioDatos.controls.apellidos.invalid &&
-                             formularioDatos.controls.apellidos.touched) {
-
-                            <p class="perfil__error">
-                                Los apellidos no pueden superar los 150 caracteres.
-                            </p>
-                        }
-
-                    </div>
-
-                    <button
-                        class="perfil__boton"
-                        type="submit"
-                        [disabled]="guardando()">
-
-                        {{ guardando() ? 'Guardando...' : 'Guardar datos' }}
-
-                    </button>
-
-                </form>
-
-            </section>
-
-
-            <!-- Sección mail -->
-
-            <section class="panel-pagina__bloque"
-                     aria-labelledby="titulo-correo">
-
-                <h2 id="titulo-correo">
-                    Correo electrónico
-                </h2>
-
-                <p class="perfil__correo">
-                    {{ correoActual() }}
-
-                    @if (correoVerificado()) {
-                        <span>· Verificado</span>
-                    } @else {
-                        <span>· Pendiente de verificación</span>
-                    }
+                <p id="error-nombre-perfil" class="perfil__error">
+                    Introduce tu nombre (máximo 100 caracteres).
                 </p>
+                }
 
-                <button
-                    class="perfil__boton"
-                    type="button"
-                    (click)="cambiarVista('correo')">
-
-                    Cambiar correo
-
-                </button>
-
-            </section>
-
-
-            <!-- Sección contraseña -->
-
-            <section class="panel-pagina__bloque"
-                     aria-labelledby="titulo-seguridad">
-
-                <h2 id="titulo-seguridad">
-                    Seguridad
-                </h2>
-
-                <p>
-                    Puedes actualizar la contraseña de acceso a tu cuenta.
-                </p>
-
-                <button
-                    class="perfil__boton"
-                    type="button"
-                    (click)="cambiarVista('contrasena')">
-
-                    Cambiar contraseña
-
-                </button>
-
-            </section>
-
-
-            <!-- Sección cerrar cuenta -->
-
-            <section class="panel-pagina__bloque"
-                     aria-labelledby="titulo-cerrar-cuenta">
-
-                <h2 id="titulo-cerrar-cuenta">
-                    Cerrar mi cuenta
-                </h2>
-
-                <p>
-                    La baja elimina tus contactos y mensajes personales.
-                </p>
-
-                <button
-                    class="perfil__boton perfil__boton--peligro"
-                    type="button"
-                    (click)="cambiarVista('baja')">
-
-                    Solicitar la baja
-
-                </button>
-
-            </section>
-
-        }
-
-        <!-- Sección cambiar correo -->
-
-        @if (vistaActual() === 'correo') {
-
-            <section class="panel-pagina__bloque"
-                     aria-labelledby="titulo-formulario-correo">
-
-                <h2 id="titulo-formulario-correo">
-                    Actualizar correo electrónico
-                </h2>
-
-                <form
-                    class="perfil__formulario"
-                    [formGroup]="formularioCorreo"
-                    (ngSubmit)="solicitarCambioCorreo()"
-                    novalidate>
-
-                    <div class="perfil__campo">
-
-                        <label for="correo-actual">
-                            Correo actual
-                        </label>
-
-                        <input
-                            id="correo-actual"
-                            type="email"
-                            [value]="correoActual()"
-                            readonly>
-
-                    </div>
-
-                    <div class="perfil__campo">
-
-                        <label for="nuevo-correo">
-                            Nuevo correo electrónico
-                        </label>
-
-                        <input
-                            id="nuevo-correo"
-                            type="email"
-                            formControlName="nuevoCorreo"
-                            autocomplete="email"
-                            [attr.aria-invalid]="formularioCorreo.controls.nuevoCorreo.invalid && formularioCorreo.controls.nuevoCorreo.touched"
-                            [attr.aria-describedby]="formularioCorreo.controls.nuevoCorreo.invalid && formularioCorreo.controls.nuevoCorreo.touched ? 'error-nuevo-correo' : null">
-
-                        @if (formularioCorreo.controls.nuevoCorreo.invalid &&
-                             formularioCorreo.controls.nuevoCorreo.touched) {
-
-                            <p id="error-nuevo-correo"
-                               class="perfil__error">
-                                Introduce una dirección de correo válida.
-                            </p>
-                        }
-
-                    </div>
-
-                    <button
-                        class="perfil__boton"
-                        type="submit"
-                        [disabled]="guardando()">
-
-                        {{ guardando() ? 'Enviando...' : 'Enviar verificación' }}
-
-                    </button>
-
-                </form>
-
-                <button
-                    class="perfil__volver"
-                    type="button"
-                    (click)="cambiarVista('datos')">
-
-                    Cancelar y volver al perfil
-
-                </button>
-
-            </section>
-
-        }
-
-        <!-- Sección cambiar contraseña -->
-
-        @if (vistaActual() === 'contrasena') {
-
-            <section class="panel-pagina__bloque"
-                     aria-labelledby="titulo-formulario-contrasena">
-
-                <h2 id="titulo-formulario-contrasena">
-                    Establecer nueva contraseña
-                </h2>
-
-                <form
-                    class="perfil__formulario"
-                    [formGroup]="formularioContrasena"
-                    (ngSubmit)="guardarContrasena()"
-                    novalidate>
-
-                    <div class="perfil__campo">
-
-                        <label for="nueva-contrasena-perfil">
-                            Nueva contraseña
-                        </label>
-
-                        <div class="perfil__contrasena">
-
-                            <input
-                                id="nueva-contrasena-perfil"
-                                [type]="mostrarContrasena() ? 'text' : 'password'"
-                                formControlName="contrasena"
-                                autocomplete="new-password"
-                                [attr.aria-invalid]="formularioContrasena.controls.contrasena.invalid && formularioContrasena.controls.contrasena.touched"
-                                [attr.aria-describedby]="formularioContrasena.controls.contrasena.invalid && formularioContrasena.controls.contrasena.touched ? 'error-contrasena-perfil' : null">
-
-                            <button
-                                class="perfil__visibilidad"
-                                type="button"
-                                (click)="cambiarVisibilidadContrasena()"
-                                [attr.aria-label]="mostrarContrasena() ? 'Ocultar contraseña' : 'Mostrar contraseña'"
-                                [attr.aria-pressed]="mostrarContrasena()">
-
-                                <svg
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    stroke-width="1.8"
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    aria-hidden="true">
-
-                                    <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/>
-                                    <circle cx="12" cy="12" r="3"/>
-
-                                    @if (mostrarContrasena()) {
-                                        <path d="M3 21 21 3"/>
-                                    }
-
-                                </svg>
-
-                            </button>
-
-                        </div>
-
-                        @if (formularioContrasena.controls.contrasena.invalid &&
-                             formularioContrasena.controls.contrasena.touched) {
-
-                            <p id="error-contrasena-perfil"
-                               class="perfil__error">
-                                La contraseña debe cumplir los requisitos indicados.
-                            </p>
-                        }
-
-                    </div>
-
-
-                    <div class="perfil__campo">
-
-                        <label for="confirmar-contrasena-perfil">
-                            Repetir contraseña
-                        </label>
-
-                        <div class="perfil__contrasena">
-
-                            <input
-                                id="confirmar-contrasena-perfil"
-                                [type]="mostrarConfirmacion() ? 'text' : 'password'"
-                                formControlName="confirmarContrasena"
-                                autocomplete="new-password"
-                                [attr.aria-invalid]="formularioContrasena.controls.confirmarContrasena.touched && (formularioContrasena.controls.confirmarContrasena.invalid || formularioContrasena.controls.confirmarContrasena.value !== formularioContrasena.controls.contrasena.value)"
-                                [attr.aria-describedby]="formularioContrasena.controls.confirmarContrasena.touched && (formularioContrasena.controls.confirmarContrasena.invalid || formularioContrasena.controls.confirmarContrasena.value !== formularioContrasena.controls.contrasena.value) ? 'error-confirmacion-perfil' : null">
-
-                            <button
-                                class="perfil__visibilidad"
-                                type="button"
-                                (click)="cambiarVisibilidadConfirmacion()"
-                                [attr.aria-label]="mostrarConfirmacion() ? 'Ocultar confirmación' : 'Mostrar confirmación'"
-                                [attr.aria-pressed]="mostrarConfirmacion()">
-
-                                <svg
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    stroke-width="1.8"
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    aria-hidden="true">
-
-                                    <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/>
-                                    <circle cx="12" cy="12" r="3"/>
-
-                                    @if (mostrarConfirmacion()) {
-                                        <path d="M3 21 21 3"/>
-                                    }
-
-                                </svg>
-
-                            </button>
-
-                        </div>
-
-                        @if (formularioContrasena.controls.confirmarContrasena.touched &&
-                             (formularioContrasena.controls.confirmarContrasena.invalid ||
-                              formularioContrasena.controls.confirmarContrasena.value !== formularioContrasena.controls.contrasena.value)) {
-
-                            <p id="error-confirmacion-perfil"
-                               class="perfil__error">
-                                Repite la misma contraseña.
-                            </p>
-                        }
-
-                    </div>
-
-                    <button
-                        class="perfil__boton"
-                        type="submit"
-                        [disabled]="guardando()">
-
-                        {{ guardando() ? 'Guardando...' : 'Guardar contraseña' }}
-
-                    </button>
-
-                </form>
-
-                <button
-                    class="perfil__volver"
-                    type="button"
-                    (click)="cambiarVista('datos')">
-
-                    Cancelar y volver al perfil
-
-                </button>
-
-            </section>
-
-        }
-
-
-        <!-- Sección pedir la baja -->
-        
-        @if (vistaActual() === 'baja') {
-
-            <section class="panel-pagina__bloque"
-                     aria-labelledby="titulo-formulario-baja">
-
-                <h2 id="titulo-formulario-baja">
-                    Confirmar solicitud de baja
-                </h2>
-
-                <div class="perfil__aviso-peligro" role="alert">
-                    Se eliminarán tus contactos y mensajes personales.
-                    Perderás el acceso a tu cuenta.
-                </div>
-
-                <p>
-                    Se conservará constancia de que la cuenta ha existido.
-                    Si actúas como lanzador de otras personas, dejarás de estar habilitad@.
-                </p>
-
-                <form
-                    class="perfil__formulario"
-                    [formGroup]="formularioBaja">
-
-                    <label class="perfil__confirmacion">
-
-                        <input
-                            type="checkbox"
-                            formControlName="confirmacion">
-
-                        <span>
-                            Entiendo las consecuencias y quiero darme de baja.
-                        </span>
-
-                    </label>
-
-                    <button
-                        class="perfil__boton perfil__boton--peligro"
-                        type="button"
-                        disabled
-                        aria-describedby="aviso-baja-pendiente">
-
-                        Confirmar la baja
-
-                    </button>
-
-                    <p id="aviso-baja-pendiente"
-                       class="perfil__nota">
-
-                        La baja definitiva estará disponible cuando se complete el procedimiento seguro de eliminación de datos y revocación de permisos.
-
-                    </p>
-
-                    <button
-                        class="perfil__boton"
-                        type="button"
-                        (click)="cambiarVista('datos')">
-
-                        Conservar mi cuenta
-
-                    </button>
-
-                </form>
-
-            </section>
-
-        }
-
-        <!-- Mensajes resultado baja -->
-
-        @if (mensaje()) {
-
-            <div class="panel-pagina__bloque">
-                <p class="perfil__mensaje-exito"
-                   role="status"
-                   aria-live="polite">
-                    {{ mensaje() }}
-                </p>
             </div>
 
+            <div class="perfil__campo">
+
+                <label for="apellidos-perfil">
+                    Apellido
+                    <span class="perfil__opcional">
+                        (opcional)
+                    </span>
+                </label>
+
+                <input id="apellidos-perfil" type="text" formControlName="apellidos" autocomplete="family-name"
+                    maxlength="150">
+
+                @if (formularioDatos.controls.apellidos.invalid &&
+                formularioDatos.controls.apellidos.touched) {
+
+                <p class="perfil__error">
+                    Los apellidos no pueden superar los 150 caracteres.
+                </p>
+                }
+
+            </div>
+
+            <button class="perfil__boton" type="submit" [disabled]="guardando()">
+
+                {{ guardando() ? 'Guardando...' : 'Guardar datos' }}
+
+            </button>
+
+        </form>
+
+
+        @if (mensaje()) {
+        <p class="perfil__mensaje-exito" role="status" aria-live="polite">
+            {{ mensaje() }}
+        </p>
         }
 
         @if (error()) {
+        <p class="perfil__aviso-peligro" role="alert">
+            {{ error() }}
+        </p>
+        }
 
-            <div class="panel-pagina__bloque">
-                <p class="perfil__aviso-peligro" role="alert">
-                    {{ error() }}
-                </p>
+
+    </section>
+
+
+    <!-- Sección mail -->
+
+    <section class="panel-pagina__bloque" aria-labelledby="titulo-correo">
+
+        <h2 id="titulo-correo">
+            Correo electrónico
+        </h2>
+
+        <p class="perfil__correo">
+            {{ correoActual() }}
+
+            @if (correoVerificado()) {
+            <span>· Verificado</span>
+            } @else {
+            <span>· Pendiente de verificación</span>
+            }
+        </p>
+
+        <button class="perfil__boton" type="button" (click)="cambiarVista('correo')">
+
+            Cambiar correo
+
+        </button>
+
+    </section>
+
+
+    <!-- Sección contraseña -->
+
+    <section class="panel-pagina__bloque" aria-labelledby="titulo-seguridad">
+
+        <h2 id="titulo-seguridad">
+            Seguridad
+        </h2>
+
+        <p>
+            Puedes actualizar la contraseña de acceso a tu cuenta.
+        </p>
+
+        <button class="perfil__boton" type="button" (click)="cambiarVista('contrasena')">
+
+            Cambiar contraseña
+
+        </button>
+
+    </section>
+
+
+    <!-- Sección cerrar cuenta -->
+
+    <section class="panel-pagina__bloque" aria-labelledby="titulo-cerrar-cuenta">
+
+        <h2 id="titulo-cerrar-cuenta">
+            Cerrar mi cuenta
+        </h2>
+
+        <p>
+            La baja elimina tus contactos y mensajes personales.
+        </p>
+
+        <button class="perfil__boton perfil__boton--peligro" type="button" (click)="cambiarVista('baja')">
+
+            Solicitar la baja
+
+        </button>
+
+    </section>
+
+    }
+
+    <!-- Sección cambiar correo -->
+
+    @if (vistaActual() === 'correo') {
+
+    <section class="panel-pagina__bloque" aria-labelledby="titulo-formulario-correo">
+
+        <h2 id="titulo-formulario-correo">
+            Actualizar correo electrónico
+        </h2>
+
+        <form class="perfil__formulario" [formGroup]="formularioCorreo" (ngSubmit)="solicitarCambioCorreo()" novalidate>
+
+            <div class="perfil__campo">
+
+                <label for="correo-actual">
+                    Correo actual
+                </label>
+
+                <input id="correo-actual" type="email" [value]="correoActual()" readonly>
+
             </div>
 
-        }
+            <div class="perfil__campo">
+
+                <label for="nuevo-correo">
+                    Nuevo correo electrónico
+                </label>
+
+                <input id="nuevo-correo" type="email" formControlName="nuevoCorreo" autocomplete="email"
+                    [attr.aria-invalid]="formularioCorreo.controls.nuevoCorreo.invalid && formularioCorreo.controls.nuevoCorreo.touched"
+                    [attr.aria-describedby]="formularioCorreo.controls.nuevoCorreo.invalid && formularioCorreo.controls.nuevoCorreo.touched ? 'error-nuevo-correo' : null">
+
+                @if (formularioCorreo.controls.nuevoCorreo.invalid &&
+                formularioCorreo.controls.nuevoCorreo.touched) {
+
+                <p id="error-nuevo-correo" class="perfil__error">
+                    Introduce una dirección de correo válida.
+                </p>
+                }
+
+            </div>
+
+            <button class="perfil__boton" type="submit" [disabled]="guardando()">
+
+                {{ guardando() ? 'Enviando...' : 'Enviar verificación' }}
+
+            </button>
+
+        </form>
+
+        <button class="perfil__volver" type="button" (click)="cambiarVista('datos')">
+
+            Cancelar y volver al perfil
+
+        </button>
+
+    </section>
+
+    }
+
+    <!-- Sección cambiar contraseña -->
+
+    @if (vistaActual() === 'contrasena') {
+
+    <section class="panel-pagina__bloque" aria-labelledby="titulo-formulario-contrasena">
+
+        <h2 id="titulo-formulario-contrasena">
+            Establecer nueva contraseña
+        </h2>
+
+        <form class="perfil__formulario" [formGroup]="formularioContrasena" (ngSubmit)="guardarContrasena()" novalidate>
+
+            <div class="perfil__campo">
+
+                <label for="nueva-contrasena-perfil">
+                    Nueva contraseña
+                </label>
+
+                <div class="perfil__contrasena">
+
+                    <input id="nueva-contrasena-perfil" [type]="mostrarContrasena() ? 'text' : 'password'"
+                        formControlName="contrasena" autocomplete="new-password"
+                        [attr.aria-invalid]="formularioContrasena.controls.contrasena.invalid && formularioContrasena.controls.contrasena.touched"
+                        [attr.aria-describedby]="formularioContrasena.controls.contrasena.invalid && formularioContrasena.controls.contrasena.touched ? 'error-contrasena-perfil' : null">
+
+                    <button class="perfil__visibilidad" type="button" (click)="cambiarVisibilidadContrasena()"
+                        [attr.aria-label]="mostrarContrasena() ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+                        [attr.aria-pressed]="mostrarContrasena()">
+
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+
+                            <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z" />
+                            <circle cx="12" cy="12" r="3" />
+
+                            @if (mostrarContrasena()) {
+                            <path d="M3 21 21 3" />
+                            }
+
+                        </svg>
+
+                    </button>
+
+                </div>
+
+                @if (formularioContrasena.controls.contrasena.invalid &&
+                formularioContrasena.controls.contrasena.touched) {
+
+                <p id="error-contrasena-perfil" class="perfil__error">
+                    La contraseña debe cumplir los requisitos indicados.
+                </p>
+                }
+
+            </div>
+
+
+            <div class="perfil__campo">
+
+                <label for="confirmar-contrasena-perfil">
+                    Repetir contraseña
+                </label>
+
+                <div class="perfil__contrasena">
+
+                    <input id="confirmar-contrasena-perfil" [type]="mostrarConfirmacion() ? 'text' : 'password'"
+                        formControlName="confirmarContrasena" autocomplete="new-password"
+                        [attr.aria-invalid]="formularioContrasena.controls.confirmarContrasena.touched && (formularioContrasena.controls.confirmarContrasena.invalid || formularioContrasena.controls.confirmarContrasena.value !== formularioContrasena.controls.contrasena.value)"
+                        [attr.aria-describedby]="formularioContrasena.controls.confirmarContrasena.touched && (formularioContrasena.controls.confirmarContrasena.invalid || formularioContrasena.controls.confirmarContrasena.value !== formularioContrasena.controls.contrasena.value) ? 'error-confirmacion-perfil' : null">
+
+                    <button class="perfil__visibilidad" type="button" (click)="cambiarVisibilidadConfirmacion()"
+                        [attr.aria-label]="mostrarConfirmacion() ? 'Ocultar confirmación' : 'Mostrar confirmación'"
+                        [attr.aria-pressed]="mostrarConfirmacion()">
+
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+
+                            <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z" />
+                            <circle cx="12" cy="12" r="3" />
+
+                            @if (mostrarConfirmacion()) {
+                            <path d="M3 21 21 3" />
+                            }
+
+                        </svg>
+
+                    </button>
+
+                </div>
+
+                @if (formularioContrasena.controls.confirmarContrasena.touched &&
+                (formularioContrasena.controls.confirmarContrasena.invalid ||
+                formularioContrasena.controls.confirmarContrasena.value !==
+                formularioContrasena.controls.contrasena.value)) {
+
+                <p id="error-confirmacion-perfil" class="perfil__error">
+                    Repite la misma contraseña.
+                </p>
+                }
+
+            </div>
+
+            <button class="perfil__boton" type="submit" [disabled]="guardando()">
+
+                {{ guardando() ? 'Guardando...' : 'Guardar contraseña' }}
+
+            </button>
+
+        </form>
+
+        <button class="perfil__volver" type="button" (click)="cambiarVista('datos')">
+
+            Cancelar y volver al perfil
+
+        </button>
+
+    </section>
+
+    }
+
+
+    <!-- Sección pedir la baja -->
+
+    @if (vistaActual() === 'baja') {
+
+    <section class="panel-pagina__bloque" aria-labelledby="titulo-formulario-baja">
+
+        <h2 id="titulo-formulario-baja">
+            Confirmar solicitud de baja
+        </h2>
+
+        <div class="perfil__aviso-peligro" role="alert">
+            Se eliminarán tus contactos y mensajes personales.
+            Perderás el acceso a tu cuenta y no podrás recuperar la información que hayas introducido.
+        </div>
+
+        <p>
+            Se conservará constancia de que la cuenta ha existido.
+            Si actúas como lanzador de otras personas, dejarás de estar habilitad@.
+        </p>
+
+        <form class="perfil__formulario" [formGroup]="formularioBaja">
+
+            <label class="perfil__confirmacion">
+
+                <input type="checkbox" formControlName="confirmacion">
+
+                <span>
+                    Entiendo las consecuencias y quiero darme de baja.
+                </span>
+
+            </label>
+
+            <button class="perfil__boton perfil__boton--peligro" type="button" disabled
+                aria-describedby="aviso-baja-pendiente">
+
+                Confirmar la baja
+
+            </button>
+
+            <p id="aviso-baja-pendiente" class="perfil__nota">
+
+                La baja definitiva estará disponible cuando se complete el procedimiento seguro de eliminación de datos
+                y revocación de permisos.
+
+            </p>
+
+            <button class="perfil__boton" type="button" (click)="cambiarVista('datos')">
+
+                Conservar mi cuenta
+
+            </button>
+
+        </form>
+
+    </section>
+
+    }
+
+    <!-- Mensajes resultado baja o guardar apellido-->
+
+    @if (vistaActual() !== 'datos' && mensaje()) {
+
+    <div class="panel-pagina__bloque">
+        <p class="perfil__mensaje-exito" role="status" aria-live="polite">
+            {{ mensaje() }}
+        </p>
+    </div>
+
+    }
+
+    @if (vistaActual() !== 'datos' && error()) {
+
+    <div class="panel-pagina__bloque">
+        <p class="perfil__aviso-peligro" role="alert">
+            {{ error() }}
+        </p>
+    </div>
+
+    }
     }
 
 </section>

@@ -12,9 +12,14 @@
 
     </header>
 
-
     <!-- Lista principal -->
     @if (vistaActual() === 'listado') {
+
+    @if (mensajeCorrecto()) {
+    <p class="lanzadores__correcto" role="status" aria-live="polite">
+        {{ mensajeCorrecto() }}
+    </p>
+    }
 
     <!-- Recuento lanzadores -->
     <section class="panel-pagina__bloque" aria-labelledby="titulo-estado-lanzadores">
@@ -44,8 +49,8 @@
         @if (!minimoCumplido()) {
 
         <p class="lanzadores__advertencia" role="status">
-            Tu cuenta todavía no dispone de los lanzadores necesarios.
-            Invita a dos personas distintas y comprueba que hayan aceptado su invitación.
+            Tu cuenta todavía no dispone de los lanzadores necesarios. <br>
+            Invita por lo menos a dos personas distintas y comprueba que hayan aceptado su invitación.
         </p>
 
         } @else {
@@ -168,6 +173,7 @@
                 </tbody>
             </table>
         </div>
+
 
 
         <!-- Tabla mobile -->
@@ -334,18 +340,18 @@
         @if (!mensajeError()) {
 
         <p>
-            Comprueba que la dirección es correcta
-            antes de enviar la invitación.
+            Comprueba que la dirección es correcta antes de enviar la invitación.
         </p>
 
-        <button class="panel__boton lanzadores__boton" type="button" disabled
-            aria-describedby="invitacion-pendiente-api">
-            Enviar invitación
+
+        <button class="panel__boton lanzadores__boton" type="button" [disabled]="enviandoInvitacion()"
+            (click)="enviarInvitacion()">
+
+            {{ enviandoInvitacion() ? 'Enviando...' : 'Enviar invitación' }}
         </button>
 
-        <p id="invitacion-pendiente-api" class="lanzadores__nota">
-            El envío estará disponible cuando conectemos la API segura de invitaciones.
-        </p>
+
+
 
         }
 

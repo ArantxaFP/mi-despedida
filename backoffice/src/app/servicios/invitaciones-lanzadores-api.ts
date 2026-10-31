@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { configuracionBackend } from '../configuracion/backend';
 
 export interface EstadoInvitacion {
     valida: boolean;
@@ -18,11 +19,12 @@ export interface ResultadoVerificacion {
 @Injectable({
     providedIn: 'root'
 })
+
 export class InvitacionesLanzadoresApi {
 
     // Dirección local del backend NestJS.
     // Al desplegar en Render, se configurará la URL pública del backend por entorno.
-    private readonly apiUrl = 'http://localhost:3000';
+    private readonly apiUrl = configuracionBackend.url;
 
     // --------------------------------------------------
     // 1. Consultar el estado de la invitación

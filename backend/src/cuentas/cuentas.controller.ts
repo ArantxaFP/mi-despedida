@@ -14,9 +14,10 @@ export class CuentasController {
     // No exige sesión porque el usuario aún no tiene cuenta porque está en el proceso de creación.
     @Post('registro')
     async registrar(
-        @Body() datos: RegistrarCuentaDto
+        @Body() datos: RegistrarCuentaDto,
+        @Headers('origin') origen?: string
     ) {
-        return this.cuentasService.registrar(datos);
+        return this.cuentasService.registrar(datos, origen);
     }
 
     // Sincronizar la cuenta después de verificar el correo.

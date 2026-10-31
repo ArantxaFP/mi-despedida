@@ -1,6 +1,8 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Autenticacion } from '../../../servicios/autenticacion';
+import { ContactosLanzadoresApi } from '../../../servicios/contactos-lanzadores-api';
+
 
 type VistaLanzadores = 'listado' | 'invitar' | 'revisar' | 'revocar';
 
@@ -31,6 +33,14 @@ export class ContactosLanzadores implements OnInit {
 
     private autenticacion = inject(Autenticacion);
     private constructorFormulario = inject(FormBuilder);
+
+    private contactosLanzadoresApi =
+        inject(ContactosLanzadoresApi);
+
+    cargandoLanzadores = signal(false);
+    enviandoInvitacion = signal(false);
+    mensajeCorrecto = signal('');
+
 
     vistaActual = signal<VistaLanzadores>('listado');
 
@@ -90,9 +100,12 @@ export class ContactosLanzadores implements OnInit {
         );
     });
 
+
     ngOnInit(): void {
         void this.cargarTitular();
+        void this.cargarLanzadores();
     }
+
 
     async cargarTitular(): Promise<void> {
         this.comprobandoTitular.set(true);
@@ -218,4 +231,82 @@ export class ContactosLanzadores implements OnInit {
 
         return nombres[estado];
     }
+
+
+    // Consultar las asignaciones reales del administrador
+    async cargarLanzadores(): Promise<void> {
+        this.cargandoLanzadores.set(true);
+        this.mensajeError.set('');
+
+        try {
+            const asignaciones =
+                await this.contactosLanzadoresApi.obtenerAsignaciones();
+
+            this.lanzadores.set(
+                asignaciones.map(asignacion => ({
+                    id: asignacion.id,
+                    nombre: asignacion.lanzadores.nombre,
+                    correo: asignacion.lanzadores.correo,
+                    estado: asignacion.estado,
+                    habilitada: asignacion.estado === 'aceptada'
+                }))
+            );
+
+            this.datosConectados.set(true);
+
+        } catch (error) {
+            this.datosConectados.set(false);
+
+            this.mensajeError.set(
+                error instanceof Error
+                    ? error.message
+                    : 'No se han podido cargar los lanzadores.'
+            );
+
+        } finally {
+            this.cargandoLanzadores.set(false);
+        }
+    }
+
+
+    // Solicitar el envío de la invitación desde Nest
+    async enviarInvitacion(): Promise<void> {
+        if (this.enviandoInvitacion()) {
+            return;
+        }
+
+        this.enviandoInvitacion.set(true);
+        this.mensajeError.set('');
+        this.mensajeCorrecto.set('');
+
+        try {
+            const datos = this.formularioInvitacion.getRawValue();
+
+            await this.contactosLanzadoresApi.crearInvitacion({
+                nombre: datos.nombre.trim(),
+                correo: datos.correo.trim().toLowerCase()
+            });
+
+            await this.cargarLanzadores();
+
+            this.formularioInvitacion.reset();
+            this.vistaActual.set('listado');
+
+            this.mensajeCorrecto.set(
+                'Brevo ha aceptado la solicitud de envío de la invitación.'
+            );
+
+        } catch (error) {
+            this.mensajeError.set(
+                error instanceof Error
+                    ? error.message
+                    : 'No se ha podido enviar la invitación.'
+            );
+
+        } finally {
+            this.enviandoInvitacion.set(false);
+        }
+    }
+
+
 }

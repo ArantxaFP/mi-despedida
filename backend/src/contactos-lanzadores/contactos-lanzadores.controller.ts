@@ -58,10 +58,12 @@ export class ContactosLanzadoresController {
         );
     }
 
+
     @Post('invitaciones')
     async crearInvitacion(
         @Body() datos: CrearInvitacionDto,
-        @Headers('authorization') autorizacion?: string
+        @Headers('authorization') autorizacion?: string,
+        @Headers('origin') origen?: string
     ) {
         const usuario = await this.verificarSesion(
             autorizacion
@@ -81,10 +83,8 @@ export class ContactosLanzadoresController {
         return this.contactosLanzadoresService.crearYEnviarInvitacion(
             usuario.id,
             usuario.email,
-            datos
+            datos,
+            origen
         );
     }
 }
-
-
-

@@ -2,6 +2,7 @@ import { BadRequestException, ForbiddenException, Injectable, ServiceUnavailable
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service';
 import { SupabaseService } from '../supabase/supabase.service';
+import { obtenerUrlBackoffice } from '../configuracion/urls-backoffice';
 
 export interface DatosRegistroCuenta {
     nombre: string;
@@ -134,7 +135,10 @@ export class CuentasService {
     }
 
     // Crear la identidad en Supabase Auth y la cuenta en PostgreSQL.
-    async registrar(datos: DatosRegistroCuenta) {
+    async registrar(
+        datos: DatosRegistroCuenta,
+        origen?: string
+    ) {
 
         if (
             !datos ||
@@ -161,10 +165,10 @@ export class CuentasService {
             );
         }
 
-        const urlBackoffice =
-            this.configService.getOrThrow<string>(
-                'BACKOFFICE_URL'
-            ).replace(/\/+$/, '');
+        const urlBackoffice = obtenerUrlBackoffice(
+            this.configService,
+            origen
+        );
 
         const { data, error } =
             await this.supabaseService

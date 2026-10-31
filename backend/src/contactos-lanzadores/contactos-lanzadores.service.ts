@@ -4,6 +4,7 @@ import { randomBytes, createHash } from 'node:crypto';
 import { PrismaService } from '../prisma/prisma.service';
 import { CorreoService } from '../correo/correo.service';
 import { CrearInvitacionDto } from './dto/crear-invitacion.dto';
+import { obtenerUrlBackoffice } from '../configuracion/urls-backoffice';
 
 @Injectable()
 export class ContactosLanzadoresService {
@@ -306,7 +307,8 @@ export class ContactosLanzadoresService {
     async crearYEnviarInvitacion(
         administradorId: string,
         correoAdministrador: string,
-        datos: CrearInvitacionDto
+        datos: CrearInvitacionDto,
+        origen?: string
     ) {
         // Impide crear invitaciones sin tener preparado el recorrido público de aceptación
         if (
@@ -318,8 +320,10 @@ export class ContactosLanzadoresService {
             );
         }
 
-        const frontendUrl =
-            this.config.getOrThrow<string>('FRONTEND_URL');
+        const frontendUrl = obtenerUrlBackoffice(
+            this.config,
+            origen
+        );
 
         // Crea la asignación, el token y el historial
         const invitacion = await this.prepararInvitacion(

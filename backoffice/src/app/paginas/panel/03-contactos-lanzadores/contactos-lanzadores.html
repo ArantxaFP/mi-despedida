@@ -148,7 +148,8 @@
 
                                 @if (lanzador.estado === 'pendiente') {
 
-                                <button type="button" disabled title="Pendiente de conexión con el backend">
+                                <button type="button" [disabled]="modificandoAsignacion()"
+                                    (click)="retirarInvitacion(lanzador)">
                                     Retirar
                                 </button>
                                 }
@@ -210,8 +211,12 @@
                     }
 
                     @if (lanzador.estado === 'pendiente') {
-                    <button type="button" disabled>
-                        Retirar invitación
+                    <button class="lanzadores__boton lanzadores__boton--peligro" type="button"
+                        [disabled]="modificandoAsignacion()" (click)="confirmarRevocacion()">
+
+                        {{ modificandoAsignacion()
+                        ? 'Revocando...'
+                        : 'Revocar autorización' }}
                     </button>
                     }
 

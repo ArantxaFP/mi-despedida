@@ -3,7 +3,6 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Autenticacion } from '../../../servicios/autenticacion';
 import { ContactosLanzadoresApi } from '../../../servicios/contactos-lanzadores-api';
 
-
 type VistaLanzadores = 'listado' | 'invitar' | 'revisar' | 'revocar';
 
 type EstadoAsignacion =
@@ -308,5 +307,83 @@ export class ContactosLanzadores implements OnInit {
         }
     }
 
+
+    modificandoAsignacion = signal(false);
+
+    async retirarInvitacion(
+        lanzador: AsignacionLanzador
+    ): Promise<void> {
+
+        if (
+            this.modificandoAsignacion() ||
+            lanzador.estado !== 'pendiente'
+        ) {
+            return;
+        }
+
+        this.modificandoAsignacion.set(true);
+        this.mensajeError.set('');
+        this.mensajeCorrecto.set('');
+
+        try {
+            await this.contactosLanzadoresApi.retirarInvitacion(
+                lanzador.id
+            );
+
+            await this.cargarLanzadores();
+
+            this.mensajeCorrecto.set(
+                'La invitación se ha retirado correctamente.'
+            );
+
+        } catch (error) {
+            this.mensajeError.set(
+                error instanceof Error
+                    ? error.message
+                    : 'No se ha podido retirar la invitación.'
+            );
+
+        } finally {
+            this.modificandoAsignacion.set(false);
+        }
+    }
+
+    async confirmarRevocacion(): Promise<void> {
+
+        const lanzador = this.lanzadorSeleccionado();
+
+        if (!lanzador || this.modificandoAsignacion()) {
+            return;
+        }
+
+        this.modificandoAsignacion.set(true);
+        this.mensajeError.set('');
+        this.mensajeCorrecto.set('');
+
+        try {
+            await this.contactosLanzadoresApi.revocarAutorizacion(
+                lanzador.id
+            );
+
+            await this.cargarLanzadores();
+
+            this.lanzadorSeleccionado.set(null);
+            this.vistaActual.set('listado');
+
+            this.mensajeCorrecto.set(
+                'La autorización se ha revocado correctamente.'
+            );
+
+        } catch (error) {
+            this.mensajeError.set(
+                error instanceof Error
+                    ? error.message
+                    : 'No se ha podido revocar la autorización.'
+            );
+
+        } finally {
+            this.modificandoAsignacion.set(false);
+        }
+    }
 
 }

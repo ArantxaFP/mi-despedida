@@ -1,0 +1,503 @@
+<section class="panel-pagina dashboard" aria-labelledby="titulo-dashboard">
+
+    <!-- GRADIENTE COMPARTIDO PARA LOS ICONOS -->
+    <svg class="dashboard__gradiente-svg" width="0" height="0" aria-hidden="true" focusable="false">
+
+        <defs>
+            <linearGradient id="dashboardGradiente" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="48" y2="48">
+
+                <stop offset="0%" stop-color="#59f0dd" />
+                <stop offset="45%" stop-color="#ffa38c" />
+                <stop offset="100%" stop-color="#476987" />
+
+            </linearGradient>
+        </defs>
+    </svg>
+
+
+    <!-- BIENVENIDA -->
+    <header class="panel-pagina__bloque
+                   panel-pagina__cabecera
+                   dashboard__bienvenida">
+
+        <h1 id="titulo-dashboard">
+            Tu espacio
+        </h1>
+
+        <p>
+            Este es el avance de tu despedida.
+        </p>
+
+    </header>
+
+
+    <!-- TARJETAS PRINCIPALES -->
+    <div class="panel-pagina__cuadricula dashboard__cuadricula">
+
+        <!-- CONTACTOS LANZADORES -->
+        <article class="panel-pagina__bloque dashboard__tarjeta" aria-labelledby="dashboard-titulo-lanzadores">
+
+            <div class="dashboard__tarjeta-cabecera">
+
+                <div class="dashboard__icono" aria-hidden="true">
+                    <svg viewBox="0 0 48 48">
+                        <circle cx="19" cy="15" r="6" />
+                        <path d="M7 35v-4c0-6 5-10 12-10s12 4 12 10v4H7Z" />
+                        <path d="M30 10a6 6 0 0 1 0 12" />
+                        <path d="M33 25c5 1 8 5 8 10h-6" />
+                    </svg>
+                </div>
+
+                <h2 id="dashboard-titulo-lanzadores">
+                    Contactos lanzadores
+                </h2>
+
+            </div>
+
+            <!-- DESCRIPCIÓN A ANCHO COMPLETO -->
+            <p class="panel-pagina__texto-secundario dashboard__descripcion">
+                Personas autorizadas para iniciar el proceso de tu despedida.
+            </p>
+
+            @if (cargandoLanzadores()) {
+
+            <p class="panel-pagina__texto-secundario" role="status">
+                Cargando autorizaciones...
+            </p>
+
+            } @else if (errorLanzadores()) {
+
+            <p class="panel__aviso-error" role="alert">
+                {{ errorLanzadores() }}
+            </p>
+
+            } @else {
+
+            <div class="dashboard__valor">
+                {{ totalLanzadores() }}
+            </div>
+
+            <div class="dashboard__estadisticas">
+
+                <p>
+                    <strong>{{ lanzadoresConfirmados() }}</strong>
+                    autorizaciones confirmadas
+                </p>
+
+                <p>
+                    <strong>{{ invitacionesPendientes() }}</strong>
+                    invitaciones pendientes
+                </p>
+
+            </div>
+
+            @if (!minimoLanzadoresCumplido()) {
+
+            <div class="panel__aviso-error" role="status">
+
+                <strong>
+                    Faltan {{ faltanLanzadores() }}
+                    autorizaciones para alcanzar el mínimo.
+                </strong>
+
+                <p>
+                    Necesitas al menos dos personas distintas que hayan aceptado su invitación y mantengan su
+                    autorización vigente.
+                </p>
+
+            </div>
+
+            }
+
+            }
+
+            <a class="panel__boton dashboard__enlace" routerLink="/panel/contactos-lanzadores">
+
+                Ver los contactos lanzadores
+
+                <span aria-hidden="true">→</span>
+            </a>
+
+        </article>
+
+
+        <!-- CONTACTOS DESTINATARIOS -->
+        <article class="panel-pagina__bloque dashboard__tarjeta" aria-labelledby="dashboard-titulo-destinatarios">
+
+            <div class="dashboard__tarjeta-cabecera">
+
+                <div class="dashboard__icono" aria-hidden="true">
+                    <svg viewBox="0 0 48 48">
+                        <rect x="5" y="12" width="38" height="26" rx="3" />
+
+                        <path d="M6 15L24 28L42 15" />
+
+                        <path d="M24 19
+                                 C20 14 13 18 24 27
+                                 C35 18 28 14 24 19Z" />
+                    </svg>
+                </div>
+
+                <h2 id="dashboard-titulo-destinatarios">
+                    Contactos destinatarios
+                </h2>
+
+            </div>
+
+            <!-- DESCRIPCIÓN A ANCHO COMPLETO -->
+            <p class="panel-pagina__texto-secundario dashboard__descripcion">
+                Personas que recibirán tu despedida.
+            </p>
+
+            @if (cargandoDestinatarios()) {
+
+            <p class="panel-pagina__texto-secundario" role="status">
+                Cargando destinatarios...
+            </p>
+
+            } @else if (errorDestinatarios()) {
+
+            <p class="panel__aviso-error" role="alert">
+                {{ errorDestinatarios() }}
+            </p>
+
+            } @else {
+
+            <div class="dashboard__valor">
+                {{ totalDestinatarios() }}
+            </div>
+
+            <div class="dashboard__estadisticas">
+
+                <p>
+                    <strong>{{ destinatariosConMensaje() }}</strong>
+                    con despedida personaliza
+                </p>
+
+                <p>
+                    <strong>{{ destinatariosSinMensaje() }}</strong>
+                    sin despedida personalizada
+                </p>
+
+            </div>
+
+            }
+
+            <a class="panel__boton dashboard__enlace" routerLink="/panel/contactos-destinatarios">
+
+                Añadir más contactos destinatarios
+
+                <span aria-hidden="true">→</span>
+            </a>
+
+        </article>
+
+
+        <!-- AUTORIZACIONES EN OTRAS CUENTAS -->
+        <article class="panel-pagina__bloque dashboard__tarjeta" aria-labelledby="dashboard-titulo-otras-cuentas">
+
+            <div class="dashboard__tarjeta-cabecera">
+
+                <div class="dashboard__icono" aria-hidden="true">
+                    <svg viewBox="0 0 48 48">
+                        <circle cx="18" cy="17" r="10" />
+                        <circle cx="15" cy="14" r="2" />
+                        <path d="M25 24L40 39" />
+                        <path d="M33 32L28 37" />
+                        <path d="M37 36L32 41" />
+                    </svg>
+                </div>
+
+                <h2 id="dashboard-titulo-otras-cuentas">
+                    Mis autorizaciones de otras cuentas
+                </h2>
+
+            </div>
+
+            <!-- DESCRIPCIÓN A ANCHO COMPLETO -->
+            <p class="panel-pagina__texto-secundario dashboard__descripcion">
+                Cuentas de otras personas para las que tienes autorización.
+            </p>
+
+            @if (cargandoAutorizaciones()) {
+
+            <p class="panel-pagina__texto-secundario" role="status">
+                Consultando autorizaciones...
+            </p>
+
+            } @else if (errorAutorizaciones()) {
+
+            <p class="panel-pagina__texto-secundario" role="status">
+                {{ errorAutorizaciones() }}
+            </p>
+
+            } @else {
+
+            <div class="dashboard__valor">
+                {{ autorizacionesAceptadas() }}
+            </div>
+
+            <p class="panel-pagina__texto-secundario">
+                Autorizaciones aceptadas y registradas de otras cuentas.
+            </p>
+
+            <button class="panel__boton dashboard__enlace" type="button" [attr.aria-expanded]="mostrarAutorizaciones()"
+                (click)="alternarAutorizaciones()">
+
+                {{ mostrarAutorizaciones()
+                ? 'Ocultar autorizaciones'
+                : 'Consultar mis autorizaciones' }}
+
+                <span aria-hidden="true">→</span>
+            </button>
+
+            @if (mostrarAutorizaciones()) {
+
+            <div class="dashboard__lista-autorizaciones">
+
+                @if (autorizacionesExternas().length === 0) {
+
+                <p>
+                    No tienes autorizaciones registradas de otras cuentas.
+                </p>
+
+                } @else {
+
+                @for (
+                autorizacion of autorizacionesExternas();
+                track autorizacion.id
+                ) {
+
+                <div class="dashboard__autorizacion">
+
+                    <strong>
+                        {{ autorizacion.administradorNombre }}
+                    </strong>
+
+                    <span>
+                        {{ autorizacion.estado }}
+                    </span>
+
+                </div>
+
+                }
+
+                }
+
+                <p class="panel-pagina__texto-secundario">
+                    La renuncia a una autorización necesitará una confirmación y quedará registrada en el historial de
+                    la cuenta.
+                </p>
+
+            </div>
+
+            }
+
+            }
+
+        </article>
+
+    </div>
+
+
+    <!-- ESTADO Y PREPARACIÓN -->
+    <div class="panel-pagina__cuadricula dashboard__cuadricula-secundaria">
+
+        <!-- ESTADO DE PREPARACIÓN -->
+        <section class="panel-pagina__bloque dashboard__tarjeta" aria-labelledby="titulo-estado-preparacion">
+
+            <div class="dashboard__tarjeta-cabecera">
+
+                <div class="dashboard__icono" aria-hidden="true">
+                    <svg viewBox="0 0 48 48">
+
+
+                        <path d="M10 5L10 43" />
+
+
+                        <path d="M10 9
+                                 C18 4 28 14 38 8
+                                 L38 28
+                                 C28 34 18 24 10 29" />
+
+                        <path d="M6 43L14 43" />
+
+                    </svg>
+                </div>
+
+                <h2 id="titulo-estado-preparacion">
+                    Estado de preparación
+                </h2>
+
+            </div>
+
+            @if (!cargandoLanzadores() && !errorLanzadores()) {
+
+            @if (minimoLanzadoresCumplido()) {
+
+            <p class="panel-pagina__mensaje dashboard__estado">
+                Mínimo de autorizaciones confirmado
+            </p>
+
+            } @else {
+
+            <p class="panel-pagina__mensaje dashboard__estado">
+                Autorizaciones pendientes
+            </p>
+
+            }
+
+            } @else {
+
+            <p class="panel-pagina__mensaje dashboard__estado">
+                Estado pendiente de consulta
+            </p>
+
+            }
+
+            <p class="panel-pagina__texto-secundario">
+                Este indicador refleja la preparación de los lanzadores.
+                <br>
+                No representa una activación ni un envío en curso.
+            </p>
+
+        </section>
+
+
+        <!-- PRÓXIMOS PASOS -->
+        <section class="panel-pagina__bloque dashboard__tarjeta" aria-labelledby="titulo-proximos-pasos">
+
+            <div class="dashboard__tarjeta-cabecera">
+
+                <div class="dashboard__icono" aria-hidden="true">
+                    <svg viewBox="0 0 48 48">
+                        <rect x="7" y="7" width="34" height="34" rx="5" />
+                        <path d="M15 23L21 29L34 16" />
+                    </svg>
+                </div>
+
+                <h2 id="titulo-proximos-pasos">
+                    Próximos pasos
+                </h2>
+
+            </div>
+
+            <div class="dashboard__pasos">
+
+                @if (
+                !cargandoLanzadores() &&
+                !errorLanzadores() &&
+                !minimoLanzadoresCumplido()
+                ) {
+
+                <a routerLink="/panel/contactos-lanzadores">
+                    Confirmar las autorizaciones necesarias
+                </a>
+
+                }
+
+                @if (
+                !cargandoDestinatarios() &&
+                !errorDestinatarios() &&
+                totalDestinatarios() === 0
+                ) {
+
+                <a routerLink="/panel/contactos-destinatarios">
+                    Añadir tus primeros destinatarios
+                </a>
+
+                }
+
+                @if (
+                !cargandoDestinatarios() &&
+                !errorDestinatarios() &&
+                destinatariosSinMensaje() > 0
+                ) {
+
+                <a routerLink="/panel/contactos-destinatarios">
+                    Revisar los mensajes personalizados
+                </a>
+
+                }
+
+                <a routerLink="/panel/perfil">
+                    Consultar los datos de tu perfil
+                </a>
+
+            </div>
+
+        </section>
+
+    </div>
+
+
+    <!-- FRASES INSPIRADORAS -->
+    <section class="panel-pagina__bloque dashboard__frases-seccion" aria-labelledby="titulo-frases-dashboard">
+
+        <h2 id="titulo-frases-dashboard" class="dashboard__frases-titulo">
+            Frases que podrían inspirarte
+        </h2>
+
+        <div class="dashboard__frases-ventana">
+
+            <div class="dashboard__frases-contenido">
+
+                <div class="dashboard__frases-slider">
+
+                    <blockquote class="dashboard__frase dashboard__frase--1">
+
+                        <span class="dashboard__comilla" aria-hidden="true">“</span>
+
+                        <p>
+                            Quizá no te lo dije lo suficiente, pero gracias por estar siempre ahí
+                        </p>
+
+                        <span class="dashboard__comilla" aria-hidden="true">”</span>
+
+                    </blockquote>
+
+                    <blockquote class="dashboard__frase dashboard__frase--2">
+
+                        <span class="dashboard__comilla" aria-hidden="true">“</span>
+
+                        <p>
+                            Siempre me has hecho reír y has alegrado mis días
+                        </p>
+
+                        <span class="dashboard__comilla" aria-hidden="true">”</span>
+
+                    </blockquote>
+
+                    <blockquote class="dashboard__frase dashboard__frase--3">
+
+                        <span class="dashboard__comilla" aria-hidden="true">“</span>
+
+                        <p>
+                            Me inspiraste en cada momento de mi vida
+                        </p>
+
+                        <span class="dashboard__comilla" aria-hidden="true">”</span>
+
+                    </blockquote>
+
+                    <blockquote class="dashboard__frase dashboard__frase--4">
+
+                        <span class="dashboard__comilla" aria-hidden="true">“</span>
+
+                        <p>
+                            Conocerte fue el mejor regalo que pude tener
+                        </p>
+
+                        <span class="dashboard__comilla" aria-hidden="true">”</span>
+
+                    </blockquote>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+</section>

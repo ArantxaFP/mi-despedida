@@ -13,9 +13,11 @@
       </a>
     </div>
 
-    <a id="enlace-visita-web" class="cabecera-acceso__texto" href="http://localhost:4201/" data-i18n="visita_web">
+
+    <a id="enlace-visita-web" class="cabecera-acceso__texto" [href]="urlWebComercial">
       Visita la web
     </a>
+
   </header>
 
   <main class="contenido-acceso">
@@ -40,8 +42,7 @@
           </label>
 
           <input id="correo-electronico" class="campo-formulario__control" type="email" formControlName="correo"
-            placeholder="mail@ejemplo.com" data-i18n-placeholder="placeholder_correo_electronico"
-            autocomplete="email"
+            placeholder="mail@ejemplo.com" data-i18n-placeholder="placeholder_correo_electronico" autocomplete="email"
             [attr.aria-invalid]="formulario.controls.correo.touched && formulario.controls.correo.invalid"
             [attr.aria-describedby]="formulario.controls.correo.touched && formulario.controls.correo.invalid ? 'error-correo-acceso' : null" />
 

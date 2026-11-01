@@ -1,1 +1,201 @@
 /* You can add global styles to this file, and also import other style files */
+@import url('https://fonts.googleapis.com/css2?family=Kalam:wght@400&family=Montserrat+Alternates:wght@300;400;500;600&family=Montserrat:wght@300;400;500;600&display=swap');
+
+:root {
+    --color-fondo: #e7fbf9;
+    --color-superficie: #ffffff;
+
+    --color-principal: #252b37;
+    --color-secundario: #476987;
+    --color-destacado: #28cdbb;
+    --color-borde: rgba(37, 43, 55, 0.14);
+
+    --fuente-general: 'Montserrat', sans-serif;
+    --fuente-titulos: 'Montserrat Alternates', sans-serif;
+
+    --ancho-contenido: 1200px;
+
+    --espacio-xs: 0.5rem;
+    --espacio-sm: 0.75rem;
+    --espacio-md: 1rem;
+    --espacio-lg: 1.5rem;
+    --espacio-xl: 2rem;
+
+    --radio-boton: 0.5rem;
+    --radio-tarjeta: 1rem;
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    margin: 0;
+    background: var(--color-fondo);
+    color: var(--color-principal);
+
+    font-family: var(--fuente-general);
+    line-height: 1.6;
+}
+
+h1,
+h2 {
+    font-family: var(--fuente-titulos);
+    font-weight: 500;
+    line-height: 1.3;
+}
+
+img {
+    display: block;
+    max-width: 100%;
+}
+
+:focus-visible {
+    outline: 3px solid var(--color-secundario);
+    outline-offset: 3px;
+}
+
+.web-tarjeta {
+    width: 100%;
+    min-width: 0;
+
+    padding: var(--espacio-lg);
+    border-radius: var(--radio-tarjeta);
+    background: var(--color-superficie);
+}
+
+// ENLACES CON ESTILO DE BOTÓN
+.transicion-button {
+    position: relative;
+    isolation: isolate;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 100%;
+    min-height: 3.25rem;
+
+    padding: 0.85rem 1.3rem;
+
+    border: 2px solid var(--color-destacado);
+    border-radius: var(--radio-boton);
+
+    background: var(--color-superficie);
+    color: var(--color-principal);
+
+    font: inherit;
+    font-size: 0.9rem;
+    font-weight: 600;
+    line-height: 1.4;
+
+    text-align: center;
+    text-decoration: none;
+    text-transform: uppercase;
+
+    cursor: pointer;
+    overflow: hidden;
+
+    transition: box-shadow 0.3s ease;
+
+    &:hover {
+        box-shadow:
+            0 4px 10px rgba(0, 0, 0, 0.15),
+            0 0 10px rgba(40, 205, 187, 0.24);
+    }
+
+    &::after {
+        content: '';
+        position: absolute;
+
+        bottom: 0;
+        left: 0;
+
+        width: 100%;
+        height: 5px;
+
+        background: linear-gradient(to right,
+                #59f0dd,
+                #ffa38c,
+                #476987,
+                #59f0dd);
+
+        background-size: 200% 100%;
+        transform: translateY(100%);
+
+        animation: gradientMove 8s linear infinite;
+        transition: transform 0.3s ease;
+    }
+
+    &:hover::after,
+    &:focus-visible::after {
+        transform: translateY(0);
+    }
+}
+
+@keyframes gradientMove {
+    0% {
+        background-position: 200% 0;
+    }
+
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+// ESTRUCTURA COMÚN DE PÁGINAS INTERIORES
+.web-pagina {
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacio-lg);
+
+    width: calc(100% - 2rem);
+    max-width: var(--ancho-contenido);
+    min-height: 320px;
+
+    margin: var(--espacio-md) auto;
+    padding: var(--espacio-lg);
+
+    h1,
+    p {
+        margin: 0;
+    }
+
+    &__proximamente {
+        color: var(--color-secundario);
+        font-family: var(--fuente-titulos);
+        font-size: clamp(1.8rem, 5vw, 3rem);
+    }
+}
+
+@media (min-width: 48rem) {
+    .web-tarjeta {
+        padding: var(--espacio-xl);
+    }
+
+    .transicion-button {
+        width: auto;
+    }
+
+    .web-pagina {
+        margin-block: var(--espacio-xl);
+        padding: 3rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+        scroll-behavior: auto !important;
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+    }
+}

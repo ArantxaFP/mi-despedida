@@ -1,57 +1,275 @@
 // Hay estilos compartidos para todos los formularios
-// Aquí los estilos específicos de la pantalla de  registro
+// Aquí los estilos específicos de la pantalla de registro
 
 :host {
-  display: block;
-  min-height: 100vh;
+    display: block;
+    min-height: 100vh;
 }
 
+
+// POLÍTICA DE PRIVACIDAD Y CHECKBOX
 .campo-privacidad {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.75rem;
-  margin-top: 0.25rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    margin-top: 0.25rem;
 
-  input {
-    width: 1.1rem;
-    height: 1.1rem;
-    margin-top: 0.2rem;
-    accent-color: #476987;
-    cursor: pointer;
-    flex-shrink: 0;
-  }
+    input {
+        width: 1.1rem;
+        height: 1.1rem;
+        margin-top: 0.2rem;
+        accent-color: #476987;
+        cursor: pointer;
+        flex-shrink: 0;
+    }
 
-  label {
-    flex: 1;
-    color: #3e4653;
-    font-size: 0.9rem;
-    line-height: 1.5;
-    cursor: pointer;
-  }
+    label {
+        color: #3e4653;
+        font-size: 0.9rem;
+        line-height: 1.5;
+        cursor: pointer;
+    }
+
+    &__texto {
+        flex: 1;
+        min-width: 0;
+        color: #3e4653;
+        font-size: 0.9rem;
+        line-height: 1.5;
+    }
+
+    &__enlace {
+        display: inline;
+        padding: 0;
+        border: 0;
+        background: transparent;
+
+        color: #476987;
+        font: inherit;
+        font-weight: 600;
+        text-decoration: underline;
+        text-underline-offset: 3px;
+
+        cursor: pointer;
+
+        &:hover {
+            color: #28cdbb;
+        }
+
+        &:focus-visible {
+            outline: 2px solid #476987;
+            outline-offset: 3px;
+        }
+    }
 }
 
+
+// MENSAJES DEL FORMULARIO
 .mensaje-error {
-  margin: 0;
-  color: #a43b48;
-  font-size: 0.8rem;
-  line-height: 1.4;
+    margin: 0;
+    color: #a43b48;
+    font-size: 0.8rem;
+    line-height: 1.4;
 }
 
 .mensaje-registro {
-  margin-top: 1.25rem;
-  padding: 1rem;
-  border-radius: 0.75rem;
-  background: #fff0eb;
-  color: #303847;
-  font-size: 0.9rem;
-  line-height: 1.5;
-  &--correcto {
-      background: #e1f8f3;
-      border-left: 3px solid #59f0dd;
-  }
+    margin-top: 1.25rem;
+    padding: 1rem;
+    border-radius: 0.75rem;
+    background: #fff0eb;
+    color: #303847;
+    font-size: 0.9rem;
+    line-height: 1.5;
+
+    &--correcto {
+        background: #e1f8f3;
+        border-left: 3px solid #59f0dd;
+    }
 }
 
 #boton-crear-cuenta:disabled {
-  cursor: not-allowed;
-  opacity: 0.65;
+    cursor: not-allowed;
+    opacity: 0.65;
 }
+
+
+
+// VENTANA MODAL - POLÍTICA DE PRIVACIDAD
+.ventana-privacidad {
+    position: fixed;
+
+    width: calc(100% - 2rem);
+    max-width: 850px;
+    max-height: 90dvh;
+
+    margin: auto;
+    padding: 0;
+
+    overflow: hidden;
+
+    border: 1px solid rgba(71, 105, 135, 0.2);
+    border-radius: 1rem;
+
+    background: #ffffff;
+    color: #303847;
+
+    box-shadow: 0 15px 45px rgba(0, 0, 0, 0.2);
+
+    // Fondo oscuro tras la ventana
+    &::backdrop {
+        background: rgba(20, 30, 40, 0.65);
+        backdrop-filter: blur(4px);
+    }
+
+    // La estructura flexible solo se aplica cuando el diálogo está abierto
+    &[open] {
+        display: flex;
+        flex-direction: column;
+    }
+
+    // CABECERA
+    &__cabecera {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+
+        flex-shrink: 0;
+
+        padding: 1rem 1.5rem;
+
+        border-bottom: 2px solid transparent;
+        border-image: linear-gradient(
+            to right,
+            #59f0dd,
+            #ffa38c,
+            #476987
+        ) 1;
+
+        h2 {
+            margin: 0;
+            font-family: var(--fuente-titulos);
+            font-size: clamp(1.2rem, 3vw, 1.6rem);
+            font-weight: 500;
+        }
+    }
+
+    &__cerrar {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        flex-shrink: 0;
+
+        width: 2.5rem;
+        height: 2.5rem;
+
+        padding: 0;
+
+        border: none;
+        border-radius: 50%;
+
+        background: transparent;
+        color: #303847;
+
+        font: inherit;
+        font-size: 1.8rem;
+        line-height: 1;
+
+        cursor: pointer;
+
+        &:hover {
+            background: #e1f8f3;
+        }
+    }
+
+    // CONTENIDO DESPLAZABLE
+    &__contenido {
+        flex: 1;
+        min-height: 0;
+
+        padding: 1.5rem;
+
+        overflow-y: auto;
+        overscroll-behavior: contain;
+
+        font-size: 0.9rem;
+        line-height: 1.7;
+
+        p {
+            margin: 0 0 1rem;
+        }
+
+        h3 {
+            margin: 1.5rem 0 0.75rem;
+            font-family: var(--fuente-titulos);
+            font-size: 1.1rem;
+        }
+    }
+
+    // PIE
+    &__pie {
+        display: flex;
+        justify-content: flex-end;
+
+        flex-shrink: 0;
+
+        padding: 1rem 1.5rem;
+
+        border-top: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    &__boton {
+        min-width: 110px;
+        min-height: 2.75rem;
+
+        padding: 0.65rem 1.25rem;
+
+        border: 2px solid #59f0dd;
+        border-radius: 0.5rem;
+
+        background: #ffffff;
+        color: #303847;
+
+        font: inherit;
+        font-weight: 600;
+
+        cursor: pointer;
+
+        transition: box-shadow 0.3s ease;
+
+        &:hover {
+            box-shadow:
+                0 4px 10px rgba(0, 0, 0, 0.12),
+                0 0 10px rgba(89, 240, 221, 0.25);
+        }
+    }
+}
+
+
+
+// TABLET Y ESCRITORIO
+@media (min-width: 48rem) {
+    .ventana-privacidad {
+
+        &__cabecera,
+        &__pie {
+            padding: 1.25rem 2rem;
+        }
+
+        &__contenido {
+            padding: 2rem;
+        }
+    }
+}
+
+
+
+// ACCESIBILIDAD
+@media (prefers-reduced-motion: reduce) {
+    .ventana-privacidad__boton {
+        transition: none;
+    }
+}
+
+

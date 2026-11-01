@@ -1,0 +1,108 @@
+<header class="cabecera">
+
+    <!-- MARCA -->
+
+    <a routerLink="/"
+       class="marca"
+       aria-label="Mi Despedida - Ir al inicio"
+       (click)="closeMenu()">
+
+        <span>Mi Despedida</span>
+
+    </a>
+
+
+    <!-- NAVEGACIÓN PRINCIPAL -->
+
+    <nav id="navegacion-principal"
+         class="navegacion-principal"
+         [class.navegacion-principal--abierta]="menuOpen"
+         aria-label="Navegación principal">
+
+        <a routerLink="/"
+           routerLinkActive="navegacion-principal__activo"
+           [routerLinkActiveOptions]="{ exact: true }"
+           (click)="closeMenu()">
+            Inicio
+        </a>
+
+        <a routerLink="/lanzadores"
+           routerLinkActive="navegacion-principal__activo"
+           (click)="closeMenu()">
+            Información para lanzadores
+        </a>
+
+        <a routerLink="/faq"
+           routerLinkActive="navegacion-principal__activo"
+           (click)="closeMenu()">
+            FAQs
+        </a>
+
+        <a routerLink="/contacto"
+           routerLinkActive="navegacion-principal__activo"
+           (click)="closeMenu()">
+            Contacto
+        </a>
+
+    </nav>
+
+
+    <!-- ACCIONES DE CABECERA -->
+
+    <div class="acciones-cabecera">
+
+        <!-- MENÚ HAMBURGUESA -->
+
+        <button type="button"
+                class="boton-menu"
+                aria-controls="navegacion-principal"
+                [attr.aria-expanded]="menuOpen"
+                [attr.aria-label]="menuOpen ? 'Cerrar menú' : 'Abrir menú'"
+                (click)="toggleMenu()">
+
+            <span></span>
+            <span></span>
+            <span></span>
+
+        </button>
+
+
+        <!-- ACCESO DE USUARIO -->
+
+        <a [href]="urlAcceso"
+           class="enlace-usuario"
+           aria-label="Iniciar sesión"
+           title="Iniciar sesión"
+           (click)="closeMenu()">
+
+            <svg viewBox="0 0 48 48"
+                 xmlns="http://www.w3.org/2000/svg"
+                 aria-hidden="true"
+                 focusable="false">
+
+                <defs>
+                    <linearGradient id="gradiente-icono-usuario"
+                                    x1="0%"
+                                    y1="0%"
+                                    x2="100%"
+                                    y2="100%">
+                        <stop offset="0%" stop-color="#59f0dd" />
+                        <stop offset="45%" stop-color="#ffa38c" />
+                        <stop offset="100%" stop-color="#476987" />
+                    </linearGradient>
+                </defs>
+
+                <circle cx="24" cy="16" r="8" />
+
+    
+                <path d="M9 40
+                         C9 31 15 27 24 27
+                         C33 27 39 31 39 40" />
+
+            </svg>
+
+        </a>
+
+    </div>
+
+</header>

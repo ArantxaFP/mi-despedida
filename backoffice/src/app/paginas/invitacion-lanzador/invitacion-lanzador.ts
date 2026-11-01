@@ -1,6 +1,7 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { InvitacionesLanzadoresApi } from '../../servicios/invitaciones-lanzadores-api';
+import { enlaces } from '../../configuracion/enlaces';
 
 @Component({
     selector: 'app-invitacion-lanzador',
@@ -14,6 +15,8 @@ export class InvitacionLanzador implements OnInit {
     private readonly route = inject(ActivatedRoute);
     private readonly invitacionesApi =
         inject(InvitacionesLanzadoresApi);
+
+    readonly urlWebComercial = enlaces.webComercial;
 
     readonly cargando = signal(true);
     readonly procesando = signal(false);

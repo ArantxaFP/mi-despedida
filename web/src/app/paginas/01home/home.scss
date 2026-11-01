@@ -1,0 +1,286 @@
+.home {
+    display: flex;
+    flex-direction: column;
+    gap: var(--espacio-lg);
+
+    width: 100%;
+    max-width: var(--ancho-contenido);
+
+    margin-inline: auto;
+    padding: var(--espacio-md);
+
+    // CABECERA
+    &__hero {
+        position: relative;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        min-height: 320px;
+        padding: var(--espacio-xl) var(--espacio-lg);
+
+        overflow: hidden;
+        border-radius: var(--radio-tarjeta);
+
+        background:
+            linear-gradient(
+                rgba(25, 36, 47, 0.5),
+                rgba(25, 36, 47, 0.65)
+            ),
+            url('/imagenes/cabecera.jpg') center / cover no-repeat,
+            #476987;
+
+        color: #fff;
+        text-align: center;
+
+        &-contenido {
+            max-width: 680px;
+        }
+
+        h1 {
+            margin: 0 0 var(--espacio-md);
+            font-size: clamp(2.5rem, 8vw, 5rem);
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        p {
+            margin: 0;
+        }
+    }
+
+    &__etiqueta {
+        margin-bottom: var(--espacio-md) !important;
+        font-weight: 600;
+        letter-spacing: 0.15em;
+    }
+
+    // SECCIONES
+    &__seccion {
+        display: flex;
+        flex-direction: column;
+        gap: var(--espacio-md);
+
+        h2,
+        p {
+            margin: 0;
+        }
+    }
+
+    // CABECERA DE CADA CARRUSEL
+    &__carrusel-cabecera {
+        display: flex;
+        flex-direction: column;
+        gap: var(--espacio-md);
+
+        > div:first-child {
+            display: flex;
+            flex-direction: column;
+            gap: var(--espacio-sm);
+        }
+
+        h2 {
+            font-size: clamp(1.4rem, 4vw, 2rem);
+        }
+    }
+
+    // CONTROLES DEL CARRUSEL
+    &__controles {
+        display: flex;
+        align-items: center;
+        gap: var(--espacio-sm);
+
+        button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+
+            width: 3rem;
+            height: 3rem;
+
+            border: 1px solid var(--color-destacado);
+            border-radius: 50%;
+
+            background: var(--color-superficie);
+            color: var(--color-principal);
+
+            font: inherit;
+            font-size: 2rem;
+            line-height: 1;
+
+            cursor: pointer;
+
+            &:hover {
+                background: var(--color-fondo);
+            }
+        }
+    }
+
+    // BASE DE LOS DOS CARRUSELES
+    &__carrusel {
+        display: flex;
+        gap: var(--espacio-md);
+
+        width: 100%;
+        min-width: 0;
+
+        padding: 0.25rem 0.25rem var(--espacio-md);
+
+        overflow-x: auto;
+        overflow-y: hidden;
+
+        scroll-snap-type: x mandatory;
+        scroll-behavior: smooth;
+        overscroll-behavior-inline: contain;
+        scrollbar-width: thin;
+    }
+
+    // TARJETAS CON CAPTURAS
+    &__captura {
+        display: flex;
+        flex-direction: column;
+        gap: var(--espacio-sm);
+
+        flex: 0 0 85%;
+        min-width: 0;
+
+        margin: 0;
+        padding: var(--espacio-sm);
+
+        border: 1px solid var(--color-borde);
+        border-radius: var(--radio-boton);
+        background: var(--color-superficie);
+
+        scroll-snap-align: start;
+
+        figcaption {
+            padding: var(--espacio-xs);
+            font-size: 0.9rem;
+            text-align: center;
+        }
+    }
+
+    &__imagen {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        width: 100%;
+        height: 250px;
+
+        overflow: hidden;
+        border-radius: var(--radio-boton);
+        background: var(--color-fondo);
+
+        img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+    }
+
+    // CARRUSEL DESKTOP
+    &__carrusel--desktop {
+
+        .home__captura {
+            flex-basis: min(90%, 680px);
+        }
+    }
+
+    // CARRUSEL MÓVIL
+    &__carrusel--mobile {
+
+        .home__captura {
+            flex-basis: min(75%, 260px);
+        }
+
+        .home__imagen {
+            height: 440px;
+        }
+    }
+
+    // BOTONES DE ACCESO
+    &__acciones {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: var(--espacio-md);
+
+        margin-top: var(--espacio-sm);
+    }
+
+    &__nota {
+        color: var(--color-secundario);
+        font-size: 0.9rem;
+    }
+}
+
+
+// TABLET
+@media (min-width: 48rem) {
+    .home {
+        gap: var(--espacio-xl);
+        padding: var(--espacio-xl);
+
+        &__hero {
+            min-height: 440px;
+        }
+
+        &__carrusel-cabecera {
+            flex-direction: row;
+            align-items: flex-start;
+            justify-content: space-between;
+        }
+
+        &__carrusel--desktop {
+
+            .home__captura {
+                flex-basis: min(80%, 780px);
+            }
+
+            .home__imagen {
+                height: 420px;
+            }
+        }
+
+        &__carrusel--mobile {
+
+            .home__captura {
+                flex-basis: 280px;
+            }
+
+            .home__imagen {
+                height: 520px;
+            }
+        }
+
+        &__acciones {
+            flex-direction: row;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+    }
+}
+
+
+// DESKTOP
+@media (min-width: 80rem) {
+    .home {
+
+        &__hero {
+            min-height: 500px;
+        }
+
+        &__carrusel--desktop {
+
+            .home__captura {
+                flex-basis: min(75%, 840px);
+            }
+
+            .home__imagen {
+                height: 480px;
+            }
+        }
+    }
+}

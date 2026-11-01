@@ -2,6 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Autenticacion } from '../../servicios/autenticacion';
 import { RouterLink } from '@angular/router';
+import { enlaces } from '../../configuracion/enlaces';
 
 @Component({
   selector: 'app-nueva-contrasena',
@@ -12,6 +13,8 @@ import { RouterLink } from '@angular/router';
 export class NuevaContrasena {
   private constructorFormulario = inject(FormBuilder);
   private autenticacion = inject(Autenticacion);
+
+  readonly urlWebComercial = enlaces.webComercial;
 
   recuperacionAutorizada = this.autenticacion.recuperacionAutorizada;
   comprobandoRecuperacion = this.autenticacion.comprobandoRecuperacion;

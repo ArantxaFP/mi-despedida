@@ -1,7 +1,8 @@
-import { Component, inject } from '@angular/core';
+import { Component, ElementRef, ViewChild, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { Autenticacion } from '../../servicios/autenticacion';
+import { enlaces } from '../../configuracion/enlaces';
 
 @Component({
   selector: 'app-registro',
@@ -17,7 +18,20 @@ export class Registro {
   enviado = false;
   registrando = false;
   registroCompletado = false;
+  readonly urlWebComercial = enlaces.webComercial;
   mensajeRegistro = '';
+
+  @ViewChild('dialogoPrivacidad')
+  private dialogoPrivacidad?: ElementRef<HTMLDialogElement>;
+
+  abrirPoliticaPrivacidad(): void {
+    this.dialogoPrivacidad?.nativeElement.showModal();
+  }
+
+  cerrarPoliticaPrivacidad(): void {
+    this.dialogoPrivacidad?.nativeElement.close();
+  }
+
   formulario;
 
   constructor(private constructorFormulario: FormBuilder) {

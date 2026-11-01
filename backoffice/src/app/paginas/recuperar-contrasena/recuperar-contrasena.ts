@@ -2,6 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { Autenticacion } from '../../servicios/autenticacion';
+import { enlaces } from '../../configuracion/enlaces';
 
 @Component({
   selector: 'app-recuperar-contrasena',
@@ -12,6 +13,8 @@ import { Autenticacion } from '../../servicios/autenticacion';
 export class RecuperarContrasena {
   private constructorFormulario = inject(FormBuilder);
   private autenticacion = inject(Autenticacion);
+
+  readonly urlWebComercial = enlaces.webComercial;
 
   enviado = signal(false);
   enviando = signal(false);

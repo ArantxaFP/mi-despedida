@@ -2,6 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Autenticacion } from '../../servicios/autenticacion';
+import { enlaces } from '../../configuracion/enlaces';
 
 @Component({
   selector: 'app-acceso',
@@ -15,6 +16,8 @@ export class Acceso {
   private autenticacion = inject(Autenticacion);
   private constructorFormulario = inject(FormBuilder);
   private router = inject(Router);
+
+  readonly urlWebComercial = enlaces.webComercial;
 
   contrasenaVisible = false;
 

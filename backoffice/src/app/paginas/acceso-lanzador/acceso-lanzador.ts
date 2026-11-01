@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { enlaces } from '../../configuracion/enlaces';
 
 @Component({
   selector: 'app-acceso-lanzador',
@@ -11,6 +12,8 @@ import { RouterLink } from '@angular/router';
 export class AccesoLanzador {
   solicitudPreparada = false;
   mostrarCodigo = false;
+
+  readonly urlWebComercial = enlaces.webComercial;
 
   formularioCorreo;
   formularioCodigo;

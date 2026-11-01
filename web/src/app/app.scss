@@ -1,0 +1,31 @@
+.web-comercial {
+    display: flex;
+    flex-direction: column;
+    min-height: 100dvh;
+
+    &__contenido {
+        flex: 1;
+        width: 100%;
+        min-width: 0;
+    }
+}
+
+.web-comercial {
+    display: flex;
+    flex-direction: column;
+    min-height: 100dvh;
+
+    &__contenido {
+        flex: 1;
+        width: 100%;
+        min-width: 0;
+
+        padding-top: 52px;
+    }
+}
+
+@media (min-width: 90rem) {
+    .web-comercial__contenido {
+        padding-top: 58px;
+    }
+}

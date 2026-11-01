@@ -1,0 +1,221 @@
+<section class="home">
+
+    <!-- CABECERA WEB COMERCIAL -->
+    <header class="home__hero">
+
+        <div class="home__hero-contenido">
+
+            <p class="home__etiqueta">
+                MI DESPEDIDA
+            </p>
+
+            <h1>Coming soon</h1>
+            <h2> MI DESPEDIDA - AVISO IMPORTANTE: ES UN PROYECTO ACADÉMICO EN DESARROLLO</h2>
+
+            <p>
+                Un espacio para preparar tus palabras de despedida, organizar tu despedida con mucho tiempo de
+                antelación y dejar mensajes para las personas que son importantes para ti sin que tengas que volver a
+                pensar en ello y que puedas dedicarte a vivir la vida sin preocupaciones.
+            </p>
+
+        </div>
+
+    </header>
+
+
+    <!-- PRESENTACIÓN -->
+    <section class="home__seccion web-tarjeta" aria-labelledby="titulo-conoce">
+
+        <h2 id="titulo-conoce">
+            Conoce Mi Despedida
+        </h2>
+
+        <p>
+            Descubre cómo es el espacio personal desde el que puedes gestionar tus contactos y preparar tus mensajes de
+            despedida.
+        </p>
+
+        <p>
+            Estas capturas te permiten conocer la aplicación antes de registrarte.
+        </p>
+
+    </section>
+
+
+    <!-- CARRUSEL CAPTURAS PANEL DESKTOP -->
+    <section class="home__seccion web-tarjeta" aria-labelledby="titulo-capturas-desktop">
+
+        <div class="home__carrusel-cabecera">
+
+            <div>
+                <h2 id="titulo-capturas-desktop">
+                    Mi Despedida desde tu ordenador
+                </h2>
+
+                <p>
+                    Consulta algunas de las pantallas de la versión de escritorio.
+                </p>
+            </div>
+
+            <div class="home__controles">
+
+                <button type="button" aria-label="Captura anterior de escritorio" aria-controls="galeria-desktop"
+                    (click)="moverDesktop(-1)">
+                    ‹
+                </button>
+
+                <button type="button" aria-label="Captura siguiente de escritorio" aria-controls="galeria-desktop"
+                    (click)="moverDesktop(1)">
+                    ›
+                </button>
+
+            </div>
+
+        </div>
+
+        <div id="galeria-desktop" #carruselDesktop class="home__carrusel home__carrusel--desktop" tabindex="0"
+            aria-label="Capturas de escritorio">
+
+            @for (captura of capturasDesktop; track captura.src) {
+
+            <figure class="home__captura">
+
+                <div class="home__imagen">
+
+                    <img [src]="captura.src" [alt]="captura.alt" loading="lazy">
+
+                </div>
+
+                <figcaption>
+                    {{ captura.titulo }}
+                </figcaption>
+
+            </figure>
+
+            }
+
+        </div>
+
+    </section>
+
+
+    <!-- CARRUSEL CAPTURAS PANEL MÓVIL -->
+    <section class="home__seccion web-tarjeta" aria-labelledby="titulo-capturas-mobile">
+
+        <div class="home__carrusel-cabecera">
+
+            <div>
+                <h2 id="titulo-capturas-mobile">
+                    También desde tu móvil
+                </h2>
+
+                <p>
+                    Las funciones del panel están adaptadas para que puedas utilizarlas desde pantallas pequeñas.
+                </p>
+            </div>
+
+            <div class="home__controles">
+
+                <button type="button" aria-label="Captura anterior de móvil" aria-controls="galeria-mobile"
+                    (click)="moverMobile(-1)">
+                    ‹
+                </button>
+
+                <button type="button" aria-label="Captura siguiente de móvil" aria-controls="galeria-mobile"
+                    (click)="moverMobile(1)">
+                    ›
+                </button>
+
+            </div>
+
+        </div>
+
+        <div id="galeria-mobile" #carruselMobile class="home__carrusel home__carrusel--mobile" tabindex="0"
+            aria-label="Capturas de móvil">
+
+            @for (captura of capturasMobile; track captura.src) {
+
+            <figure class="home__captura">
+
+                <div class="home__imagen">
+
+                    <img [src]="captura.src" [alt]="captura.alt" loading="lazy">
+
+                </div>
+
+                <figcaption>
+                    {{ captura.titulo }}
+                </figcaption>
+
+            </figure>
+
+            }
+
+        </div>
+
+    </section>
+
+
+    <!-- ACCESO A LA APLICACIÓN -->
+    <section class="home__seccion web-tarjeta" aria-labelledby="titulo-acceso">
+
+        <h2 id="titulo-acceso">
+            Accede a tu espacio
+        </h2>
+
+        <p>
+            Accede con tu cuenta o regístrate para comenzar a preparar tu despedida.
+        </p>
+
+
+        <div class="home__acciones">
+
+            <a class="transicion-button" [href]="enlaces.acceso">
+                Iniciar sesión
+            </a>
+
+            <a class="transicion-button" [href]="enlaces.registro">
+                Registrarse
+            </a>
+
+            <a class="transicion-button" [href]="enlaces.accesoLanzador">
+                Acceder como lanzador
+            </a>
+
+        </div>
+
+
+        <p class="home__nota">
+            Si has recibido una invitación para actuar como lanzador, consulta las instrucciones incluidas en el correo
+            recibido.
+        </p>
+
+    </section>
+
+
+    <!-- AYUDA Y CONTACTO -->
+    <section class="home__seccion web-tarjeta" aria-labelledby="titulo-ayuda">
+
+        <h2 id="titulo-ayuda">
+            ¿Tienes alguna duda?
+        </h2>
+
+        <p>
+            Puedes consultar las preguntas frecuentes o acceder a la página de contacto.
+        </p>
+
+        <div class="home__acciones">
+
+            <a class="transicion-button" routerLink="/faq">
+                Consultar FAQs
+            </a>
+
+            <a class="transicion-button" routerLink="/contacto">
+                Contactar
+            </a>
+
+        </div>
+
+    </section>
+
+</section>

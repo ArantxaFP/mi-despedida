@@ -1,0 +1,71 @@
+.politica-privacidad {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+
+    color: var(--color-principal);
+    font-family: var(--fuente-general);
+    line-height: 1.7;
+
+    h1 {
+        margin: 0;
+        font-size: clamp(1.7rem, 4vw, 2.5rem);
+    }
+
+    h2 {
+        margin: 0 0 1rem;
+        font-size: clamp(1.2rem, 3vw, 1.6rem);
+    }
+
+    h3 {
+        margin: 1.25rem 0 0.75rem;
+        font-size: 1.05rem;
+    }
+
+    p {
+        margin: 0 0 1rem;
+    }
+
+    ul {
+        margin: 0 0 1rem;
+        padding-left: 1.5rem;
+
+        li {
+            margin-bottom: 0.5rem;
+        }
+    }
+
+    a {
+        color: #476987;
+        text-underline-offset: 3px;
+    }
+
+    section {
+        min-width: 0;
+    }
+
+    &__aviso,
+    &__recordatorio {
+        padding: 1.25rem;
+
+        border-left: 4px solid #59f0dd;
+        border-radius: 0.75rem;
+
+        background: #e7fbf9;
+    }
+
+    &__recordatorio {
+        border-left-color: #ffa38c;
+        background: #fff0eb;
+    }
+}
+
+@media (min-width: 48rem) {
+    .politica-privacidad {
+
+        &__aviso,
+        &__recordatorio {
+            padding: 2rem;
+        }
+    }
+}

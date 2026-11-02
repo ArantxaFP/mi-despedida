@@ -126,30 +126,52 @@ export class Home {
 
     readonly capturasMobile: Captura[] = [
         {
-            src: '/imagenes/panel_mobile/dashboard.png',
+            src: '/imagenes/panel_mobile/01bo_crear_cuenta_mobile.webp',
+            titulo: 'Crear una cuenta',
+            alt: 'Formulario de registro de Mi Despedida en móvil'
+        },
+        {
+            src: '/imagenes/panel_mobile/02bo_acceso_cuenta_mobile.webp',
+            titulo: 'Iniciar sesión',
+            alt: 'Pantalla de acceso a Mi Despedida en móvil'
+        },
+        {
+            src: '/imagenes/panel_mobile/03bo_recuperar_contrasena_mobile.webp',
+            titulo: 'Recuperar contraseña',
+            alt: 'Formulario para recuperar la contraseña en móvil'
+        },
+        {
+            src: '/imagenes/panel_mobile/04bo_acceso_lanzador_mobile.webp',
+            titulo: 'Acceso como lanzador',
+            alt: 'Pantalla de acceso de lanzadores en móvil'
+        },
+        {
+            src: '/imagenes/panel_mobile/05bo_dashboard_mobile.webp',
             titulo: 'Tu espacio desde el móvil',
             alt: 'Dashboard de Mi Despedida en móvil'
         },
         {
-            src: '/imagenes/panel_mobile/perfil.png',
+            src: '/imagenes/panel_mobile/06bo_perfil_mobile.webp',
             titulo: 'Tu perfil',
-            alt: 'Vista móvil del perfil'
+            alt: 'Vista móvil del perfil del administrador'
         },
         {
-            src: '/imagenes/panel_mobile/lanzadores.png',
+            src: '/imagenes/panel_mobile/07bo_lanzadores_mobile.webp',
             titulo: 'Tus lanzadores',
-            alt: 'Vista móvil de contactos lanzadores'
+            alt: 'Vista móvil de los contactos lanzadores'
         },
         {
-            src: '/imagenes/panel_mobile/destinatarios.png',
+            src: '/imagenes/panel_mobile/08bo_destinatarios_mobile.webp',
             titulo: 'Tus destinatarios',
             alt: 'Vista móvil de los contactos destinatarios'
         },
         {
-            src: '/imagenes/panel_mobile/carta.png',
-            titulo: 'Tu mensaje personal',
-            alt: 'Vista móvil del editor de cartas'
+            src: '/imagenes/panel_mobile/09bo_destinatario_edicion_mobile.webp',
+            titulo: 'Edición de destinatarios',
+            alt: 'Vista móvil del formulario de edición de destinatarios'
         }
+
+
     ];
 
     @ViewChild('carruselDesktop')

@@ -1,30 +1,46 @@
 /* You can add global styles to this file, and also import other style files */
 @import url('https://fonts.googleapis.com/css2?family=Kalam:wght@400&family=Montserrat+Alternates:wght@300;400;500;600&family=Montserrat:wght@300;400;500;600&display=swap');
 
+// VARIABLES GLOBALES
 :root {
+
+    // COLORES
     --color-fondo: #e7fbf9;
     --color-superficie: #ffffff;
-
     --color-principal: #252b37;
     --color-secundario: #476987;
     --color-destacado: #28cdbb;
     --color-borde: rgba(37, 43, 55, 0.14);
 
+    // TIPOGRAFÍAS
     --fuente-general: 'Montserrat', sans-serif;
     --fuente-titulos: 'Montserrat Alternates', sans-serif;
 
+    // TAMAÑOS DE TEXTO
+    --texto-h1: clamp(1.7rem, 4vw, 2.5rem);
+    --texto-h2: clamp(1.2rem, 3vw, 1.6rem);
+    --texto-h3: 1.4rem;
+    --texto-parrafo: 1.2rem;
+    --texto-lista: 1.2rem;
+
+    // CONTENEDOR
     --ancho-contenido: 1200px;
 
+    // ESPACIADOS
     --espacio-xs: 0.5rem;
     --espacio-sm: 0.75rem;
     --espacio-md: 1rem;
     --espacio-lg: 1.5rem;
     --espacio-xl: 2rem;
 
+    // BORDES
     --radio-boton: 0.5rem;
     --radio-tarjeta: 1rem;
 }
 
+
+
+// ESTILOS GENERALES
 *,
 *::before,
 *::after {
@@ -44,12 +60,42 @@ body {
     line-height: 1.6;
 }
 
+
+
+// TÍTULOS
 h1,
-h2 {
+h2,
+h3 {
     font-family: var(--fuente-titulos);
     font-weight: 500;
     line-height: 1.3;
 }
+
+h1 {
+    margin: 0;
+    font-size: var(--texto-h1);
+}
+
+h2 {
+    margin: 0 0 var(--espacio-md);
+    font-size: var(--texto-h2);
+}
+
+h3 {
+    font-size: var(--texto-h3);
+}
+
+
+// PÁRRAFOS Y LISTAS
+p {
+    margin: 0 0 var(--espacio-md);
+    font-size: var(--texto-parrafo);
+}
+
+li {
+    font-size: var(--texto-lista);
+}
+
 
 img {
     display: block;
@@ -148,6 +194,67 @@ img {
         background-position: -200% 0;
     }
 }
+
+// ENLACES CON SUBRAYADO GRADIENTE (aplica a todo excepto al header)
+a:not(.transicion-button):not(.cabecera a) {
+    color: inherit;
+    text-decoration: none;
+
+    // Subrayado normal: 2px y color destacado
+    background-image: linear-gradient(var(--color-destacado),
+            var(--color-destacado));
+
+    background-repeat: no-repeat;
+    background-size: 100% 2px;
+    background-position: left bottom;
+
+    // Separación entre texto y subrayado
+    padding-bottom: 5px;
+
+    &:hover,
+    &:focus-visible {
+        // Subrayado hover: 4px y gradiente continuo
+        background-image: linear-gradient(90deg,
+                #59f0dd 0%,
+                #ffa38c 25%,
+                #476987 50%,
+                #59f0dd 75%,
+                #ffa38c 100%);
+
+        background-size: 200% 4px;
+        animation: movimientoGradienteEnlaces 5s linear infinite;
+    }
+}
+
+
+
+// ANIMACIÓN CONTINUA DEL GRADIENTE
+@keyframes movimientoGradienteEnlaces {
+    0% {
+        background-position: 0% 100%;
+    }
+
+    100% {
+        background-position: 100% 100%;
+    }
+}
+
+
+
+// ACCESIBILIDAD
+@media (prefers-reduced-motion: reduce) {
+
+    a:not(.transicion-button):not(.cabecera a) {
+
+        &:hover,
+        &:focus-visible {
+            animation: none;
+            background-position: 50% 100%;
+        }
+    }
+}
+
+
 
 // ESTRUCTURA COMÚN DE PÁGINAS INTERIORES
 .web-pagina {

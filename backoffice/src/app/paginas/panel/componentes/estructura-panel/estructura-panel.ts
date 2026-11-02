@@ -2,6 +2,7 @@ import { Component, inject, signal, OnInit, OnDestroy } from '@angular/core';
 import { Router, RouterOutlet, RouterLink, NavigationEnd } from '@angular/router';
 import { filter, Subscription } from 'rxjs';
 import { MenuLateral } from '../menu-lateral/menu-lateral';
+import { enlaces } from '../../../../configuracion/enlaces';
 
 @Component({
   selector: 'app-estructura-panel',
@@ -13,6 +14,8 @@ export class EstructuraPanel implements OnInit, OnDestroy {
 
   private router = inject(Router);
   private suscripcionRutas?: Subscription;
+
+  readonly urlWebComercial = enlaces.webComercial;
 
   menuAbierto = signal(false);
 

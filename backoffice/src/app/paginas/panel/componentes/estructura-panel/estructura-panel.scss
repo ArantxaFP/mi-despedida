@@ -96,7 +96,32 @@
         color: var(--color-secundario);
         font-size: var(--texto-secundario);
     }
+
+
+
 }
+
+
+// ENLACE A LA WEB COMERCIAL
+.cabecera-panel__enlace-web {
+    margin-left: auto;
+
+    color: #476987;
+    font-family: var(--fuente-general);
+    font-size: 0.9rem;
+    font-weight: 400;
+    text-decoration: none;
+    white-space: nowrap;
+
+    &:hover,
+    &:focus-visible {
+        color: var(--color-principal);
+        text-decoration: underline;
+        text-underline-offset: 4px;
+    }
+}
+
+
 
 // Tablet
 @media (min-width: 48rem) {

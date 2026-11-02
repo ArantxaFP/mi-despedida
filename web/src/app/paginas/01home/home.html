@@ -76,15 +76,17 @@
         <div id="galeria-desktop" #carruselDesktop class="home__carrusel home__carrusel--desktop" tabindex="0"
             aria-label="Capturas de escritorio">
 
-            @for (captura of capturasDesktop; track captura.src) {
+
+            @for (captura of capturasDesktop; track captura.src; let indice = $index) {
 
             <figure class="home__captura">
 
-                <div class="home__imagen">
+                <button type="button" class="home__imagen home__imagen--ampliable"
+                    [attr.aria-label]="'Ampliar imagen: ' + captura.titulo" (click)="abrirVisor('desktop', indice)">
 
                     <img [src]="captura.src" [alt]="captura.alt" loading="lazy">
 
-                </div>
+                </button>
 
                 <figcaption>
                     {{ captura.titulo }}
@@ -93,6 +95,7 @@
             </figure>
 
             }
+
 
         </div>
 
@@ -133,15 +136,17 @@
         <div id="galeria-mobile" #carruselMobile class="home__carrusel home__carrusel--mobile" tabindex="0"
             aria-label="Capturas de móvil">
 
-            @for (captura of capturasMobile; track captura.src) {
+
+            @for (captura of capturasMobile; track captura.src; let indice = $index) {
 
             <figure class="home__captura">
 
-                <div class="home__imagen">
+                <button type="button" class="home__imagen home__imagen--ampliable"
+                    [attr.aria-label]="'Ampliar imagen: ' + captura.titulo" (click)="abrirVisor('mobile', indice)">
 
                     <img [src]="captura.src" [alt]="captura.alt" loading="lazy">
 
-                </div>
+                </button>
 
                 <figcaption>
                     {{ captura.titulo }}
@@ -150,6 +155,7 @@
             </figure>
 
             }
+
 
         </div>
 
@@ -219,3 +225,68 @@
     </section>
 
 </section>
+
+
+<!-- VISOR DE CAPTURAS A PANTALLA COMPLETA -->
+
+<dialog #dialogoCapturas class="visor-capturas" aria-label="Visor de capturas de Mi Despedida">
+
+    <div class="visor-capturas__contenido">
+
+        <!-- CABECERA -->
+        <header class="visor-capturas__cabecera">
+
+            <div class="visor-capturas__informacion">
+                <span class="visor-capturas__contador">
+                    {{ indiceCaptura + 1 }} / {{ capturasVisor.length }}
+                </span>
+
+                <span class="visor-capturas__titulo">
+                    {{ capturaActual?.titulo }}
+                </span>
+            </div>
+
+            <button type="button" class="visor-capturas__cerrar" aria-label="Cerrar visor de imágenes"
+                (click)="cerrarVisor()">
+                &times;
+            </button>
+
+        </header>
+
+        <!-- IMAGEN Y NAVEGACIÓN -->
+        <div class="visor-capturas__principal">
+
+            <button type="button" class="visor-capturas__flecha" aria-label="Imagen anterior"
+                (click)="cambiarCaptura(-1)">
+                &#10094;
+            </button>
+
+            <div class="visor-capturas__imagen">
+
+                @if (capturaActual; as captura) {
+
+                <img [src]="captura.src" [alt]="captura.alt">
+
+                }
+
+            </div>
+
+            <button type="button" class="visor-capturas__flecha" aria-label="Imagen siguiente"
+                (click)="cambiarCaptura(1)">
+                &#10095;
+            </button>
+
+        </div>
+
+        <!-- PIE DEL VISOR -->
+        <footer class="visor-capturas__pie">
+
+            <p>
+                {{ capturaActual?.titulo }}
+            </p>
+
+        </footer>
+
+    </div>
+
+</dialog>

@@ -1,4 +1,4 @@
-import { Component, ElementRef, ViewChild } from '@angular/core';
+import { Component, ElementRef, ViewChild, HostListener } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { enlaces } from '../../configuracion/enlaces';
 
@@ -19,33 +19,110 @@ export class Home {
     // Acceso a la aplicación de gestión
     readonly enlaces = enlaces;
 
+    // VISOR DE CAPTURAS A PANTALLA COMPLETA
+    @ViewChild('dialogoCapturas')
+    private dialogoCapturas?: ElementRef<HTMLDialogElement>;
+
+    tipoGaleria: 'desktop' | 'mobile' = 'desktop';
+    indiceCaptura = 0;
+
+    get capturasVisor(): Captura[] {
+        return this.tipoGaleria === 'desktop'
+            ? this.capturasDesktop
+            : this.capturasMobile;
+    }
+
+    get capturaActual(): Captura | undefined {
+        return this.capturasVisor[this.indiceCaptura];
+    }
+
+    abrirVisor(
+        tipo: 'desktop' | 'mobile',
+        indice: number
+    ): void {
+        this.tipoGaleria = tipo;
+        this.indiceCaptura = indice;
+        this.dialogoCapturas?.nativeElement.showModal();
+    }
+
+    cerrarVisor(): void {
+        this.dialogoCapturas?.nativeElement.close();
+    }
+
+    cambiarCaptura(direccion: -1 | 1): void {
+        const total = this.capturasVisor.length;
+
+        if (total === 0) return;
+
+        this.indiceCaptura =
+            (this.indiceCaptura + direccion + total) % total;
+    }
+
+    @HostListener('window:keydown', ['$event'])
+    controlarTeclado(evento: KeyboardEvent): void {
+        if (!this.dialogoCapturas?.nativeElement.open) return;
+
+        if (evento.key === 'ArrowLeft') {
+            evento.preventDefault();
+            this.cambiarCaptura(-1);
+        }
+
+        if (evento.key === 'ArrowRight') {
+            evento.preventDefault();
+            this.cambiarCaptura(1);
+        }
+    }
+
+
+
     readonly capturasDesktop: Captura[] = [
         {
-            src: '/imagenes/panel_desktop/dashboard.png',
+            src: '/imagenes/panel_desktop/01bo_crear_cuenta_desktop.webp',
+            titulo: 'Crear una cuenta',
+            alt: 'Formulario de registro de Mi Despedida en escritorio'
+        },
+        {
+            src: '/imagenes/panel_desktop/02bo_acceso_cuenta_desktop.webp',
+            titulo: 'Iniciar sesión',
+            alt: 'Pantalla de acceso a Mi Despedida en escritorio'
+        },
+        {
+            src: '/imagenes/panel_desktop/03bo_recuperar_contrasena_desktop.webp',
+            titulo: 'Recuperar contraseña',
+            alt: 'Formulario para recuperar la contraseña en escritorio'
+        },
+        {
+            src: '/imagenes/panel_desktop/04bo_acceso_lanzador_desktop.webp',
+            titulo: 'Acceso como lanzador',
+            alt: 'Pantalla de acceso de lanzadores en escritorio'
+        },
+        {
+            src: '/imagenes/panel_desktop/05bo_dashboard_desktop.webp',
             titulo: 'Tu espacio personal',
             alt: 'Dashboard de Mi Despedida en escritorio'
         },
         {
-            src: '/imagenes/panel_desktop/perfil.png',
+            src: '/imagenes/panel_desktop/06bo_perfil_desktop.webp',
             titulo: 'Gestión del perfil',
-            alt: 'Formulario de datos personales en escritorio'
+            alt: 'Pantalla del perfil de administrador en escritorio'
         },
         {
-            src: '/imagenes/panel_desktop/lanzadores.png',
+            src: '/imagenes/panel_desktop/07bo_lanzadores_desktop.webp',
             titulo: 'Contactos lanzadores',
-            alt: 'Listado de autorizaciones de lanzadores en escritorio'
+            alt: 'Gestión de contactos lanzadores en escritorio'
         },
         {
-            src: '/imagenes/panel_desktop/destinatarios.png',
+            src: '/imagenes/panel_desktop/08bo_destinatarios_desktop.webp',
             titulo: 'Contactos destinatarios',
-            alt: 'Tabla de destinatarios de Mi Despedida en escritorio'
+            alt: 'Gestión de contactos destinatarios en escritorio'
         },
         {
-            src: '/imagenes/panel_desktop/carta.png',
-            titulo: 'Mensajes personales',
-            alt: 'Editor de una carta personal en escritorio'
+            src: '/imagenes/panel_desktop/09bo_destinatario_edicion_desktop.webp',
+            titulo: 'Edición de destinatarios',
+            alt: 'Formulario de edición de un contacto destinatario en escritorio'
         }
     ];
+
 
     readonly capturasMobile: Captura[] = [
         {

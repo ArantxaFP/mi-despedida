@@ -58,7 +58,8 @@
                     Nombre
                 </label>
 
-                <input id="nombre-perfil" type="text" formControlName="nombre" autocomplete="given-name" maxlength="100"
+                <input id="nombre-perfil" type="text" formControlName="nombre"
+                    [readonly]="!editandoDatos() || guardando()" autocomplete="given-name" maxlength="100"
                     [attr.aria-invalid]="formularioDatos.controls.nombre.invalid && formularioDatos.controls.nombre.touched"
                     [attr.aria-describedby]="formularioDatos.controls.nombre.invalid && formularioDatos.controls.nombre.touched ? 'error-nombre-perfil' : null">
 
@@ -81,8 +82,8 @@
                     </span>
                 </label>
 
-                <input id="apellidos-perfil" type="text" formControlName="apellidos" autocomplete="family-name"
-                    maxlength="150">
+                <input id="apellidos-perfil" type="text" formControlName="apellidos"
+                    [readonly]="!editandoDatos() || guardando()" autocomplete="family-name" maxlength="150">
 
                 @if (formularioDatos.controls.apellidos.invalid &&
                 formularioDatos.controls.apellidos.touched) {
@@ -94,11 +95,33 @@
 
             </div>
 
+
+
+            @if (!editandoDatos()) {
+
+            <button class="perfil__boton" type="button" (click)="iniciarEdicionDatos()"
+                [disabled]="solicitandoBloqueo()">
+
+                Editar datos
+
+            </button>
+
+            } @else {
+
             <button class="perfil__boton" type="submit" [disabled]="guardando()">
 
                 {{ guardando() ? 'Guardando...' : 'Guardar datos' }}
 
             </button>
+
+            <button class="perfil__boton" type="button" (click)="cancelarEdicionDatos()" [disabled]="guardando()">
+
+                Cancelar
+
+            </button>
+
+            }
+
 
         </form>
 

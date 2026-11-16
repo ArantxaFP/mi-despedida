@@ -1,6 +1,6 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal, OnDestroy } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Autenticacion } from '../../../servicios/autenticacion';
+import { Autenticacion, type BloqueoEdicionCuenta } from '../../../servicios/autenticacion';
 
 type VistaPerfil = 'datos' | 'correo' | 'contrasena' | 'baja';
 
@@ -10,13 +10,32 @@ type VistaPerfil = 'datos' | 'correo' | 'contrasena' | 'baja';
     templateUrl: './perfil.html',
     styleUrl: './perfil.scss'
 })
-export class Perfil implements OnInit {
+export class Perfil implements OnInit, OnDestroy {
     private autenticacion = inject(Autenticacion);
     private constructorFormulario = inject(FormBuilder);
 
     vistaActual = signal<VistaPerfil>('datos');
     cargando = signal(true);
     guardando = signal(false);
+
+    // Indica si el administrador está editando sus datos personales
+    editandoDatos = signal(false);
+
+    readonly solicitandoBloqueo = signal(false);
+
+    // Activar en la base de pruebas cuando el SQL y la renovación estén preparados
+    private readonly usarBloqueoPerfil = false;
+    private bloqueoPerfil: BloqueoEdicionCuenta | null = null;
+    private temporizadorRenovacion: number | undefined;
+    private perfilDestruido = false;
+
+    // Conserva los últimos datos cargados o guardados para poder cancelar una edición
+    private datosGuardados = {
+        nombre: '',
+        apellidos: ''
+    };
+
+
     mensaje = signal('');
     error = signal('');
 
@@ -83,10 +102,14 @@ export class Perfil implements OnInit {
 
             const usuario = data.user;
 
-            this.formularioDatos.patchValue({
-                nombre: usuario.user_metadata?.['nombre'] ?? '',
-                apellidos: usuario.user_metadata?.['apellidos'] ?? ''
-            });
+            const datosPerfil = await this.autenticacion.obtenerDatosPerfil();
+
+            this.datosGuardados = {
+                nombre: datosPerfil.nombre,
+                apellidos: datosPerfil.apellidos ?? ''
+            };
+
+            this.formularioDatos.patchValue(this.datosGuardados);
 
             this.correoActual.set(usuario.email ?? '');
             this.correoVerificado.set(
@@ -95,7 +118,7 @@ export class Perfil implements OnInit {
 
         } catch {
             this.error.set(
-                'No se ha podido conectar con el servicio.'
+                'No se han podido recuperar los datos de tu cuenta.'
             );
         } finally {
             this.cargando.set(false);
@@ -103,6 +126,16 @@ export class Perfil implements OnInit {
     }
 
     cambiarVista(vista: VistaPerfil): void {
+        if (this.usarBloqueoPerfil) {
+            if (this.solicitandoBloqueo() || this.guardando()) {
+                return;
+            }
+
+            if (vista !== 'datos' && this.editandoDatos()) {
+                this.cancelarEdicionDatos();
+            }
+        }
+
         this.vistaActual.set(vista);
         this.mensaje.set('');
         this.error.set('');
@@ -115,11 +148,160 @@ export class Perfil implements OnInit {
         this.mostrarConfirmacion.set(false);
     }
 
+
+    // Preparar la edición de los datos personales
+    async iniciarEdicionDatos(): Promise<void> {
+        if (
+            this.cargando() ||
+            this.guardando() ||
+            this.editandoDatos() ||
+            this.solicitandoBloqueo()
+        ) {
+            return;
+        }
+
+        this.mensaje.set('');
+        this.error.set('');
+
+        if (!this.usarBloqueoPerfil) {
+            this.editandoDatos.set(true);
+            return;
+        }
+
+        this.solicitandoBloqueo.set(true);
+
+        try {
+            const { bloqueo, error } =
+                await this.autenticacion.adquirirBloqueoPerfil();
+
+            if (this.perfilDestruido) {
+                if (bloqueo) {
+                    void this.autenticacion.liberarBloqueoPerfil(bloqueo.token);
+                }
+                return;
+            }
+
+            if (error || !bloqueo) {
+                this.error.set(
+                    error?.message ?? 'No se ha podido iniciar la edición del perfil.'
+                );
+                return;
+            }
+
+            this.bloqueoPerfil = bloqueo;
+            this.datosGuardados = {
+                nombre: bloqueo.datosActuales.nombre,
+                apellidos: bloqueo.datosActuales.apellidos ?? ''
+            };
+
+            this.formularioDatos.reset(this.datosGuardados);
+            this.programarRenovacionBloqueo();
+            this.editandoDatos.set(true);
+        } finally {
+            this.solicitandoBloqueo.set(false);
+        }
+    }
+
+    // Cancelar los cambios sin modificar los datos guardados
+    cancelarEdicionDatos(): void {
+        if (this.guardando()) {
+            return;
+        }
+
+        this.liberarBloqueoDatos();
+        this.formularioDatos.reset(this.datosGuardados);
+
+        this.editandoDatos.set(false);
+        this.mensaje.set('');
+        this.error.set('');
+    }
+
+    private programarRenovacionBloqueo(espera = 120_000): void {
+        this.detenerRenovacionBloqueo();
+
+        this.temporizadorRenovacion = window.setTimeout(() => {
+            this.temporizadorRenovacion = undefined;
+            void this.renovarBloqueoDatos();
+        }, espera);
+    }
+
+    private detenerRenovacionBloqueo(): void {
+        if (this.temporizadorRenovacion !== undefined) {
+            window.clearTimeout(this.temporizadorRenovacion);
+            this.temporizadorRenovacion = undefined;
+        }
+    }
+
+    private async renovarBloqueoDatos(): Promise<void> {
+        const bloqueo = this.bloqueoPerfil;
+
+        if (!bloqueo || this.perfilDestruido) {
+            return;
+        }
+
+        if (this.guardando()) {
+            this.programarRenovacionBloqueo(5_000);
+            return;
+        }
+
+        const { fechaCaducidad, conflicto } =
+            await this.autenticacion.renovarBloqueoPerfil(bloqueo.token);
+
+        // Ignorar la respuesta si el usuario canceló, guardó o salió del perfil
+        if (this.perfilDestruido || this.bloqueoPerfil?.token !== bloqueo.token) {
+            return;
+        }
+
+        if (this.guardando()) {
+            this.programarRenovacionBloqueo(5_000);
+            return;
+        }
+
+        if (conflicto) {
+            this.bloqueoPerfil = null;
+            this.error.set(
+                'La edición ha perdido su bloqueo. ' +
+                'Copia tus cambios antes de cancelar y volver a pulsar Editar o lo perderás.'
+            );
+            return;
+        }
+
+        if (!fechaCaducidad) {
+            this.programarRenovacionBloqueo(15_000);
+            return;
+        }
+
+        this.bloqueoPerfil = { ...bloqueo, fechaCaducidad };
+        this.programarRenovacionBloqueo();
+    }
+
+
+    private liberarBloqueoDatos(): void {
+        this.detenerRenovacionBloqueo();
+
+        const bloqueo = this.bloqueoPerfil;
+        this.bloqueoPerfil = null;
+
+        if (bloqueo) {
+            void this.autenticacion.liberarBloqueoPerfil(bloqueo.token);
+        }
+    }
+
+    ngOnDestroy(): void {
+        this.perfilDestruido = true;
+
+        this.detenerRenovacionBloqueo();
+
+        if (!this.guardando()) {
+            this.liberarBloqueoDatos();
+        }
+    }
+
     async guardarDatos(): Promise<void> {
         this.mensaje.set('');
         this.error.set('');
 
-        if (this.guardando()) return;
+        if (this.guardando() || !this.editandoDatos()) return;
 
         if (this.formularioDatos.invalid) {
             this.formularioDatos.markAllAsTouched();
@@ -140,27 +322,74 @@ export class Perfil implements OnInit {
         this.guardando.set(true);
 
         try {
-            const { error } =
-                await this.autenticacion.actualizarDatosPersonales(
+
+            let mensajeGuardado = 'Tus datos personales se han actualizado correctamente.';
+
+            if (this.usarBloqueoPerfil) {
+                const bloqueo = this.bloqueoPerfil;
+
+                if (!bloqueo) {
+                    this.error.set(
+                        'La edición ya no tiene un bloqueo válido. ' +
+                        'Copia tus cambios antes de cancelar y volver a pulsar Editar.'
+                    );
+                    return;
+                }
+
+                const { resultado, error, conflicto } =
+                    await this.autenticacion.actualizarDatosPerfilBloqueo(
+                        nombre,
+                        apellidos,
+                        bloqueo
+                    );
+
+                if (error || !resultado) {
+                    if (conflicto) {
+                        this.liberarBloqueoDatos();
+                    }
+
+                    this.error.set(
+                        conflicto
+                            ? 'La edición ha caducado o el perfil ha cambiado. ' +
+                            'Copia tus cambios antes de cancelar y volver a pulsar Editar.'
+                            : error?.message ?? 'No se han podido guardar estos datos.'
+                    );
+                    return;
+                }
+
+                // Nest ya ha liberado el bloqueo, también si los datos coincidían
+                this.detenerRenovacionBloqueo();
+                this.bloqueoPerfil = null;
+                mensajeGuardado = resultado.mensaje;
+            } else {
+                const { error } = await this.autenticacion.actualizarDatosPersonales(
                     nombre,
                     apellidos
                 );
 
-            if (error) {
-                this.error.set(
-                    'No se han podido guardar tus datos. Inténtalo de nuevo.'
-                );
-                return;
+                if (error) {
+                    this.error.set(
+                        'No se han podido guardar estos datos. Inténtalo de nuevo.'
+                    );
+                    return;
+                }
             }
+
 
             this.formularioDatos.patchValue({
                 nombre,
                 apellidos
             });
 
-            this.mensaje.set(
-                'Tus datos personales se han actualizado correctamente.'
-            );
+            // Actualizar la copia de los datos guardados
+            this.datosGuardados = {
+                nombre,
+                apellidos
+            };
+
+            this.editandoDatos.set(false);
+
+            this.mensaje.set(mensajeGuardado);
 
         } catch {
             this.error.set(
@@ -168,7 +397,13 @@ export class Perfil implements OnInit {
             );
         } finally {
             this.guardando.set(false);
+
+            if (this.perfilDestruido) {
+                this.liberarBloqueoDatos();
+            }
         }
+
+
     }
 
     async solicitarCambioCorreo(): Promise<void> {

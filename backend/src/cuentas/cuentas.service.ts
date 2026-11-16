@@ -1,8 +1,12 @@
-import { BadRequestException, ForbiddenException, Injectable, ServiceUnavailableException, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, ServiceUnavailableException, UnauthorizedException, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service';
 import { SupabaseService } from '../supabase/supabase.service';
 import { obtenerUrlBackoffice } from '../configuracion/urls-backoffice';
+
+import { EditarCuentaSuperadminDto } from './dto/editar-cuenta-superadmin.dto';
+import { BloqueosEdicionCuentasService } from './bloqueos-edicion-cuentas.service';
+import { ActualizarDatosPerfilBloqueoDto } from './dto/actualizar-datos-perfil-bloqueo.dto';
 
 export interface DatosRegistroCuenta {
     nombre: string;
@@ -19,8 +23,410 @@ export class CuentasService {
     constructor(
         private readonly prisma: PrismaService,
         private readonly supabaseService: SupabaseService,
-        private readonly configService: ConfigService
+        private readonly configService: ConfigService,
+        private readonly bloqueosEdicion: BloqueosEdicionCuentasService
     ) { }
+
+    // Consulta el rol y el estado de la cuenta autenticada.
+    // Se utilizará para determinar a qué panel puede acceder el usuario.
+    async obtenerMiAcceso(
+        autorizacion?: string
+    ) {
+
+        if (
+            !autorizacion ||
+            !/^Bearer\s+\S+$/i.test(autorizacion)
+        ) {
+            throw new UnauthorizedException(
+                'Debes iniciar sesión.'
+            );
+        }
+
+        const token = autorizacion.split(/\s+/)[1];
+
+        // Verificar el token directamente con Supabase Auth
+        const { data, error } =
+            await this.supabaseService.verificarUsuario(
+                token
+            );
+
+        const usuario = data?.user;
+
+        if (error || !usuario) {
+            throw new UnauthorizedException(
+                'La sesión no es válida o ha caducado.'
+            );
+        }
+
+        if (!usuario.email_confirmed_at) {
+            throw new UnauthorizedException(
+                'Debes verificar tu correo electrónico.'
+            );
+        }
+
+        // Consulta el rol y estado reales almacenados en Postgre
+        const cuenta = await this.prisma.cuentas.findUnique({
+            where: {
+                id: usuario.id
+            },
+            select: {
+                rol: true,
+                estado: true
+            }
+        });
+
+        if (!cuenta) {
+            throw new ForbiddenException(
+                'No existe una cuenta operativa válida.'
+            );
+        }
+
+        return {
+            rol: cuenta.rol,
+            estado: cuenta.estado
+        };
+    }
+
+    // Comprobar que el usuario autenticado es un superadministrador en estado activo.
+    // Esta autorización se reutilizará en todas las operaciones del panel de superadministración.
+    async comprobarSuperadministradorActivo(
+        autorizacion?: string
+    ): Promise<string> {
+
+        if (
+            !autorizacion ||
+            !/^Bearer\s+\S+$/i.test(autorizacion)
+        ) {
+            throw new UnauthorizedException(
+                'Debes iniciar sesión.'
+            );
+        }
+
+        const token = autorizacion.split(/\s+/)[1];
+
+        // Verificar la identidad mediante Supabase Auth
+        const { data, error } =
+            await this.supabaseService.verificarUsuario(token);
+
+        const usuario = data?.user;
+
+        if (
+            error ||
+            !usuario ||
+            !usuario.email_confirmed_at
+        ) {
+            throw new UnauthorizedException(
+                'La sesión no es válida o el correo no está verificado.'
+            );
+        }
+
+        // Comprobar el rol y estado reales en Postgre
+        const cuenta = await this.prisma.cuentas.findUnique({
+            where: {
+                id: usuario.id
+            },
+            select: {
+                rol: true,
+                estado: true
+            }
+        });
+
+        if (
+            !cuenta ||
+            cuenta.rol !== 'superadministrador' ||
+            cuenta.estado !== 'activa'
+        ) {
+            throw new ForbiddenException(
+                'No tienes permisos para realizar esta operación.'
+            );
+        }
+
+        // Identificador verificado del superadministrador
+        return usuario.id;
+    }
+
+
+    // Consultar las cuentas registradas en la plataforma.
+    // Acceso exclusivo para superadministradores activos.
+    // No devuelve contraseñas, tokens ni contenido privado.
+    async listarCuentasSuperadministrador(
+        autorizacion?: string
+    ) {
+
+
+        // Verificar que la operación la realiza un superadministrador con la cuenta activa
+        await this.comprobarSuperadministradorActivo(
+            autorizacion
+        );
+
+
+
+        // Devolver únicamente los campos autorizados.
+        // Los superadmins se gestionan en una sección independiente.
+        return this.prisma.cuentas.findMany({
+            where: {
+                rol: 'administrador'
+            },
+
+            select: {
+                id: true,
+                nombre: true,
+                apellidos: true,
+                correo: true,
+                rol: true,
+                estado: true
+            },
+            orderBy: {
+                nombre: 'asc'
+            }
+        });
+    }
+
+    // Previsualiza los cambios solicitados por un superadministrador.
+    // No realiza modificaciones en PostgreSQL ni Supabase Auth.
+    async previsualizarEdicionCuentaSuperadministrador(
+        autorizacion: string | undefined,
+        cuentaId: string,
+        datos: EditarCuentaSuperadminDto
+    ) {
+
+        // Solo un superadministrador activo puede realizar esta operación
+        await this.comprobarSuperadministradorActivo(
+            autorizacion
+        );
+
+        // Consultar únicamente los datos necesarios de la cuenta
+        const cuenta = await this.prisma.cuentas.findUnique({
+            where: {
+                id: cuentaId
+            },
+            select: {
+                id: true,
+                nombre: true,
+                apellidos: true,
+                correo: true,
+                rol: true,
+                estado: true
+            }
+        });
+
+        if (!cuenta) {
+            throw new NotFoundException(
+                'No se ha encontrado la cuenta.'
+            );
+        }
+
+        // Esta sección solo permite gestionar cuentas de administradores.
+        // Las cuentas de superadminis van aparte.
+        if (cuenta.rol !== 'administrador') {
+            throw new ForbiddenException(
+                'Esta sección no permite gestionar cuentas de superadministradores.'
+            );
+        }
+
+
+        // Normalizar los datos introducidos
+        const propuesta = {
+            nombre: datos.nombre.trim(),
+            apellidos: datos.apellidos?.trim() || null,
+            correo: datos.correo.trim().toLowerCase()
+        };
+
+        // Identificar qué campos han cambiado
+        const cambios = {
+            nombre: propuesta.nombre !== cuenta.nombre,
+            apellidos: propuesta.apellidos !== cuenta.apellidos,
+            correo: propuesta.correo !== cuenta.correo
+        };
+
+        return {
+            cuentaId: cuenta.id,
+            rol: cuenta.rol,
+            estado: cuenta.estado,
+            datosPropuestos: propuesta,
+            camposModificados: cambios,
+            requiereVerificacionCorreo: cambios.correo,
+            guardado: false
+        };
+    }
+
+
+
+    // Identificar al administrador titular que solicita una operación sobre el bloqueo de su propia cuenta
+    private async verificarTitularEdicionPerfil(
+        autorizacion: string | undefined,
+        cuentaId?: string
+    ): Promise<string> {
+
+        if (
+            !autorizacion ||
+            !/^Bearer\s+\S+$/i.test(autorizacion)
+        ) {
+            throw new UnauthorizedException(
+                'Debes iniciar sesión.'
+            );
+        }
+
+        const token = autorizacion.split(/\s+/)[1];
+
+        const { data, error } =
+            await this.supabaseService.verificarUsuario(token);
+
+        const usuario = data?.user;
+
+        if (
+            error ||
+            !usuario ||
+            !usuario.email_confirmed_at
+
+        ) {
+            throw new UnauthorizedException(
+                'La sesión no es válida o el correo no está verificado.'
+            );
+        }
+
+        // Impedir que un administrador gestione el bloqueo de la cuenta de otra persona
+        if (cuentaId !== undefined && usuario.id !== cuentaId) {
+            throw new ForbiddenException(
+                'No puedes gestionar la edición de otra cuenta.'
+            );
+        }
+
+        // Comprobar el rol y estado actuales en Postgre
+        await this.comprobarCuentaActiva(usuario.id);
+
+        return usuario.id;
+    }
+
+    // Leer los datos personales del administrador autenticado
+    async obtenerDatosPerfil(autorizacion?: string) {
+        const titularId = await this.verificarTitularEdicionPerfil(autorizacion);
+
+        const cuenta = await this.prisma.cuentas.findFirst({
+            where: {
+                id: titularId,
+                rol: 'administrador',
+                estado: 'activa'
+            },
+            select: {
+                nombre: true,
+                apellidos: true
+            }
+        });
+
+        if (!cuenta) {
+            throw new ForbiddenException(
+                'Tu cuenta no está habilitada para consultar el perfil.'
+            );
+        }
+
+        return cuenta;
+    }
+
+    // Guardar los datos personales del titular con su bloqueo de edición
+    async actualizarDatosPerfilConBloqueo(
+        autorizacion: string | undefined,
+        datos: ActualizarDatosPerfilBloqueoDto
+    ) {
+        const titularId = await this.verificarTitularEdicionPerfil(autorizacion);
+
+        return this.bloqueosEdicion.guardarNombreYApellidosConBloqueo(
+            titularId,
+            titularId,
+            datos.token,
+            datos.versionEsperada,
+            datos.nombre,
+            datos.apellidos ?? null
+        );
+    }
+
+
+    // Adquirir el bloqueo prioritario del administrador titular
+    async adquirirBloqueoEdicionPerfil(
+        autorizacion: string | undefined,
+        cuentaId: string
+    ) {
+
+        const editorId = await this.verificarTitularEdicionPerfil(
+            autorizacion,
+            cuentaId
+        );
+
+        return this.bloqueosEdicion.adquirirBloqueo(
+            cuentaId,
+            editorId
+        );
+    }
+
+
+    // Renovar el bloqueo prioritario del administrador titular
+    async renovarBloqueoEdicionPerfil(
+        autorizacion: string | undefined,
+        cuentaId: string,
+        token: string
+    ) {
+
+        const editorId = await this.verificarTitularEdicionPerfil(
+            autorizacion,
+            cuentaId
+        );
+
+        return this.bloqueosEdicion.renovarBloqueo(
+            cuentaId,
+            editorId,
+            token
+        );
+    }
+
+
+    // Liberar el bloqueo al cancelar o terminar la edición
+    async liberarBloqueoEdicionPerfil(
+        autorizacion: string | undefined,
+        cuentaId: string,
+        token: string
+    ) {
+
+        const editorId = await this.verificarTitularEdicionPerfil(
+            autorizacion,
+            cuentaId
+        );
+
+        return this.bloqueosEdicion.liberarBloqueo(
+            cuentaId,
+            editorId,
+            token
+        );
+    }
+
+
+    async adquirirBloqueoEdicionSuperadministrador(
+        autorizacion: string | undefined,
+        cuentaId: string
+    ) {
+        const editorId = await this.comprobarSuperadministradorActivo(autorizacion);
+
+        return this.bloqueosEdicion.adquirirBloqueo(cuentaId, editorId);
+    }
+
+    async renovarBloqueoEdicionSuperadministrador(
+        autorizacion: string | undefined,
+        cuentaId: string,
+        token: string
+    ) {
+        const editorId = await this.comprobarSuperadministradorActivo(autorizacion);
+
+        return this.bloqueosEdicion.renovarBloqueo(cuentaId, editorId, token);
+    }
+
+    async liberarBloqueoEdicionSuperadministrador(
+        autorizacion: string | undefined,
+        cuentaId: string,
+        token: string
+    ) {
+        const editorId = await this.comprobarSuperadministradorActivo(autorizacion);
+
+        return this.bloqueosEdicion.liberarBloqueo(cuentaId, editorId, token);
+    }
 
 
     // Comprobar que el administrador tiene una cuenta activa.
@@ -34,7 +440,8 @@ export class CuentasService {
                 id: usuarioId
             },
             select: {
-                estado: true
+                estado: true,
+                rol: true
             }
         });
 
@@ -43,6 +450,15 @@ export class CuentasService {
                 'No existe una cuenta operativa válida.'
             );
         }
+
+        // Las operaciones de este método están reservadas a los administradores titulares.
+        // Los superadministradores utilizan endpoints propios distintos por política de privacidad de datos.
+        if (cuenta.rol !== 'administrador') {
+            throw new ForbiddenException(
+                'No tienes permisos para realizar esta operación.'
+            );
+        }
+
 
         if (cuenta.estado !== 'activa') {
             throw new ForbiddenException(
@@ -111,7 +527,7 @@ export class CuentasService {
             );
         }
 
-        // Actualizar también la cuenta propia en PostgreSQL.
+        // Actualizar también la cuenta propia en Postgre
         try {
             await this.prisma.cuentas.updateMany({
                 where: {
@@ -134,7 +550,7 @@ export class CuentasService {
         };
     }
 
-    // Crear la identidad en Supabase Auth y la cuenta en PostgreSQL.
+    // Crear la identidad en Supabase Auth y la cuenta en Postgre
     async registrar(
         datos: DatosRegistroCuenta,
         origen?: string
@@ -332,6 +748,14 @@ export class CuentasService {
 
         if (cuenta) {
 
+            // Los superadministradores tienen un procedimiento de activación independiente mediante invitación.
+            // Verificar el correo no activa automáticamente su cuenta.
+            if (cuenta.rol === 'superadministrador') {
+                return {
+                    estado: cuenta.estado
+                };
+            }
+
             // Solo las cuentas pendientes pueden pasar automáticamente al estado activa
             if (cuenta.estado === 'pendiente_verificacion') {
 
@@ -373,7 +797,7 @@ export class CuentasService {
                     };
                 }
 
-                // La actualización se ha realizado correctamente.
+                // La actualización se ha realizado correctamente
                 await this.retirarMarcaRegistro(usuario.id);
 
                 return {

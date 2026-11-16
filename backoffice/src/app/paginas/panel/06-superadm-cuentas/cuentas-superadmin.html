@@ -1,0 +1,220 @@
+<div class="panel-pagina">
+
+    <!-- CABECERA DE LA PÁGINA -->
+    <section class="panel-pagina__bloque panel-pagina__cabecera">
+
+        <h1>Gestión de cuentas de administradores</h1>
+
+        <p>
+            Consulta y administra las cuentas de los usuarios registrados en Mi Despedida.
+        </p>
+
+    </section>
+
+    <!-- LISTA DE CUENTAS -->
+    <section class="panel-pagina__bloque">
+
+        <h2>Listado de cuentas</h2>
+
+        <p class="panel-pagina__texto-secundario">
+            Desde esta sección podrás consultar los datos y gestionar el estado de cada cuenta.
+        </p>
+
+        <!-- BUSCADOR Y ACTUALIZACIÓN -->
+        <div class="cuentas-superadmin__herramientas">
+
+            <div class="cuentas-superadmin__buscador">
+
+                <label for="buscar-cuentas">
+                    Buscar cuentas
+                </label>
+
+                <input id="buscar-cuentas" type="search" placeholder="Nombre, correo, rol o estado" [value]="filtro()"
+                    (input)="filtro.set(busqueda.value)" #busqueda>
+
+            </div>
+
+            <button type="button" class="panel__boton" (click)="actualizarCuentas()"
+                [disabled]="cargando() || solicitandoBloqueo() || cuentaEnEdicionId() !== null">
+                {{ cargando() ? 'Actualizando...' : 'Actualizar' }}
+            </button>
+
+        </div>
+
+        <div class="panel-pagina__tabla-responsive">
+
+            <table class="tabla-cuentas">
+
+                <thead>
+                    <tr>
+                        <th scope="col">Nombre</th>
+                        <th scope="col">Apellidos</th>
+                        <th scope="col">Correo electrónico</th>
+                        <th scope="col">Rol</th>
+                        <th scope="col">Estado</th>
+                        <th scope="col">Acciones</th>
+                    </tr>
+                </thead>
+
+
+
+                <tbody>
+
+                    @for (cuenta of cuentasFiltradas(); track cuenta.id) {
+
+                    <tr [class.tabla-cuentas__fila-edicion]="cuentaEnEdicionId() === cuenta.id">
+
+                        <!-- Campo Nombre -->
+                        <td>
+                            @if (cuentaEnEdicionId() === cuenta.id) {
+                            <input class="tabla-cuentas__campo" type="text" aria-label="Nombre" maxlength="100"
+                                [value]="borradorCuenta()?.nombre ?? ''"
+                                (input)="actualizarCampo('nombre', nombreInput.value)" #nombreInput>
+                            } @else {
+                            {{ cuenta.nombre }}
+                            }
+                        </td>
+
+                        <!-- Campo Apellidos -->
+                        <td>
+                            @if (cuentaEnEdicionId() === cuenta.id) {
+                            <input class="tabla-cuentas__campo" type="text" aria-label="Apellidos" maxlength="150"
+                                [value]="borradorCuenta()?.apellidos ?? ''"
+                                (input)="actualizarCampo('apellidos', apellidosInput.value)" #apellidosInput>
+                            } @else {
+                            {{ cuenta.apellidos || '—' }}
+                            }
+                        </td>
+
+                        <!-- Campo correo -->
+                        <td>
+                            @if (cuentaEnEdicionId() === cuenta.id) {
+                            <input class="tabla-cuentas__campo" type="email" aria-label="Correo electrónico"
+                                [value]="borradorCuenta()?.correo ?? ''"
+                                (input)="actualizarCampo('correo', correoInput.value)" #correoInput>
+                            } @else {
+                            {{ cuenta.correo }}
+                            }
+                        </td>
+
+                        <!-- ROL: NO EDITABLE -->
+                        <td>{{ cuenta.rol }}</td>
+
+                        <!-- ESTADO: ACCIONES SEPARADAS -->
+                        <td>{{ cuenta.estado }}</td>
+
+                        <!-- ACCIONES -->
+                        <td>
+                            <div class="tabla-cuentas__acciones">
+
+                                @if (cuentaEnEdicionId() === cuenta.id) {
+
+                                <button type="button" class="panel__boton" disabled
+                                    title="Disponible cuando implementemos el guardado seguro en NestJS">
+                                    Guardar
+                                </button>
+
+
+                                <button type="button" class="panel__boton" (click)="previsualizarCambios()"
+                                    [disabled]="!hayCambios() || previsualizando()">
+
+                                    {{ previsualizando() ? 'Comprobando...' : 'Previsualizar cambios' }}
+
+                                </button>
+
+
+                                <button type="button" class="panel__boton" (click)="cancelarEdicion()">
+                                    Cancelar
+                                </button>
+
+                                } @else {
+
+                                <button type="button" class="panel__boton" (click)="iniciarEdicion(cuenta)"
+                                    [disabled]="cargando() || solicitandoBloqueo() || cuentaEnEdicionId() !== null">
+                                    Editar
+                                </button>
+
+
+                                }
+
+                            </div>
+
+                            @if (errorPrevisualizacion() && cuentaEnEdicionId() === cuenta.id) {
+                            <p class="tabla-cuentas__mensaje" role="alert">
+                                {{ errorPrevisualizacion() }}
+                            </p>
+                            }
+
+                            @if (previsualizacion(); as resultado) {
+
+                            @if (cuentaEnEdicionId() === cuenta.id) {
+
+                            <div class="tabla-cuentas__previsualizacion" role="status">
+
+                                <strong>Resultado de la previsualización</strong>
+
+                                <p>
+                                    Nombre:
+                                    {{ resultado.camposModificados.nombre ? 'Modificado' : 'Sin cambios' }}
+                                </p>
+
+                                <p>
+                                    Apellidos:
+                                    {{ resultado.camposModificados.apellidos ? 'Modificados' : 'Sin cambios' }}
+                                </p>
+
+                                <p>
+                                    Correo:
+                                    {{ resultado.camposModificados.correo ? 'Modificado' : 'Sin cambios' }}
+                                </p>
+
+                                @if (resultado.requiereVerificacionCorreo) {
+                                <p>
+                                    El nuevo correo electrónico requerirá verificación.
+                                </p>
+                                }
+
+                                <p>Los cambios todavía no se han guardado.</p>
+
+                            </div>
+
+                            }
+
+                            }
+
+
+
+                        </td>
+
+                    </tr>
+
+                    }
+
+                </tbody>
+
+
+
+            </table>
+
+        </div>
+
+
+        @if (mensajeError()) {
+        <p class="panel__aviso-error" role="alert">
+            {{ mensajeError() }}
+        </p>
+        }
+
+        @if (cargando()) {
+        <p class="panel-pagina__mensaje" role="status">
+            Cargando cuentas...
+        </p>
+        } @else if (!mensajeError() && cuentasFiltradas().length === 0) {
+        <p class="panel-pagina__mensaje" role="status">
+            No se han encontrado cuentas.
+        </p>
+        }
+
+    </section>
+
+</div>

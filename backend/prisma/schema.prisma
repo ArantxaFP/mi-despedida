@@ -687,15 +687,89 @@ model cuentas {
   correo                  String                    @unique(map: "cuentas_correo_unico") @db.VarChar
   rol                     String                    @default("administrador") @db.VarChar
   estado                  String                    @default("pendiente_verificacion") @db.VarChar
+  
+  // Versión compartida para controlar las modificaciones realizadas por el administrador titular y los superadministradores.
+  version                 Int                       @default(1)
+
+  
   fecha_registro          DateTime                  @default(now()) @db.Timestamptz(6)
   fecha_suspension        DateTime?                 @db.Timestamptz(6)
   motivo_suspension       String?
   fecha_cierre            DateTime?                 @db.Timestamptz(6)
+  
+  
+  // Bloqueo de edición que puede tener esta cuenta
+  bloqueo_edicion        bloqueos_edicion_cuentas?  @relation("CuentaBloqueada")
+
+  // Bloqueos adquiridos por este usuario como editor
+  bloqueos_como_editor   bloqueos_edicion_cuentas[] @relation("EditorCuenta")
+  
   contactos_destinatarios contactos_destinatarios[]
   users                   users                     @relation(fields: [id], references: [id], onUpdate: NoAction, map: "cuentas_usuario_id_fkey")
 
   @@schema("public")
 }
+
+
+/// Tabla de control de ediciones de cuentas
+/// El administrador titular tiene prioridad sobre los superadminis.
+/// Los bloqueos duran cinco minutos y pueden renovarse.
+model bloqueos_edicion_cuentas {
+  cuenta_id        String   @id @db.Uuid
+  editor_id        String   @db.Uuid
+  rol_editor       String   @db.VarChar(20)
+  token_hash       String   @unique @db.VarChar(64)
+  version_inicio   Int
+
+  fecha_inicio     DateTime @default(now()) @db.Timestamptz(6)
+  fecha_renovacion DateTime @default(now()) @db.Timestamptz(6)
+  fecha_caducidad  DateTime @default(dbgenerated("(now() + '5 minutes'::interval)")) @db.Timestamptz(6)
+
+  // Cuenta cuyos datos están siendo editados
+  cuenta cuentas @relation("CuentaBloqueada", fields: [cuenta_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  // Usuario que ha adquirido el bloqueo
+  editor cuentas @relation("EditorCuenta", fields: [editor_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([fecha_caducidad], map: "bloqueos_cuentas_caducidad_idx")
+  @@index([editor_id], map: "bloqueos_cuentas_editor_idx")
+  @@schema("public")
+}
+
+
+/// Auditoría de operaciones realizadas sobre las cuentas
+model auditoria_operaciones_cuentas {
+  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+
+  // Identificadores conservados para las tareas de auditoría
+  cuenta_afectada_id String   @db.Uuid
+  actor_id           String?  @db.Uuid
+
+  // Información de la operación
+  rol_actor          String   @db.VarChar(20)
+  accion             String   @db.VarChar(60)
+  resultado          String   @db.VarChar(20)
+
+  // Nombres de campos modificados, nunca sus valores
+  campos_modificados String[] @default([])
+  motivo_codigo      String?  @db.VarChar(60)
+
+  // Versiones anteriores y posteriores a la operación
+  version_anterior    Int?
+  version_nueva       Int?
+
+  // Momento en que se registra la operación
+  fecha_evento        DateTime @default(now()) @db.Timestamptz(6)
+
+  // Índices para consulta y gestión de la conservación
+  @@index([cuenta_afectada_id, fecha_evento(sort: Desc)], map: "auditoria_cuentas_cuenta_fecha_idx")
+  @@index([actor_id, fecha_evento(sort: Desc)], map: "auditoria_cuentas_actor_fecha_idx")
+  @@index([fecha_evento], map: "auditoria_cuentas_fecha_idx")
+
+  @@schema("public")
+}
+
+
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.

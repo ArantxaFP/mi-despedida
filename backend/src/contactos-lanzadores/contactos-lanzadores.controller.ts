@@ -37,6 +37,13 @@ export class ContactosLanzadoresController {
             );
         }
 
+        // Todas las operaciones privadas requieren que el correo del administrador esté verificado
+        if (!data.user.email_confirmed_at) {
+            throw new UnauthorizedException(
+                'Debes verificar tu correo electrónico.'
+            );
+        }
+
         return data.user;
     }
 

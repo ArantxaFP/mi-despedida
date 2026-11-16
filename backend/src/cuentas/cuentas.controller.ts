@@ -1,7 +1,11 @@
-import { Body, Controller, Headers, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Headers, Patch, Post, Get, Param, ParseUUIDPipe, ValidationPipe } from '@nestjs/common';
 import { CuentasService } from './cuentas.service';
+
 import { RegistrarCuentaDto } from './dto/registrar-cuenta.dto';
 import { ActualizarDatosCuentaDto } from './dto/actualizar-datos-cuenta.dto';
+import { EditarCuentaSuperadminDto } from './dto/editar-cuenta-superadmin.dto';
+import { CredencialBloqueoDto } from './dto/credencial-bloqueo.dto';
+import { ActualizarDatosPerfilBloqueoDto } from './dto/actualizar-datos-perfil-bloqueo.dto';
 
 @Controller('cuentas')
 export class CuentasController {
@@ -29,6 +33,170 @@ export class CuentasController {
         return this.cuentasService.sincronizar(autorizacion);
     }
 
+    // Consultar el rol y el estado de la cuenta autenticada.
+    // Se utilizará para dirigir al usuario a su panel correspondiente.
+    @Get('mi-acceso')
+    async obtenerMiAcceso(
+        @Headers('authorization') autorizacion?: string
+    ) {
+        return this.cuentasService.obtenerMiAcceso(autorizacion);
+    }
+
+    // Listado de cuentas exclusivo del superadministrador
+    @Get('superadmin/listado')
+    async listarCuentasSuperadministrador(
+        @Headers('authorization') autorizacion?: string
+    ) {
+        return this.cuentasService.listarCuentasSuperadministrador(
+            autorizacion
+        );
+    }
+
+    // Solo permite consultar los cambios propuestos.
+    // No guarda modificaciones en la base de datos.
+    @Post('superadmin/cuentas/:id/previsualizar-edicion')
+    async previsualizarEdicionSuperadministrador(
+        @Param('id', new ParseUUIDPipe({ version: 'all' }))
+        cuentaId: string,
+
+        @Body(new ValidationPipe({
+            whitelist: true,
+            forbidNonWhitelisted: true,
+            transform: true
+        }))
+        datos: EditarCuentaSuperadminDto,
+
+        @Headers('authorization')
+        autorizacion?: string
+    ) {
+        return this.cuentasService
+            .previsualizarEdicionCuentaSuperadministrador(
+                autorizacion,
+                cuentaId,
+                datos
+            );
+    }
+
+
+    @Post('superadmin/cuentas/:id/bloqueo')
+    async adquirirBloqueoEdicionSuperadministrador(
+        @Param('id', new ParseUUIDPipe({ version: 'all' }))
+        cuentaId: string,
+        @Headers('authorization') autorizacion?: string
+    ) {
+        return this.cuentasService.adquirirBloqueoEdicionSuperadministrador(
+            autorizacion,
+            cuentaId
+        );
+    }
+
+    @Post('superadmin/cuentas/:id/bloqueo/renovar')
+    async renovarBloqueoEdicionSuperadministrador(
+        @Param('id', new ParseUUIDPipe({ version: 'all' }))
+        cuentaId: string,
+        @Body(new ValidationPipe({
+            whitelist: true,
+            forbidNonWhitelisted: true,
+            transform: true
+        }))
+        datos: CredencialBloqueoDto,
+        @Headers('authorization') autorizacion?: string
+    ) {
+        return this.cuentasService.renovarBloqueoEdicionSuperadministrador(
+            autorizacion,
+            cuentaId,
+            datos.token
+        );
+    }
+
+    @Post('superadmin/cuentas/:id/bloqueo/liberar')
+    async liberarBloqueoEdicionSuperadministrador(
+        @Param('id', new ParseUUIDPipe({ version: 'all' }))
+        cuentaId: string,
+        @Body(new ValidationPipe({
+            whitelist: true,
+            forbidNonWhitelisted: true,
+            transform: true
+        }))
+        datos: CredencialBloqueoDto,
+        @Headers('authorization') autorizacion?: string
+    ) {
+        return this.cuentasService.liberarBloqueoEdicionSuperadministrador(
+            autorizacion,
+            cuentaId,
+            datos.token
+        );
+    }
+
+    // Solicitar un bloqueo prioritario para editar el perfil
+    @Post('edicion/:id/bloqueo')
+    async adquirirBloqueoEdicionPerfil(
+        @Param('id', new ParseUUIDPipe({ version: 'all' }))
+        cuentaId: string,
+
+        @Headers('authorization')
+        autorizacion?: string
+    ) {
+        return this.cuentasService.adquirirBloqueoEdicionPerfil(
+            autorizacion,
+            cuentaId
+        );
+    }
+
+
+    // Renovar el bloqueo de edición del administrador titular.
+    @Post('edicion/:id/bloqueo/renovar')
+    async renovarBloqueoEdicionPerfil(
+        @Param('id', new ParseUUIDPipe({ version: 'all' }))
+        cuentaId: string,
+
+        @Body(new ValidationPipe({
+            whitelist: true,
+            forbidNonWhitelisted: true,
+            transform: true
+        }))
+        datos: CredencialBloqueoDto,
+
+        @Headers('authorization')
+        autorizacion?: string
+    ) {
+        return this.cuentasService.renovarBloqueoEdicionPerfil(
+            autorizacion,
+            cuentaId,
+            datos.token
+        );
+    }
+
+
+    // Liberar el bloqueo cuando se cancela la edición
+    @Post('edicion/:id/bloqueo/liberar')
+    async liberarBloqueoEdicionPerfil(
+        @Param('id', new ParseUUIDPipe({ version: 'all' }))
+        cuentaId: string,
+
+        @Body(new ValidationPipe({
+            whitelist: true,
+            forbidNonWhitelisted: true,
+            transform: true
+        }))
+        datos: CredencialBloqueoDto,
+
+        @Headers('authorization')
+        autorizacion?: string
+    ) {
+        return this.cuentasService.liberarBloqueoEdicionPerfil(
+            autorizacion,
+            cuentaId,
+            datos.token
+        );
+    }
+
+    @Get('perfil')
+    async obtenerDatosPerfil(
+        @Headers('authorization') autorizacion?: string
+    ) {
+        return this.cuentasService.obtenerDatosPerfil(autorizacion);
+    }
 
     // Actualizar nombre y apellidos del administrador
     @Patch('perfil')
@@ -40,6 +208,22 @@ export class CuentasController {
             autorizacion,
             datos.nombre,
             datos.apellidos
+        );
+    }
+
+    @Patch('perfil/datos-con-bloqueo')
+    async actualizarDatosPerfilBloqueo(
+        @Headers('authorization') autorizacion: string | undefined,
+        @Body(new ValidationPipe({
+            whitelist: true,
+            forbidNonWhitelisted: true,
+            transform: true
+        }))
+        datos: ActualizarDatosPerfilBloqueoDto
+    ) {
+        return this.cuentasService.actualizarDatosPerfilConBloqueo(
+            autorizacion,
+            datos
         );
     }
 

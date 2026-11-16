@@ -13,6 +13,7 @@ import { ContactosLanzadores } from './paginas/panel/03-contactos-lanzadores/con
 import { ContactosDestinatarios } from './paginas/panel/04-contactos-destinatarios/contactos-destinatarios';
 
 import { autenticacionGuard } from './guards/autenticacion.guard';
+import { superadministradorGuard } from './guards/superadministrador.guard';
 
 export const routes: Routes = [
   {
@@ -45,6 +46,11 @@ export const routes: Routes = [
     path: 'panel',
     component: EstructuraPanel,
     canActivate: [autenticacionGuard],
+    canActivateChild: [autenticacionGuard],
+    data: {
+      tipoPanel: 'administrador'
+    },
+
     children: [
       {
         path: '',
@@ -68,6 +74,39 @@ export const routes: Routes = [
         component: ContactosDestinatarios
       }
     ]
+  },
+
+  // PANEL ACCESO SUPERADMINISTRADOR
+  {
+    path: 'superadmin',
+    component: EstructuraPanel,
+    canActivate: [superadministradorGuard],
+    canActivateChild: [superadministradorGuard],
+    data: {
+      tipoPanel: 'superadministrador'
+    },
+    children: [
+      {
+        path: '',
+        redirectTo: 'dashboard',
+        pathMatch: 'full'
+      },
+      {
+        path: 'dashboard',
+        loadComponent: () =>
+          import('./paginas/panel/05-superadm-dashboard/dashboard-superadmin')
+            .then(m => m.DashboardSuperadmin)
+      },
+
+      {
+        path: 'cuentas',
+        loadComponent: () =>
+          import('./paginas/panel/06-superadm-cuentas/cuentas-superadmin')
+            .then(m => m.CuentasSuperadmin)
+      }
+
+    ]
+
   },
 
   {

@@ -1,0 +1,41 @@
+<nav class="menu-lateral" aria-label="Menú de superadministración">
+
+  <ul class="menu-lateral__lista">
+
+    <!-- INICIO -->
+    <li>
+      <a class="menu-lateral__enlace" routerLink="/superadmin/dashboard" routerLinkActive="activo"
+        [routerLinkActiveOptions]="{ exact: true }" ariaCurrentWhenActive="page">
+        Inicio
+      </a>
+    </li>
+
+
+    <!-- GESTIÓN DE CUENTAS -->
+    <li>
+      <a class="menu-lateral__enlace" routerLink="/superadmin/cuentas" routerLinkActive="activo"
+        ariaCurrentWhenActive="page">
+        Gestión de cuentas
+      </a>
+    </li>
+
+
+    <!-- CERRAR SESIÓN -->
+    <li>
+      <button id="boton-cerrar-sesion-superadmin" class="menu-lateral__enlace" type="button" (click)="cerrarSesion()"
+        [disabled]="cerrandoSesion()">
+
+        {{ cerrandoSesion() ? 'Cerrando sesión...' : 'Cerrar sesión' }}
+
+      </button>
+    </li>
+
+  </ul>
+
+  @if (mensajeError()) {
+  <p id="error-cerrar-sesion-superadmin" class="mensaje-error" role="alert">
+    {{ mensajeError() }}
+  </p>
+  }
+
+</nav>

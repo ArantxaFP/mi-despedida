@@ -4,13 +4,16 @@ import { PrismaModule } from '../prisma/prisma.module';
 import { CuentasController } from './cuentas.controller';
 import { CuentasService } from './cuentas.service';
 
+import { BloqueosEdicionCuentasService } from './bloqueos-edicion-cuentas.service';
+
 @Module({
     imports: [
         SupabaseModule,
         PrismaModule
     ],
     controllers: [CuentasController],
-    providers: [CuentasService],
+    providers: [CuentasService,
+    BloqueosEdicionCuentasService],
     exports: [CuentasService]
 })
 export class CuentasModule { }

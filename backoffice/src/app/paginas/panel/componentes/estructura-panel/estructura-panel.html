@@ -13,7 +13,7 @@
 
             </button>
 
-            <a class="cabecera-panel__marca" routerLink="/panel/dashboard">
+            <a class="cabecera-panel__marca" [routerLink]="esSuperadmin ? '/superadmin/dashboard' : '/panel/dashboard'">
                 MI DESPEDIDA
             </a>
 
@@ -31,10 +31,16 @@
         <aside id="navegacion-panel" class="panel__lateral" [class.panel__lateral--abierto]="menuAbierto()"
             [hidden]="!menuAbierto()">
 
+            @if (esSuperadmin) {
+            <app-menu-superadmin></app-menu-superadmin>
+            } @else {
             <app-menu-lateral></app-menu-lateral>
+            }
 
             <p class="panel__lema">
-                Prepara tu despedida a tu ritmo.
+                {{ esSuperadmin
+                ? 'Gestión y supervisión de Mi Despedida.'
+                : 'Prepara tu despedida a tu ritmo.' }}
             </p>
 
         </aside>

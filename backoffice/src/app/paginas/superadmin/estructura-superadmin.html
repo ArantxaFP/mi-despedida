@@ -1,0 +1,56 @@
+<div class="panel">
+
+  <header class="cabecera-panel">
+
+    <div class="cabecera-panel__izquierda">
+
+      <button id="boton-menu-superadmin" class="cabecera-panel__menu" type="button" (click)="cambiarEstadoMenu()"
+        [attr.aria-expanded]="menuAbierto()" aria-controls="navegacion-superadmin"
+        [attr.aria-label]="menuAbierto() ? 'Ocultar menú' : 'Mostrar menú'">
+
+        <span></span>
+        <span></span>
+        <span></span>
+
+      </button>
+
+      <a class="cabecera-panel__marca" routerLink="/superadmin">
+        MI DESPEDIDA
+      </a>
+
+    </div>
+
+    <!-- ACCESO A LA WEB COMERCIAL -->
+    <a id="enlace-visita-web" class="cabecera-panel__enlace-web" [href]="urlWebComercial" target="_blank"
+      rel="noopener noreferrer">
+      Visita la web
+    </a>
+
+  </header>
+
+  <div class="panel__contenido" [class.panel__contenido--sin-menu]="!menuAbierto()">
+
+    <aside id="navegacion-superadmin" class="panel__lateral" [class.panel__lateral--abierto]="menuAbierto()"
+      [hidden]="!menuAbierto()">
+
+      <!-- El menú del superadministrador -->
+
+      <app-menu-superadmin></app-menu-superadmin>
+
+      <p class="panel__lema">
+        Gestión y supervisión de Mi Despedida.
+      </p>
+
+    </aside>
+
+    <main id="contenido-principal" class="panel__principal">
+
+      <h1>Panel de superadministración</h1>
+
+      <router-outlet></router-outlet>
+
+    </main>
+
+  </div>
+
+</div>

@@ -3,6 +3,12 @@ import { Router, RouterLink } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Autenticacion } from '../../servicios/autenticacion';
 import { enlaces } from '../../configuracion/enlaces';
+import { configuracionBackend } from '../../configuracion/backend';
+
+interface DatosAcceso {
+  rol: string;
+  estado: string;
+}
 
 @Component({
   selector: 'app-acceso',
@@ -37,6 +43,47 @@ export class Acceso {
     this.contrasenaVisible = !this.contrasenaVisible;
   }
 
+  // Consulta el rol y el estado de la cuenta autenticada.
+  // Si todavía no existe el registro en PostgreSQL, se devuelve null
+  private async consultarAccesoActual(): Promise<DatosAcceso | null> {
+    const token = await this.autenticacion.obtenerTokenAcceso();
+
+    if (!token) {
+      throw new Error('No existe una sesión válida.');
+    }
+
+    const respuesta = await fetch(
+      `${configuracionBackend.url}/cuentas/mi-acceso`,
+      {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`
+        },
+        cache: 'no-store'
+      }
+    );
+
+    // El servicio devuelve 403 cuando no existe el registro operativo
+    if (respuesta.status === 403) {
+      return null;
+    }
+
+    if (!respuesta.ok) {
+      throw new Error('No se ha podido consultar el acceso.');
+    }
+
+    const datos: DatosAcceso = await respuesta.json();
+
+    if (
+      typeof datos.rol !== 'string' ||
+      typeof datos.estado !== 'string'
+    ) {
+      throw new Error('La respuesta de acceso no es válida.');
+    }
+
+    return datos;
+  }
+
   async iniciarSesion(): Promise<void> {
     this.mensajeAcceso.set('');
 
@@ -67,11 +114,74 @@ export class Acceso {
       }
 
       // Comprobar que NestJS reconoce la cuenta y que su estado permite acceder al backoffice.
-      let estadoCuenta: string;
+      // Comprobar el rol y el estado para acceder al panel correspondiente.
+      let destinoPanel: string;
 
       try {
-        estadoCuenta =
-          await this.autenticacion.sincronizarCuenta();
+        const accesoInicial = await this.consultarAccesoActual();
+
+        if (accesoInicial?.rol === 'superadministrador') {
+
+          // Los superadministradores tienen un procedimiento propio de activación mediante invitación.
+          // No ejecutar sincronizarCuenta() para estas cuentas.
+          if (accesoInicial.estado !== 'activa') {
+            await this.autenticacion.cerrarSesion();
+
+            this.mensajeAcceso.set(
+              'Tu cuenta todavía no está habilitada para acceder al panel.'
+            );
+            return;
+          }
+
+          destinoPanel = '/superadmin';
+
+        } else {
+
+          // El registro público solo permite cuentas de administrador
+          if (
+            accesoInicial &&
+            accesoInicial.rol !== 'administrador'
+          ) {
+            await this.autenticacion.cerrarSesion();
+
+            this.mensajeAcceso.set(
+              'Tu cuenta no dispone de acceso a este panel.'
+            );
+            return;
+          }
+
+          // Sincronización y recuperación de registros
+          const estadoCuenta =
+            await this.autenticacion.sincronizarCuenta();
+
+          if (estadoCuenta !== 'activa') {
+            await this.autenticacion.cerrarSesion();
+
+            this.mensajeAcceso.set(
+              'Tu cuenta no está habilitada para acceder al panel.'
+            );
+            return;
+          }
+
+          // Comprobar nuevamente el rol después de la sincronización
+          const accesoFinal = await this.consultarAccesoActual();
+
+          if (
+            !accesoFinal ||
+            accesoFinal.rol !== 'administrador' ||
+            accesoFinal.estado !== 'activa'
+          ) {
+            await this.autenticacion.cerrarSesion();
+
+            this.mensajeAcceso.set(
+              'No se ha podido confirmar el acceso a tu panel.'
+            );
+            return;
+          }
+
+          destinoPanel = '/panel/dashboard';
+        }
+
       } catch {
         await this.autenticacion.cerrarSesion();
 
@@ -81,22 +191,14 @@ export class Acceso {
         return;
       }
 
-      if (estadoCuenta !== 'activa') {
-        await this.autenticacion.cerrarSesion();
-
-        this.mensajeAcceso.set(
-          'Tu cuenta no está habilitada para acceder al panel.'
-        );
-        return;
-      }
-
       // Inicio de sesión correcto y cuenta activa:
-      // acceder al panel privado.
+      // acceder al panel correspondiente según el rol.
       const navegacionCorrecta =
         await this.router.navigateByUrl(
-          '/panel/dashboard',
+          destinoPanel,
           { replaceUrl: true }
         );
+
 
       if (!navegacionCorrecta) {
         this.mensajeAcceso.set(

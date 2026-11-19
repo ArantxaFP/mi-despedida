@@ -24,7 +24,7 @@ export class Perfil implements OnInit, OnDestroy {
     readonly solicitandoBloqueo = signal(false);
 
     // Activar en la base de pruebas cuando el SQL y la renovación estén preparados
-    private readonly usarBloqueoPerfil = false;
+    private readonly usarBloqueoPerfil = true;
     private bloqueoPerfil: BloqueoEdicionCuenta | null = null;
     private temporizadorRenovacion: number | undefined;
     private perfilDestruido = false;

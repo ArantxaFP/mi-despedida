@@ -84,6 +84,8 @@ export const ModelName = {
   invitaciones_lanzadores: 'invitaciones_lanzadores',
   verificaciones_invitaciones_lanzadores: 'verificaciones_invitaciones_lanzadores',
   cuentas: 'cuentas',
+  bloqueos_edicion_cuentas: 'bloqueos_edicion_cuentas',
+  auditoria_operaciones_cuentas: 'auditoria_operaciones_cuentas',
   historico_cierre_cuentas: 'historico_cierre_cuentas',
   contactos_destinatarios: 'contactos_destinatarios',
   mensajes_destinatarios: 'mensajes_destinatarios'
@@ -619,6 +621,7 @@ export const CuentasScalarFieldEnum = {
   correo: 'correo',
   rol: 'rol',
   estado: 'estado',
+  version: 'version',
   fecha_registro: 'fecha_registro',
   fecha_suspension: 'fecha_suspension',
   motivo_suspension: 'motivo_suspension',
@@ -626,6 +629,37 @@ export const CuentasScalarFieldEnum = {
 } as const
 
 export type CuentasScalarFieldEnum = (typeof CuentasScalarFieldEnum)[keyof typeof CuentasScalarFieldEnum]
+
+
+export const Bloqueos_edicion_cuentasScalarFieldEnum = {
+  cuenta_id: 'cuenta_id',
+  editor_id: 'editor_id',
+  rol_editor: 'rol_editor',
+  token_hash: 'token_hash',
+  version_inicio: 'version_inicio',
+  fecha_inicio: 'fecha_inicio',
+  fecha_renovacion: 'fecha_renovacion',
+  fecha_caducidad: 'fecha_caducidad'
+} as const
+
+export type Bloqueos_edicion_cuentasScalarFieldEnum = (typeof Bloqueos_edicion_cuentasScalarFieldEnum)[keyof typeof Bloqueos_edicion_cuentasScalarFieldEnum]
+
+
+export const Auditoria_operaciones_cuentasScalarFieldEnum = {
+  id: 'id',
+  cuenta_afectada_id: 'cuenta_afectada_id',
+  actor_id: 'actor_id',
+  rol_actor: 'rol_actor',
+  accion: 'accion',
+  resultado: 'resultado',
+  campos_modificados: 'campos_modificados',
+  motivo_codigo: 'motivo_codigo',
+  version_anterior: 'version_anterior',
+  version_nueva: 'version_nueva',
+  fecha_evento: 'fecha_evento'
+} as const
+
+export type Auditoria_operaciones_cuentasScalarFieldEnum = (typeof Auditoria_operaciones_cuentasScalarFieldEnum)[keyof typeof Auditoria_operaciones_cuentasScalarFieldEnum]
 
 
 export const Historico_cierre_cuentasScalarFieldEnum = {

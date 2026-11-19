@@ -21,8 +21,18 @@ export type cuentasModel = runtime.Types.Result.DefaultSelection<Prisma.$cuentas
 
 export type AggregateCuentas = {
   _count: CuentasCountAggregateOutputType | null
+  _avg: CuentasAvgAggregateOutputType | null
+  _sum: CuentasSumAggregateOutputType | null
   _min: CuentasMinAggregateOutputType | null
   _max: CuentasMaxAggregateOutputType | null
+}
+
+export type CuentasAvgAggregateOutputType = {
+  version: number | null
+}
+
+export type CuentasSumAggregateOutputType = {
+  version: number | null
 }
 
 export type CuentasMinAggregateOutputType = {
@@ -32,6 +42,7 @@ export type CuentasMinAggregateOutputType = {
   correo: string | null
   rol: string | null
   estado: string | null
+  version: number | null
   fecha_registro: Date | null
   fecha_suspension: Date | null
   motivo_suspension: string | null
@@ -45,6 +56,7 @@ export type CuentasMaxAggregateOutputType = {
   correo: string | null
   rol: string | null
   estado: string | null
+  version: number | null
   fecha_registro: Date | null
   fecha_suspension: Date | null
   motivo_suspension: string | null
@@ -58,6 +70,7 @@ export type CuentasCountAggregateOutputType = {
   correo: number
   rol: number
   estado: number
+  version: number
   fecha_registro: number
   fecha_suspension: number
   motivo_suspension: number
@@ -66,6 +79,14 @@ export type CuentasCountAggregateOutputType = {
 }
 
 
+export type CuentasAvgAggregateInputType = {
+  version?: true
+}
+
+export type CuentasSumAggregateInputType = {
+  version?: true
+}
+
 export type CuentasMinAggregateInputType = {
   id?: true
   nombre?: true
@@ -73,6 +94,7 @@ export type CuentasMinAggregateInputType = {
   correo?: true
   rol?: true
   estado?: true
+  version?: true
   fecha_registro?: true
   fecha_suspension?: true
   motivo_suspension?: true
@@ -86,6 +108,7 @@ export type CuentasMaxAggregateInputType = {
   correo?: true
   rol?: true
   estado?: true
+  version?: true
   fecha_registro?: true
   fecha_suspension?: true
   motivo_suspension?: true
@@ -99,6 +122,7 @@ export type CuentasCountAggregateInputType = {
   correo?: true
   rol?: true
   estado?: true
+  version?: true
   fecha_registro?: true
   fecha_suspension?: true
   motivo_suspension?: true
@@ -144,6 +168,18 @@ export type CuentasAggregateArgs<ExtArgs extends runtime.Types.Extensions.Intern
   /**
    * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
    * 
+   * Select which fields to average
+  **/
+  _avg?: CuentasAvgAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
+   * Select which fields to sum
+  **/
+  _sum?: CuentasSumAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
    * Select which fields to find the minimum value
   **/
   _min?: CuentasMinAggregateInputType
@@ -174,6 +210,8 @@ export type cuentasGroupByArgs<ExtArgs extends runtime.Types.Extensions.Internal
   take?: number
   skip?: number
   _count?: CuentasCountAggregateInputType | true
+  _avg?: CuentasAvgAggregateInputType
+  _sum?: CuentasSumAggregateInputType
   _min?: CuentasMinAggregateInputType
   _max?: CuentasMaxAggregateInputType
 }
@@ -185,11 +223,14 @@ export type CuentasGroupByOutputType = {
   correo: string
   rol: string
   estado: string
+  version: number
   fecha_registro: Date
   fecha_suspension: Date | null
   motivo_suspension: string | null
   fecha_cierre: Date | null
   _count: CuentasCountAggregateOutputType | null
+  _avg: CuentasAvgAggregateOutputType | null
+  _sum: CuentasSumAggregateOutputType | null
   _min: CuentasMinAggregateOutputType | null
   _max: CuentasMaxAggregateOutputType | null
 }
@@ -219,10 +260,13 @@ export type cuentasWhereInput = {
   correo?: Prisma.StringFilter<"cuentas"> | string
   rol?: Prisma.StringFilter<"cuentas"> | string
   estado?: Prisma.StringFilter<"cuentas"> | string
+  version?: Prisma.IntFilter<"cuentas"> | number
   fecha_registro?: Prisma.DateTimeFilter<"cuentas"> | Date | string
   fecha_suspension?: Prisma.DateTimeNullableFilter<"cuentas"> | Date | string | null
   motivo_suspension?: Prisma.StringNullableFilter<"cuentas"> | string | null
   fecha_cierre?: Prisma.DateTimeNullableFilter<"cuentas"> | Date | string | null
+  bloqueo_edicion?: Prisma.XOR<Prisma.Bloqueos_edicion_cuentasNullableScalarRelationFilter, Prisma.bloqueos_edicion_cuentasWhereInput> | null
+  bloqueos_como_editor?: Prisma.Bloqueos_edicion_cuentasListRelationFilter
   contactos_destinatarios?: Prisma.Contactos_destinatariosListRelationFilter
   users?: Prisma.XOR<Prisma.UsersScalarRelationFilter, Prisma.usersWhereInput>
 }
@@ -234,10 +278,13 @@ export type cuentasOrderByWithRelationInput = {
   correo?: Prisma.SortOrder
   rol?: Prisma.SortOrder
   estado?: Prisma.SortOrder
+  version?: Prisma.SortOrder
   fecha_registro?: Prisma.SortOrder
   fecha_suspension?: Prisma.SortOrderInput | Prisma.SortOrder
   motivo_suspension?: Prisma.SortOrderInput | Prisma.SortOrder
   fecha_cierre?: Prisma.SortOrderInput | Prisma.SortOrder
+  bloqueo_edicion?: Prisma.bloqueos_edicion_cuentasOrderByWithRelationInput
+  bloqueos_como_editor?: Prisma.bloqueos_edicion_cuentasOrderByRelationAggregateInput
   contactos_destinatarios?: Prisma.contactos_destinatariosOrderByRelationAggregateInput
   users?: Prisma.usersOrderByWithRelationInput
 }
@@ -252,10 +299,13 @@ export type cuentasWhereUniqueInput = Prisma.AtLeast<{
   apellidos?: Prisma.StringNullableFilter<"cuentas"> | string | null
   rol?: Prisma.StringFilter<"cuentas"> | string
   estado?: Prisma.StringFilter<"cuentas"> | string
+  version?: Prisma.IntFilter<"cuentas"> | number
   fecha_registro?: Prisma.DateTimeFilter<"cuentas"> | Date | string
   fecha_suspension?: Prisma.DateTimeNullableFilter<"cuentas"> | Date | string | null
   motivo_suspension?: Prisma.StringNullableFilter<"cuentas"> | string | null
   fecha_cierre?: Prisma.DateTimeNullableFilter<"cuentas"> | Date | string | null
+  bloqueo_edicion?: Prisma.XOR<Prisma.Bloqueos_edicion_cuentasNullableScalarRelationFilter, Prisma.bloqueos_edicion_cuentasWhereInput> | null
+  bloqueos_como_editor?: Prisma.Bloqueos_edicion_cuentasListRelationFilter
   contactos_destinatarios?: Prisma.Contactos_destinatariosListRelationFilter
   users?: Prisma.XOR<Prisma.UsersScalarRelationFilter, Prisma.usersWhereInput>
 }, "id" | "correo">
@@ -267,13 +317,16 @@ export type cuentasOrderByWithAggregationInput = {
   correo?: Prisma.SortOrder
   rol?: Prisma.SortOrder
   estado?: Prisma.SortOrder
+  version?: Prisma.SortOrder
   fecha_registro?: Prisma.SortOrder
   fecha_suspension?: Prisma.SortOrderInput | Prisma.SortOrder
   motivo_suspension?: Prisma.SortOrderInput | Prisma.SortOrder
   fecha_cierre?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.cuentasCountOrderByAggregateInput
+  _avg?: Prisma.cuentasAvgOrderByAggregateInput
   _max?: Prisma.cuentasMaxOrderByAggregateInput
   _min?: Prisma.cuentasMinOrderByAggregateInput
+  _sum?: Prisma.cuentasSumOrderByAggregateInput
 }
 
 export type cuentasScalarWhereWithAggregatesInput = {
@@ -286,6 +339,7 @@ export type cuentasScalarWhereWithAggregatesInput = {
   correo?: Prisma.StringWithAggregatesFilter<"cuentas"> | string
   rol?: Prisma.StringWithAggregatesFilter<"cuentas"> | string
   estado?: Prisma.StringWithAggregatesFilter<"cuentas"> | string
+  version?: Prisma.IntWithAggregatesFilter<"cuentas"> | number
   fecha_registro?: Prisma.DateTimeWithAggregatesFilter<"cuentas"> | Date | string
   fecha_suspension?: Prisma.DateTimeNullableWithAggregatesFilter<"cuentas"> | Date | string | null
   motivo_suspension?: Prisma.StringNullableWithAggregatesFilter<"cuentas"> | string | null
@@ -298,10 +352,13 @@ export type cuentasCreateInput = {
   correo: string
   rol?: string
   estado?: string
+  version?: number
   fecha_registro?: Date | string
   fecha_suspension?: Date | string | null
   motivo_suspension?: string | null
   fecha_cierre?: Date | string | null
+  bloqueo_edicion?: Prisma.bloqueos_edicion_cuentasCreateNestedOneWithoutCuentaInput
+  bloqueos_como_editor?: Prisma.bloqueos_edicion_cuentasCreateNestedManyWithoutEditorInput
   contactos_destinatarios?: Prisma.contactos_destinatariosCreateNestedManyWithoutCuentasInput
   users: Prisma.usersCreateNestedOneWithoutCuentasInput
 }
@@ -313,10 +370,13 @@ export type cuentasUncheckedCreateInput = {
   correo: string
   rol?: string
   estado?: string
+  version?: number
   fecha_registro?: Date | string
   fecha_suspension?: Date | string | null
   motivo_suspension?: string | null
   fecha_cierre?: Date | string | null
+  bloqueo_edicion?: Prisma.bloqueos_edicion_cuentasUncheckedCreateNestedOneWithoutCuentaInput
+  bloqueos_como_editor?: Prisma.bloqueos_edicion_cuentasUncheckedCreateNestedManyWithoutEditorInput
   contactos_destinatarios?: Prisma.contactos_destinatariosUncheckedCreateNestedManyWithoutCuentasInput
 }
 
@@ -326,10 +386,13 @@ export type cuentasUpdateInput = {
   correo?: Prisma.StringFieldUpdateOperationsInput | string
   rol?: Prisma.StringFieldUpdateOperationsInput | string
   estado?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
   fecha_registro?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   fecha_suspension?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   motivo_suspension?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fecha_cierre?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  bloqueo_edicion?: Prisma.bloqueos_edicion_cuentasUpdateOneWithoutCuentaNestedInput
+  bloqueos_como_editor?: Prisma.bloqueos_edicion_cuentasUpdateManyWithoutEditorNestedInput
   contactos_destinatarios?: Prisma.contactos_destinatariosUpdateManyWithoutCuentasNestedInput
   users?: Prisma.usersUpdateOneRequiredWithoutCuentasNestedInput
 }
@@ -341,10 +404,13 @@ export type cuentasUncheckedUpdateInput = {
   correo?: Prisma.StringFieldUpdateOperationsInput | string
   rol?: Prisma.StringFieldUpdateOperationsInput | string
   estado?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
   fecha_registro?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   fecha_suspension?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   motivo_suspension?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fecha_cierre?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  bloqueo_edicion?: Prisma.bloqueos_edicion_cuentasUncheckedUpdateOneWithoutCuentaNestedInput
+  bloqueos_como_editor?: Prisma.bloqueos_edicion_cuentasUncheckedUpdateManyWithoutEditorNestedInput
   contactos_destinatarios?: Prisma.contactos_destinatariosUncheckedUpdateManyWithoutCuentasNestedInput
 }
 
@@ -355,6 +421,7 @@ export type cuentasCreateManyInput = {
   correo: string
   rol?: string
   estado?: string
+  version?: number
   fecha_registro?: Date | string
   fecha_suspension?: Date | string | null
   motivo_suspension?: string | null
@@ -367,6 +434,7 @@ export type cuentasUpdateManyMutationInput = {
   correo?: Prisma.StringFieldUpdateOperationsInput | string
   rol?: Prisma.StringFieldUpdateOperationsInput | string
   estado?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
   fecha_registro?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   fecha_suspension?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   motivo_suspension?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -380,6 +448,7 @@ export type cuentasUncheckedUpdateManyInput = {
   correo?: Prisma.StringFieldUpdateOperationsInput | string
   rol?: Prisma.StringFieldUpdateOperationsInput | string
   estado?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
   fecha_registro?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   fecha_suspension?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   motivo_suspension?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -398,10 +467,15 @@ export type cuentasCountOrderByAggregateInput = {
   correo?: Prisma.SortOrder
   rol?: Prisma.SortOrder
   estado?: Prisma.SortOrder
+  version?: Prisma.SortOrder
   fecha_registro?: Prisma.SortOrder
   fecha_suspension?: Prisma.SortOrder
   motivo_suspension?: Prisma.SortOrder
   fecha_cierre?: Prisma.SortOrder
+}
+
+export type cuentasAvgOrderByAggregateInput = {
+  version?: Prisma.SortOrder
 }
 
 export type cuentasMaxOrderByAggregateInput = {
@@ -411,6 +485,7 @@ export type cuentasMaxOrderByAggregateInput = {
   correo?: Prisma.SortOrder
   rol?: Prisma.SortOrder
   estado?: Prisma.SortOrder
+  version?: Prisma.SortOrder
   fecha_registro?: Prisma.SortOrder
   fecha_suspension?: Prisma.SortOrder
   motivo_suspension?: Prisma.SortOrder
@@ -424,10 +499,15 @@ export type cuentasMinOrderByAggregateInput = {
   correo?: Prisma.SortOrder
   rol?: Prisma.SortOrder
   estado?: Prisma.SortOrder
+  version?: Prisma.SortOrder
   fecha_registro?: Prisma.SortOrder
   fecha_suspension?: Prisma.SortOrder
   motivo_suspension?: Prisma.SortOrder
   fecha_cierre?: Prisma.SortOrder
+}
+
+export type cuentasSumOrderByAggregateInput = {
+  version?: Prisma.SortOrder
 }
 
 export type CuentasScalarRelationFilter = {
@@ -467,6 +547,34 @@ export type cuentasUncheckedUpdateOneWithoutUsersNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.cuentasUpdateToOneWithWhereWithoutUsersInput, Prisma.cuentasUpdateWithoutUsersInput>, Prisma.cuentasUncheckedUpdateWithoutUsersInput>
 }
 
+export type cuentasCreateNestedOneWithoutBloqueo_edicionInput = {
+  create?: Prisma.XOR<Prisma.cuentasCreateWithoutBloqueo_edicionInput, Prisma.cuentasUncheckedCreateWithoutBloqueo_edicionInput>
+  connectOrCreate?: Prisma.cuentasCreateOrConnectWithoutBloqueo_edicionInput
+  connect?: Prisma.cuentasWhereUniqueInput
+}
+
+export type cuentasCreateNestedOneWithoutBloqueos_como_editorInput = {
+  create?: Prisma.XOR<Prisma.cuentasCreateWithoutBloqueos_como_editorInput, Prisma.cuentasUncheckedCreateWithoutBloqueos_como_editorInput>
+  connectOrCreate?: Prisma.cuentasCreateOrConnectWithoutBloqueos_como_editorInput
+  connect?: Prisma.cuentasWhereUniqueInput
+}
+
+export type cuentasUpdateOneRequiredWithoutBloqueo_edicionNestedInput = {
+  create?: Prisma.XOR<Prisma.cuentasCreateWithoutBloqueo_edicionInput, Prisma.cuentasUncheckedCreateWithoutBloqueo_edicionInput>
+  connectOrCreate?: Prisma.cuentasCreateOrConnectWithoutBloqueo_edicionInput
+  upsert?: Prisma.cuentasUpsertWithoutBloqueo_edicionInput
+  connect?: Prisma.cuentasWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.cuentasUpdateToOneWithWhereWithoutBloqueo_edicionInput, Prisma.cuentasUpdateWithoutBloqueo_edicionInput>, Prisma.cuentasUncheckedUpdateWithoutBloqueo_edicionInput>
+}
+
+export type cuentasUpdateOneRequiredWithoutBloqueos_como_editorNestedInput = {
+  create?: Prisma.XOR<Prisma.cuentasCreateWithoutBloqueos_como_editorInput, Prisma.cuentasUncheckedCreateWithoutBloqueos_como_editorInput>
+  connectOrCreate?: Prisma.cuentasCreateOrConnectWithoutBloqueos_como_editorInput
+  upsert?: Prisma.cuentasUpsertWithoutBloqueos_como_editorInput
+  connect?: Prisma.cuentasWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.cuentasUpdateToOneWithWhereWithoutBloqueos_como_editorInput, Prisma.cuentasUpdateWithoutBloqueos_como_editorInput>, Prisma.cuentasUncheckedUpdateWithoutBloqueos_como_editorInput>
+}
+
 export type cuentasCreateNestedOneWithoutContactos_destinatariosInput = {
   create?: Prisma.XOR<Prisma.cuentasCreateWithoutContactos_destinatariosInput, Prisma.cuentasUncheckedCreateWithoutContactos_destinatariosInput>
   connectOrCreate?: Prisma.cuentasCreateOrConnectWithoutContactos_destinatariosInput
@@ -487,10 +595,13 @@ export type cuentasCreateWithoutUsersInput = {
   correo: string
   rol?: string
   estado?: string
+  version?: number
   fecha_registro?: Date | string
   fecha_suspension?: Date | string | null
   motivo_suspension?: string | null
   fecha_cierre?: Date | string | null
+  bloqueo_edicion?: Prisma.bloqueos_edicion_cuentasCreateNestedOneWithoutCuentaInput
+  bloqueos_como_editor?: Prisma.bloqueos_edicion_cuentasCreateNestedManyWithoutEditorInput
   contactos_destinatarios?: Prisma.contactos_destinatariosCreateNestedManyWithoutCuentasInput
 }
 
@@ -500,10 +611,13 @@ export type cuentasUncheckedCreateWithoutUsersInput = {
   correo: string
   rol?: string
   estado?: string
+  version?: number
   fecha_registro?: Date | string
   fecha_suspension?: Date | string | null
   motivo_suspension?: string | null
   fecha_cierre?: Date | string | null
+  bloqueo_edicion?: Prisma.bloqueos_edicion_cuentasUncheckedCreateNestedOneWithoutCuentaInput
+  bloqueos_como_editor?: Prisma.bloqueos_edicion_cuentasUncheckedCreateNestedManyWithoutEditorInput
   contactos_destinatarios?: Prisma.contactos_destinatariosUncheckedCreateNestedManyWithoutCuentasInput
 }
 
@@ -529,10 +643,13 @@ export type cuentasUpdateWithoutUsersInput = {
   correo?: Prisma.StringFieldUpdateOperationsInput | string
   rol?: Prisma.StringFieldUpdateOperationsInput | string
   estado?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
   fecha_registro?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   fecha_suspension?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   motivo_suspension?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fecha_cierre?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  bloqueo_edicion?: Prisma.bloqueos_edicion_cuentasUpdateOneWithoutCuentaNestedInput
+  bloqueos_como_editor?: Prisma.bloqueos_edicion_cuentasUpdateManyWithoutEditorNestedInput
   contactos_destinatarios?: Prisma.contactos_destinatariosUpdateManyWithoutCuentasNestedInput
 }
 
@@ -542,10 +659,173 @@ export type cuentasUncheckedUpdateWithoutUsersInput = {
   correo?: Prisma.StringFieldUpdateOperationsInput | string
   rol?: Prisma.StringFieldUpdateOperationsInput | string
   estado?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
   fecha_registro?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   fecha_suspension?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   motivo_suspension?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fecha_cierre?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  bloqueo_edicion?: Prisma.bloqueos_edicion_cuentasUncheckedUpdateOneWithoutCuentaNestedInput
+  bloqueos_como_editor?: Prisma.bloqueos_edicion_cuentasUncheckedUpdateManyWithoutEditorNestedInput
+  contactos_destinatarios?: Prisma.contactos_destinatariosUncheckedUpdateManyWithoutCuentasNestedInput
+}
+
+export type cuentasCreateWithoutBloqueo_edicionInput = {
+  nombre: string
+  apellidos?: string | null
+  correo: string
+  rol?: string
+  estado?: string
+  version?: number
+  fecha_registro?: Date | string
+  fecha_suspension?: Date | string | null
+  motivo_suspension?: string | null
+  fecha_cierre?: Date | string | null
+  bloqueos_como_editor?: Prisma.bloqueos_edicion_cuentasCreateNestedManyWithoutEditorInput
+  contactos_destinatarios?: Prisma.contactos_destinatariosCreateNestedManyWithoutCuentasInput
+  users: Prisma.usersCreateNestedOneWithoutCuentasInput
+}
+
+export type cuentasUncheckedCreateWithoutBloqueo_edicionInput = {
+  id: string
+  nombre: string
+  apellidos?: string | null
+  correo: string
+  rol?: string
+  estado?: string
+  version?: number
+  fecha_registro?: Date | string
+  fecha_suspension?: Date | string | null
+  motivo_suspension?: string | null
+  fecha_cierre?: Date | string | null
+  bloqueos_como_editor?: Prisma.bloqueos_edicion_cuentasUncheckedCreateNestedManyWithoutEditorInput
+  contactos_destinatarios?: Prisma.contactos_destinatariosUncheckedCreateNestedManyWithoutCuentasInput
+}
+
+export type cuentasCreateOrConnectWithoutBloqueo_edicionInput = {
+  where: Prisma.cuentasWhereUniqueInput
+  create: Prisma.XOR<Prisma.cuentasCreateWithoutBloqueo_edicionInput, Prisma.cuentasUncheckedCreateWithoutBloqueo_edicionInput>
+}
+
+export type cuentasCreateWithoutBloqueos_como_editorInput = {
+  nombre: string
+  apellidos?: string | null
+  correo: string
+  rol?: string
+  estado?: string
+  version?: number
+  fecha_registro?: Date | string
+  fecha_suspension?: Date | string | null
+  motivo_suspension?: string | null
+  fecha_cierre?: Date | string | null
+  bloqueo_edicion?: Prisma.bloqueos_edicion_cuentasCreateNestedOneWithoutCuentaInput
+  contactos_destinatarios?: Prisma.contactos_destinatariosCreateNestedManyWithoutCuentasInput
+  users: Prisma.usersCreateNestedOneWithoutCuentasInput
+}
+
+export type cuentasUncheckedCreateWithoutBloqueos_como_editorInput = {
+  id: string
+  nombre: string
+  apellidos?: string | null
+  correo: string
+  rol?: string
+  estado?: string
+  version?: number
+  fecha_registro?: Date | string
+  fecha_suspension?: Date | string | null
+  motivo_suspension?: string | null
+  fecha_cierre?: Date | string | null
+  bloqueo_edicion?: Prisma.bloqueos_edicion_cuentasUncheckedCreateNestedOneWithoutCuentaInput
+  contactos_destinatarios?: Prisma.contactos_destinatariosUncheckedCreateNestedManyWithoutCuentasInput
+}
+
+export type cuentasCreateOrConnectWithoutBloqueos_como_editorInput = {
+  where: Prisma.cuentasWhereUniqueInput
+  create: Prisma.XOR<Prisma.cuentasCreateWithoutBloqueos_como_editorInput, Prisma.cuentasUncheckedCreateWithoutBloqueos_como_editorInput>
+}
+
+export type cuentasUpsertWithoutBloqueo_edicionInput = {
+  update: Prisma.XOR<Prisma.cuentasUpdateWithoutBloqueo_edicionInput, Prisma.cuentasUncheckedUpdateWithoutBloqueo_edicionInput>
+  create: Prisma.XOR<Prisma.cuentasCreateWithoutBloqueo_edicionInput, Prisma.cuentasUncheckedCreateWithoutBloqueo_edicionInput>
+  where?: Prisma.cuentasWhereInput
+}
+
+export type cuentasUpdateToOneWithWhereWithoutBloqueo_edicionInput = {
+  where?: Prisma.cuentasWhereInput
+  data: Prisma.XOR<Prisma.cuentasUpdateWithoutBloqueo_edicionInput, Prisma.cuentasUncheckedUpdateWithoutBloqueo_edicionInput>
+}
+
+export type cuentasUpdateWithoutBloqueo_edicionInput = {
+  nombre?: Prisma.StringFieldUpdateOperationsInput | string
+  apellidos?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  correo?: Prisma.StringFieldUpdateOperationsInput | string
+  rol?: Prisma.StringFieldUpdateOperationsInput | string
+  estado?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  fecha_registro?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  fecha_suspension?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  motivo_suspension?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fecha_cierre?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  bloqueos_como_editor?: Prisma.bloqueos_edicion_cuentasUpdateManyWithoutEditorNestedInput
+  contactos_destinatarios?: Prisma.contactos_destinatariosUpdateManyWithoutCuentasNestedInput
+  users?: Prisma.usersUpdateOneRequiredWithoutCuentasNestedInput
+}
+
+export type cuentasUncheckedUpdateWithoutBloqueo_edicionInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  nombre?: Prisma.StringFieldUpdateOperationsInput | string
+  apellidos?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  correo?: Prisma.StringFieldUpdateOperationsInput | string
+  rol?: Prisma.StringFieldUpdateOperationsInput | string
+  estado?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  fecha_registro?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  fecha_suspension?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  motivo_suspension?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fecha_cierre?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  bloqueos_como_editor?: Prisma.bloqueos_edicion_cuentasUncheckedUpdateManyWithoutEditorNestedInput
+  contactos_destinatarios?: Prisma.contactos_destinatariosUncheckedUpdateManyWithoutCuentasNestedInput
+}
+
+export type cuentasUpsertWithoutBloqueos_como_editorInput = {
+  update: Prisma.XOR<Prisma.cuentasUpdateWithoutBloqueos_como_editorInput, Prisma.cuentasUncheckedUpdateWithoutBloqueos_como_editorInput>
+  create: Prisma.XOR<Prisma.cuentasCreateWithoutBloqueos_como_editorInput, Prisma.cuentasUncheckedCreateWithoutBloqueos_como_editorInput>
+  where?: Prisma.cuentasWhereInput
+}
+
+export type cuentasUpdateToOneWithWhereWithoutBloqueos_como_editorInput = {
+  where?: Prisma.cuentasWhereInput
+  data: Prisma.XOR<Prisma.cuentasUpdateWithoutBloqueos_como_editorInput, Prisma.cuentasUncheckedUpdateWithoutBloqueos_como_editorInput>
+}
+
+export type cuentasUpdateWithoutBloqueos_como_editorInput = {
+  nombre?: Prisma.StringFieldUpdateOperationsInput | string
+  apellidos?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  correo?: Prisma.StringFieldUpdateOperationsInput | string
+  rol?: Prisma.StringFieldUpdateOperationsInput | string
+  estado?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  fecha_registro?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  fecha_suspension?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  motivo_suspension?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fecha_cierre?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  bloqueo_edicion?: Prisma.bloqueos_edicion_cuentasUpdateOneWithoutCuentaNestedInput
+  contactos_destinatarios?: Prisma.contactos_destinatariosUpdateManyWithoutCuentasNestedInput
+  users?: Prisma.usersUpdateOneRequiredWithoutCuentasNestedInput
+}
+
+export type cuentasUncheckedUpdateWithoutBloqueos_como_editorInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  nombre?: Prisma.StringFieldUpdateOperationsInput | string
+  apellidos?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  correo?: Prisma.StringFieldUpdateOperationsInput | string
+  rol?: Prisma.StringFieldUpdateOperationsInput | string
+  estado?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  fecha_registro?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  fecha_suspension?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  motivo_suspension?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fecha_cierre?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  bloqueo_edicion?: Prisma.bloqueos_edicion_cuentasUncheckedUpdateOneWithoutCuentaNestedInput
   contactos_destinatarios?: Prisma.contactos_destinatariosUncheckedUpdateManyWithoutCuentasNestedInput
 }
 
@@ -555,10 +835,13 @@ export type cuentasCreateWithoutContactos_destinatariosInput = {
   correo: string
   rol?: string
   estado?: string
+  version?: number
   fecha_registro?: Date | string
   fecha_suspension?: Date | string | null
   motivo_suspension?: string | null
   fecha_cierre?: Date | string | null
+  bloqueo_edicion?: Prisma.bloqueos_edicion_cuentasCreateNestedOneWithoutCuentaInput
+  bloqueos_como_editor?: Prisma.bloqueos_edicion_cuentasCreateNestedManyWithoutEditorInput
   users: Prisma.usersCreateNestedOneWithoutCuentasInput
 }
 
@@ -569,10 +852,13 @@ export type cuentasUncheckedCreateWithoutContactos_destinatariosInput = {
   correo: string
   rol?: string
   estado?: string
+  version?: number
   fecha_registro?: Date | string
   fecha_suspension?: Date | string | null
   motivo_suspension?: string | null
   fecha_cierre?: Date | string | null
+  bloqueo_edicion?: Prisma.bloqueos_edicion_cuentasUncheckedCreateNestedOneWithoutCuentaInput
+  bloqueos_como_editor?: Prisma.bloqueos_edicion_cuentasUncheckedCreateNestedManyWithoutEditorInput
 }
 
 export type cuentasCreateOrConnectWithoutContactos_destinatariosInput = {
@@ -597,10 +883,13 @@ export type cuentasUpdateWithoutContactos_destinatariosInput = {
   correo?: Prisma.StringFieldUpdateOperationsInput | string
   rol?: Prisma.StringFieldUpdateOperationsInput | string
   estado?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
   fecha_registro?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   fecha_suspension?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   motivo_suspension?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fecha_cierre?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  bloqueo_edicion?: Prisma.bloqueos_edicion_cuentasUpdateOneWithoutCuentaNestedInput
+  bloqueos_como_editor?: Prisma.bloqueos_edicion_cuentasUpdateManyWithoutEditorNestedInput
   users?: Prisma.usersUpdateOneRequiredWithoutCuentasNestedInput
 }
 
@@ -611,10 +900,13 @@ export type cuentasUncheckedUpdateWithoutContactos_destinatariosInput = {
   correo?: Prisma.StringFieldUpdateOperationsInput | string
   rol?: Prisma.StringFieldUpdateOperationsInput | string
   estado?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
   fecha_registro?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   fecha_suspension?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   motivo_suspension?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   fecha_cierre?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  bloqueo_edicion?: Prisma.bloqueos_edicion_cuentasUncheckedUpdateOneWithoutCuentaNestedInput
+  bloqueos_como_editor?: Prisma.bloqueos_edicion_cuentasUncheckedUpdateManyWithoutEditorNestedInput
 }
 
 
@@ -623,10 +915,12 @@ export type cuentasUncheckedUpdateWithoutContactos_destinatariosInput = {
  */
 
 export type CuentasCountOutputType = {
+  bloqueos_como_editor: number
   contactos_destinatarios: number
 }
 
 export type CuentasCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  bloqueos_como_editor?: boolean | CuentasCountOutputTypeCountBloqueos_como_editorArgs
   contactos_destinatarios?: boolean | CuentasCountOutputTypeCountContactos_destinatariosArgs
 }
 
@@ -638,6 +932,13 @@ export type CuentasCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Exte
    * Select specific fields to fetch from the CuentasCountOutputType
    */
   select?: Prisma.CuentasCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * CuentasCountOutputType without action
+ */
+export type CuentasCountOutputTypeCountBloqueos_como_editorArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.bloqueos_edicion_cuentasWhereInput
 }
 
 /**
@@ -655,10 +956,13 @@ export type cuentasSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   correo?: boolean
   rol?: boolean
   estado?: boolean
+  version?: boolean
   fecha_registro?: boolean
   fecha_suspension?: boolean
   motivo_suspension?: boolean
   fecha_cierre?: boolean
+  bloqueo_edicion?: boolean | Prisma.cuentas$bloqueo_edicionArgs<ExtArgs>
+  bloqueos_como_editor?: boolean | Prisma.cuentas$bloqueos_como_editorArgs<ExtArgs>
   contactos_destinatarios?: boolean | Prisma.cuentas$contactos_destinatariosArgs<ExtArgs>
   users?: boolean | Prisma.usersDefaultArgs<ExtArgs>
   _count?: boolean | Prisma.CuentasCountOutputTypeDefaultArgs<ExtArgs>
@@ -671,6 +975,7 @@ export type cuentasSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   correo?: boolean
   rol?: boolean
   estado?: boolean
+  version?: boolean
   fecha_registro?: boolean
   fecha_suspension?: boolean
   motivo_suspension?: boolean
@@ -685,6 +990,7 @@ export type cuentasSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   correo?: boolean
   rol?: boolean
   estado?: boolean
+  version?: boolean
   fecha_registro?: boolean
   fecha_suspension?: boolean
   motivo_suspension?: boolean
@@ -699,14 +1005,17 @@ export type cuentasSelectScalar = {
   correo?: boolean
   rol?: boolean
   estado?: boolean
+  version?: boolean
   fecha_registro?: boolean
   fecha_suspension?: boolean
   motivo_suspension?: boolean
   fecha_cierre?: boolean
 }
 
-export type cuentasOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "nombre" | "apellidos" | "correo" | "rol" | "estado" | "fecha_registro" | "fecha_suspension" | "motivo_suspension" | "fecha_cierre", ExtArgs["result"]["cuentas"]>
+export type cuentasOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "nombre" | "apellidos" | "correo" | "rol" | "estado" | "version" | "fecha_registro" | "fecha_suspension" | "motivo_suspension" | "fecha_cierre", ExtArgs["result"]["cuentas"]>
 export type cuentasInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  bloqueo_edicion?: boolean | Prisma.cuentas$bloqueo_edicionArgs<ExtArgs>
+  bloqueos_como_editor?: boolean | Prisma.cuentas$bloqueos_como_editorArgs<ExtArgs>
   contactos_destinatarios?: boolean | Prisma.cuentas$contactos_destinatariosArgs<ExtArgs>
   users?: boolean | Prisma.usersDefaultArgs<ExtArgs>
   _count?: boolean | Prisma.CuentasCountOutputTypeDefaultArgs<ExtArgs>
@@ -721,6 +1030,8 @@ export type cuentasIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Exte
 export type $cuentasPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "cuentas"
   objects: {
+    bloqueo_edicion: Prisma.$bloqueos_edicion_cuentasPayload<ExtArgs> | null
+    bloqueos_como_editor: Prisma.$bloqueos_edicion_cuentasPayload<ExtArgs>[]
     contactos_destinatarios: Prisma.$contactos_destinatariosPayload<ExtArgs>[]
     users: Prisma.$usersPayload<ExtArgs>
   }
@@ -731,6 +1042,7 @@ export type $cuentasPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     correo: string
     rol: string
     estado: string
+    version: number
     fecha_registro: Date
     fecha_suspension: Date | null
     motivo_suspension: string | null
@@ -1129,6 +1441,8 @@ readonly fields: cuentasFieldRefs;
  */
 export interface Prisma__cuentasClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  bloqueo_edicion<T extends Prisma.cuentas$bloqueo_edicionArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.cuentas$bloqueo_edicionArgs<ExtArgs>>): Prisma.Prisma__bloqueos_edicion_cuentasClient<runtime.Types.Result.GetResult<Prisma.$bloqueos_edicion_cuentasPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  bloqueos_como_editor<T extends Prisma.cuentas$bloqueos_como_editorArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.cuentas$bloqueos_como_editorArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$bloqueos_edicion_cuentasPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   contactos_destinatarios<T extends Prisma.cuentas$contactos_destinatariosArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.cuentas$contactos_destinatariosArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$contactos_destinatariosPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   users<T extends Prisma.usersDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.usersDefaultArgs<ExtArgs>>): Prisma.Prisma__usersClient<runtime.Types.Result.GetResult<Prisma.$usersPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
@@ -1166,6 +1480,7 @@ export interface cuentasFieldRefs {
   readonly correo: Prisma.FieldRef<"cuentas", 'String'>
   readonly rol: Prisma.FieldRef<"cuentas", 'String'>
   readonly estado: Prisma.FieldRef<"cuentas", 'String'>
+  readonly version: Prisma.FieldRef<"cuentas", 'Int'>
   readonly fecha_registro: Prisma.FieldRef<"cuentas", 'DateTime'>
   readonly fecha_suspension: Prisma.FieldRef<"cuentas", 'DateTime'>
   readonly motivo_suspension: Prisma.FieldRef<"cuentas", 'String'>
@@ -1568,6 +1883,49 @@ export type cuentasDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Inter
    * Limit how many cuentas to delete.
    */
   limit?: number
+}
+
+/**
+ * cuentas.bloqueo_edicion
+ */
+export type cuentas$bloqueo_edicionArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the bloqueos_edicion_cuentas
+   */
+  select?: Prisma.bloqueos_edicion_cuentasSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the bloqueos_edicion_cuentas
+   */
+  omit?: Prisma.bloqueos_edicion_cuentasOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.bloqueos_edicion_cuentasInclude<ExtArgs> | null
+  where?: Prisma.bloqueos_edicion_cuentasWhereInput
+}
+
+/**
+ * cuentas.bloqueos_como_editor
+ */
+export type cuentas$bloqueos_como_editorArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the bloqueos_edicion_cuentas
+   */
+  select?: Prisma.bloqueos_edicion_cuentasSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the bloqueos_edicion_cuentas
+   */
+  omit?: Prisma.bloqueos_edicion_cuentasOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.bloqueos_edicion_cuentasInclude<ExtArgs> | null
+  where?: Prisma.bloqueos_edicion_cuentasWhereInput
+  orderBy?: Prisma.bloqueos_edicion_cuentasOrderByWithRelationInput | Prisma.bloqueos_edicion_cuentasOrderByWithRelationInput[]
+  cursor?: Prisma.bloqueos_edicion_cuentasWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.Bloqueos_edicion_cuentasScalarFieldEnum | Prisma.Bloqueos_edicion_cuentasScalarFieldEnum[]
 }
 
 /**

@@ -430,6 +430,8 @@ export const ModelName = {
   invitaciones_lanzadores: 'invitaciones_lanzadores',
   verificaciones_invitaciones_lanzadores: 'verificaciones_invitaciones_lanzadores',
   cuentas: 'cuentas',
+  bloqueos_edicion_cuentas: 'bloqueos_edicion_cuentas',
+  auditoria_operaciones_cuentas: 'auditoria_operaciones_cuentas',
   historico_cierre_cuentas: 'historico_cierre_cuentas',
   contactos_destinatarios: 'contactos_destinatarios',
   mensajes_destinatarios: 'mensajes_destinatarios'
@@ -448,7 +450,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "audit_log_entries" | "custom_oauth_providers" | "flow_state" | "identities" | "instances" | "mfa_amr_claims" | "mfa_challenges" | "mfa_factors" | "mfa_recovery_code_sets" | "mfa_recovery_codes" | "oauth_authorizations" | "oauth_client_states" | "oauth_clients" | "oauth_consents" | "one_time_tokens" | "refresh_tokens" | "saml_providers" | "saml_relay_states" | "schema_migrations" | "scim_tokens" | "scim_users" | "sessions" | "sso_domains" | "sso_providers" | "users" | "webauthn_challenges" | "webauthn_credentials" | "asignaciones_lanzadores" | "historial_asignaciones" | "lanzadores" | "invitaciones_lanzadores" | "verificaciones_invitaciones_lanzadores" | "cuentas" | "historico_cierre_cuentas" | "contactos_destinatarios" | "mensajes_destinatarios"
+    modelProps: "audit_log_entries" | "custom_oauth_providers" | "flow_state" | "identities" | "instances" | "mfa_amr_claims" | "mfa_challenges" | "mfa_factors" | "mfa_recovery_code_sets" | "mfa_recovery_codes" | "oauth_authorizations" | "oauth_client_states" | "oauth_clients" | "oauth_consents" | "one_time_tokens" | "refresh_tokens" | "saml_providers" | "saml_relay_states" | "schema_migrations" | "scim_tokens" | "scim_users" | "sessions" | "sso_domains" | "sso_providers" | "users" | "webauthn_challenges" | "webauthn_credentials" | "asignaciones_lanzadores" | "historial_asignaciones" | "lanzadores" | "invitaciones_lanzadores" | "verificaciones_invitaciones_lanzadores" | "cuentas" | "bloqueos_edicion_cuentas" | "auditoria_operaciones_cuentas" | "historico_cierre_cuentas" | "contactos_destinatarios" | "mensajes_destinatarios"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -2894,6 +2896,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    bloqueos_edicion_cuentas: {
+      payload: Prisma.$bloqueos_edicion_cuentasPayload<ExtArgs>
+      fields: Prisma.bloqueos_edicion_cuentasFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.bloqueos_edicion_cuentasFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$bloqueos_edicion_cuentasPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.bloqueos_edicion_cuentasFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$bloqueos_edicion_cuentasPayload>
+        }
+        findFirst: {
+          args: Prisma.bloqueos_edicion_cuentasFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$bloqueos_edicion_cuentasPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.bloqueos_edicion_cuentasFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$bloqueos_edicion_cuentasPayload>
+        }
+        findMany: {
+          args: Prisma.bloqueos_edicion_cuentasFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$bloqueos_edicion_cuentasPayload>[]
+        }
+        create: {
+          args: Prisma.bloqueos_edicion_cuentasCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$bloqueos_edicion_cuentasPayload>
+        }
+        createMany: {
+          args: Prisma.bloqueos_edicion_cuentasCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.bloqueos_edicion_cuentasCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$bloqueos_edicion_cuentasPayload>[]
+        }
+        delete: {
+          args: Prisma.bloqueos_edicion_cuentasDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$bloqueos_edicion_cuentasPayload>
+        }
+        update: {
+          args: Prisma.bloqueos_edicion_cuentasUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$bloqueos_edicion_cuentasPayload>
+        }
+        deleteMany: {
+          args: Prisma.bloqueos_edicion_cuentasDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.bloqueos_edicion_cuentasUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.bloqueos_edicion_cuentasUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$bloqueos_edicion_cuentasPayload>[]
+        }
+        upsert: {
+          args: Prisma.bloqueos_edicion_cuentasUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$bloqueos_edicion_cuentasPayload>
+        }
+        aggregate: {
+          args: Prisma.Bloqueos_edicion_cuentasAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateBloqueos_edicion_cuentas>
+        }
+        groupBy: {
+          args: Prisma.bloqueos_edicion_cuentasGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Bloqueos_edicion_cuentasGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.bloqueos_edicion_cuentasCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Bloqueos_edicion_cuentasCountAggregateOutputType> | number
+        }
+      }
+    }
+    auditoria_operaciones_cuentas: {
+      payload: Prisma.$auditoria_operaciones_cuentasPayload<ExtArgs>
+      fields: Prisma.auditoria_operaciones_cuentasFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.auditoria_operaciones_cuentasFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$auditoria_operaciones_cuentasPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.auditoria_operaciones_cuentasFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$auditoria_operaciones_cuentasPayload>
+        }
+        findFirst: {
+          args: Prisma.auditoria_operaciones_cuentasFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$auditoria_operaciones_cuentasPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.auditoria_operaciones_cuentasFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$auditoria_operaciones_cuentasPayload>
+        }
+        findMany: {
+          args: Prisma.auditoria_operaciones_cuentasFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$auditoria_operaciones_cuentasPayload>[]
+        }
+        create: {
+          args: Prisma.auditoria_operaciones_cuentasCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$auditoria_operaciones_cuentasPayload>
+        }
+        createMany: {
+          args: Prisma.auditoria_operaciones_cuentasCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.auditoria_operaciones_cuentasCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$auditoria_operaciones_cuentasPayload>[]
+        }
+        delete: {
+          args: Prisma.auditoria_operaciones_cuentasDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$auditoria_operaciones_cuentasPayload>
+        }
+        update: {
+          args: Prisma.auditoria_operaciones_cuentasUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$auditoria_operaciones_cuentasPayload>
+        }
+        deleteMany: {
+          args: Prisma.auditoria_operaciones_cuentasDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.auditoria_operaciones_cuentasUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.auditoria_operaciones_cuentasUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$auditoria_operaciones_cuentasPayload>[]
+        }
+        upsert: {
+          args: Prisma.auditoria_operaciones_cuentasUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$auditoria_operaciones_cuentasPayload>
+        }
+        aggregate: {
+          args: Prisma.Auditoria_operaciones_cuentasAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAuditoria_operaciones_cuentas>
+        }
+        groupBy: {
+          args: Prisma.auditoria_operaciones_cuentasGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Auditoria_operaciones_cuentasGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.auditoria_operaciones_cuentasCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Auditoria_operaciones_cuentasCountAggregateOutputType> | number
+        }
+      }
+    }
     historico_cierre_cuentas: {
       payload: Prisma.$historico_cierre_cuentasPayload<ExtArgs>
       fields: Prisma.historico_cierre_cuentasFieldRefs
@@ -3669,6 +3819,7 @@ export const CuentasScalarFieldEnum = {
   correo: 'correo',
   rol: 'rol',
   estado: 'estado',
+  version: 'version',
   fecha_registro: 'fecha_registro',
   fecha_suspension: 'fecha_suspension',
   motivo_suspension: 'motivo_suspension',
@@ -3676,6 +3827,37 @@ export const CuentasScalarFieldEnum = {
 } as const
 
 export type CuentasScalarFieldEnum = (typeof CuentasScalarFieldEnum)[keyof typeof CuentasScalarFieldEnum]
+
+
+export const Bloqueos_edicion_cuentasScalarFieldEnum = {
+  cuenta_id: 'cuenta_id',
+  editor_id: 'editor_id',
+  rol_editor: 'rol_editor',
+  token_hash: 'token_hash',
+  version_inicio: 'version_inicio',
+  fecha_inicio: 'fecha_inicio',
+  fecha_renovacion: 'fecha_renovacion',
+  fecha_caducidad: 'fecha_caducidad'
+} as const
+
+export type Bloqueos_edicion_cuentasScalarFieldEnum = (typeof Bloqueos_edicion_cuentasScalarFieldEnum)[keyof typeof Bloqueos_edicion_cuentasScalarFieldEnum]
+
+
+export const Auditoria_operaciones_cuentasScalarFieldEnum = {
+  id: 'id',
+  cuenta_afectada_id: 'cuenta_afectada_id',
+  actor_id: 'actor_id',
+  rol_actor: 'rol_actor',
+  accion: 'accion',
+  resultado: 'resultado',
+  campos_modificados: 'campos_modificados',
+  motivo_codigo: 'motivo_codigo',
+  version_anterior: 'version_anterior',
+  version_nueva: 'version_nueva',
+  fecha_evento: 'fecha_evento'
+} as const
+
+export type Auditoria_operaciones_cuentasScalarFieldEnum = (typeof Auditoria_operaciones_cuentasScalarFieldEnum)[keyof typeof Auditoria_operaciones_cuentasScalarFieldEnum]
 
 
 export const Historico_cierre_cuentasScalarFieldEnum = {
@@ -4185,6 +4367,8 @@ export type GlobalOmitConfig = {
   invitaciones_lanzadores?: Prisma.invitaciones_lanzadoresOmit
   verificaciones_invitaciones_lanzadores?: Prisma.verificaciones_invitaciones_lanzadoresOmit
   cuentas?: Prisma.cuentasOmit
+  bloqueos_edicion_cuentas?: Prisma.bloqueos_edicion_cuentasOmit
+  auditoria_operaciones_cuentas?: Prisma.auditoria_operaciones_cuentasOmit
   historico_cierre_cuentas?: Prisma.historico_cierre_cuentasOmit
   contactos_destinatarios?: Prisma.contactos_destinatariosOmit
   mensajes_destinatarios?: Prisma.mensajes_destinatariosOmit

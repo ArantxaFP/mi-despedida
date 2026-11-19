@@ -52,7 +52,7 @@ export class CuentasSuperadmin implements OnInit, OnDestroy {
 
   readonly solicitandoBloqueo = signal(false);
 
-  private readonly usarBloqueoSuperadministrador = false;
+  private readonly usarBloqueoSuperadministrador = true;
   private bloqueoEdicion: BloqueoEdicionCuenta | null = null;
   private componenteDestruido = false;
 

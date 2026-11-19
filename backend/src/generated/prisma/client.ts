@@ -237,6 +237,18 @@ export type verificaciones_invitaciones_lanzadores = Prisma.verificaciones_invit
  */
 export type cuentas = Prisma.cuentasModel
 /**
+ * Model bloqueos_edicion_cuentas
+ * Tabla de control de ediciones de cuentas
+ * El administrador titular tiene prioridad sobre los superadminis.
+ * Los bloqueos duran cinco minutos y pueden renovarse.
+ */
+export type bloqueos_edicion_cuentas = Prisma.bloqueos_edicion_cuentasModel
+/**
+ * Model auditoria_operaciones_cuentas
+ * Auditoría de operaciones realizadas sobre las cuentas
+ */
+export type auditoria_operaciones_cuentas = Prisma.auditoria_operaciones_cuentasModel
+/**
  * Model historico_cierre_cuentas
  * This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
  * This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.

@@ -14,7 +14,7 @@ interface CuentaSuperadmin {
 interface BorradorCuenta {
   nombre: string;
   apellidos: string;
-  correo: string;
+ // correo: string;
 }
 
 interface PrevisualizacionEdicion {
@@ -23,10 +23,10 @@ interface PrevisualizacionEdicion {
   camposModificados: {
     nombre: boolean;
     apellidos: boolean;
-    correo: boolean;
+    /*correo: boolean;*/
   };
 
-  requiereVerificacionCorreo: boolean;
+  /*requiereVerificacionCorreo: boolean;*/
   guardado: boolean;
 }
 
@@ -51,9 +51,12 @@ export class CuentasSuperadmin implements OnInit, OnDestroy {
   readonly cuentaEnEdicionId = signal<string | null>(null);
 
   readonly solicitandoBloqueo = signal(false);
+  readonly guardandoEdicion = signal(false);
+  readonly mensajeGuardado = signal('');
 
   private readonly usarBloqueoSuperadministrador = true;
   private bloqueoEdicion: BloqueoEdicionCuenta | null = null;
+  private temporizadorRenovacion: number | undefined;
   private componenteDestruido = false;
 
   readonly borradorCuenta = signal<BorradorCuenta | null>(null);
@@ -74,8 +77,8 @@ export class CuentasSuperadmin implements OnInit, OnDestroy {
 
     return (
       borrador.nombre.trim() !== original.nombre ||
-      borrador.apellidos.trim() !== (original.apellidos ?? '') ||
-      borrador.correo.trim().toLowerCase() !== original.correo
+      borrador.apellidos.trim() !== (original.apellidos ?? '') 
+      /* || borrador.correo.trim().toLowerCase() !== original.correo */
     );
   });
 
@@ -151,17 +154,20 @@ export class CuentasSuperadmin implements OnInit, OnDestroy {
         )
       );
       this.abrirEdicion(cuentaActualizada);
+      this.programarRenovacionBloqueo();
     } finally {
       this.solicitandoBloqueo.set(false);
     }
+
+    
   }
 
   private abrirEdicion(cuenta: CuentaSuperadmin): void {
     this.cuentaEnEdicionId.set(cuenta.id);
     this.borradorCuenta.set({
       nombre: cuenta.nombre,
-      apellidos: cuenta.apellidos ?? '',
-      correo: cuenta.correo
+      apellidos: cuenta.apellidos ?? ''
+      /* correo: cuenta.correo */
     });
     this.previsualizacion.set(null);
     this.errorPrevisualizacion.set('');
@@ -183,6 +189,87 @@ export class CuentasSuperadmin implements OnInit, OnDestroy {
     this.errorPrevisualizacion.set('');
   }
 
+  /* Dejo comentado para que el superadmin no pueda cambiar los mails en el MVP 
+  correoModificado(): boolean {
+    const borrador = this.borradorCuenta();
+    const cuenta = this.cuentas().find(
+      actual => actual.id === this.cuentaEnEdicionId()
+    );
+
+    return !!borrador && !!cuenta &&
+      borrador.correo.trim().toLowerCase() !== cuenta.correo;
+  }
+  */
+
+  puedeGuardarEdicion(): boolean {
+    return !!this.bloqueoEdicion &&
+      !this.guardandoEdicion() &&
+      !this.previsualizando() &&
+      !!this.borradorCuenta()?.nombre.trim() &&
+      this.hayCambios(); 
+     /* && !this.correoModificado();*/
+  }
+
+  async guardarEdicion(): Promise<void> {
+    const cuentaId = this.cuentaEnEdicionId();
+    const bloqueo = this.bloqueoEdicion;
+    const borrador = this.borradorCuenta();
+
+    if (!cuentaId || !bloqueo || !borrador || !this.puedeGuardarEdicion()) {
+      return;
+    }
+
+    const nombre = borrador.nombre.trim();
+    const apellidos = borrador.apellidos.trim();
+
+    this.guardandoEdicion.set(true);
+    this.mensajeError.set('');
+    this.mensajeGuardado.set('');
+
+    try {
+      const { resultado, error, conflicto } =
+        await this.autenticacion.actualizarDatosCuentaSuperadministrador(
+          cuentaId,
+          nombre,
+          apellidos,
+          bloqueo
+        );
+
+      if (error || !resultado) {
+        if (conflicto) {
+          this.liberarBloqueoEdicion();
+        }
+
+        this.mensajeError.set(
+          conflicto
+            ? 'Se ha perdido el bloqueo o la cuenta ha cambiado. ' +
+            'Copia tus cambios antes de cancelar y volver a pulsar Editar.'
+            : error?.message ?? 'No se han podido guardar los datos.'
+        );
+        return;
+      }
+
+      // El servidor ya ha liberado el bloqueo tras completar el guardado
+      this.bloqueoEdicion = null;
+
+      this.cuentas.update(cuentas => cuentas.map(cuenta =>
+        cuenta.id === cuentaId
+          ? { ...cuenta, nombre, apellidos: apellidos || null }
+          : cuenta
+      ));
+
+      this.cancelarEdicion();
+      this.mensajeGuardado.set(resultado.mensaje);
+    } finally {
+      this.guardandoEdicion.set(false);
+
+      if (this.componenteDestruido) {
+        this.liberarBloqueoEdicion();
+      }
+    }
+  }
+
+
   // Cancelar la edición sin modificar los datos originales
   cancelarEdicion(): void {
     this.liberarBloqueoEdicion();
@@ -192,7 +279,79 @@ export class CuentasSuperadmin implements OnInit, OnDestroy {
     this.errorPrevisualizacion.set('');
   }
 
+  private programarRenovacionBloqueo(espera = 120_000): void {
+    this.detenerRenovacionBloqueo();
+
+    this.temporizadorRenovacion = window.setTimeout(() => {
+      this.temporizadorRenovacion = undefined;
+      void this.renovarBloqueoEdicion();
+    }, espera);
+  }
+
+  private detenerRenovacionBloqueo(): void {
+    if (this.temporizadorRenovacion !== undefined) {
+      window.clearTimeout(this.temporizadorRenovacion);
+      this.temporizadorRenovacion = undefined;
+    }
+  }
+
+  private async renovarBloqueoEdicion(): Promise<void> {
+    const cuentaId = this.cuentaEnEdicionId();
+    const bloqueo = this.bloqueoEdicion;
+
+    if (!cuentaId || !bloqueo || this.componenteDestruido) {
+      return;
+    }
+
+    if (this.guardandoEdicion()) {
+      this.programarRenovacionBloqueo(5_000);
+      return;
+    }
+
+    const { datos, conflicto } =
+      await this.autenticacion.renovarBloqueoSuperadministrador(
+        cuentaId,
+        bloqueo.token
+      );
+
+    // La respuesta puede llegar después de cerrar la edición
+    if (
+      this.componenteDestruido ||
+      this.cuentaEnEdicionId() !== cuentaId ||
+      this.bloqueoEdicion?.token !== bloqueo.token
+    ) {
+      return;
+    }
+
+    if (this.guardandoEdicion()) {
+      this.programarRenovacionBloqueo(5_000);
+      return;
+    }
+
+    if (conflicto) {
+      this.bloqueoEdicion = null;
+      this.mensajeError.set(
+        'Se ha perdido el bloqueo de edición. ' +
+        'Copia tus cambios antes de cancelar y volver a pulsar Editar.'
+      );
+      return;
+    }
+
+    if (!datos) {
+      this.programarRenovacionBloqueo(15_000);
+      return;
+    }
+
+    this.bloqueoEdicion = {
+      ...bloqueo,
+      fechaCaducidad: datos.fechaCaducidad
+    };
+    this.programarRenovacionBloqueo();
+  }
+
   private liberarBloqueoEdicion(): void {
+    this.detenerRenovacionBloqueo();
+
     const cuentaId = this.cuentaEnEdicionId();
     const bloqueo = this.bloqueoEdicion;
     this.bloqueoEdicion = null;
@@ -207,7 +366,11 @@ export class CuentasSuperadmin implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.componenteDestruido = true;
-    this.liberarBloqueoEdicion();
+    this.detenerRenovacionBloqueo();
+
+    if (!this.guardandoEdicion()) {
+      this.liberarBloqueoEdicion();
+    }
   }
 
   // Consultar los cambios propuestos antes de guardar. No modifica.
@@ -269,8 +432,8 @@ export class CuentasSuperadmin implements OnInit, OnDestroy {
       if (
         this.cuentaEnEdicionId() === cuentaId &&
         borradorActual?.nombre === datosEnviados.nombre &&
-        borradorActual?.apellidos === datosEnviados.apellidos &&
-        borradorActual?.correo === datosEnviados.correo
+        borradorActual?.apellidos === datosEnviados.apellidos
+        /*  && borradorActual?.correo === datosEnviados.correo */
       ) {
         this.previsualizacion.set(resultado);
       }

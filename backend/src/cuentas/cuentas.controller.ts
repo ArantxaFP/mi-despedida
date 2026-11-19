@@ -2,7 +2,6 @@ import { Body, Controller, Headers, Patch, Post, Get, Param, ParseUUIDPipe, Vali
 import { CuentasService } from './cuentas.service';
 
 import { RegistrarCuentaDto } from './dto/registrar-cuenta.dto';
-import { ActualizarDatosCuentaDto } from './dto/actualizar-datos-cuenta.dto';
 import { EditarCuentaSuperadminDto } from './dto/editar-cuenta-superadmin.dto';
 import { CredencialBloqueoDto } from './dto/credencial-bloqueo.dto';
 import { ActualizarDatosPerfilBloqueoDto } from './dto/actualizar-datos-perfil-bloqueo.dto';
@@ -128,6 +127,30 @@ export class CuentasController {
         );
     }
 
+    @Patch('superadmin/cuentas/:id/datos-con-bloqueo')
+    async actualizarDatosCuentaSuperadministrador(
+        @Param('id', new ParseUUIDPipe({ version: 'all' }))
+        cuentaId: string,
+
+        @Headers('authorization')
+        autorizacion: string | undefined,
+
+        @Body(new ValidationPipe({
+            whitelist: true,
+            forbidNonWhitelisted: true,
+            transform: true
+        }))
+        datos: ActualizarDatosPerfilBloqueoDto
+    ) {
+        return this.cuentasService.actualizarDatosCuentaSuperadministrador(
+            autorizacion,
+            cuentaId,
+            datos
+        );
+    }
+
+
+
     // Solicitar un bloqueo prioritario para editar el perfil
     @Post('edicion/:id/bloqueo')
     async adquirirBloqueoEdicionPerfil(
@@ -199,18 +222,7 @@ export class CuentasController {
     }
 
     // Actualizar nombre y apellidos del administrador
-    @Patch('perfil')
-    async actualizarPerfil(
-        @Headers('authorization') autorizacion: string | undefined,
-        @Body() datos: ActualizarDatosCuentaDto
-    ) {
-        return this.cuentasService.actualizarDatosPersonales(
-            autorizacion,
-            datos.nombre,
-            datos.apellidos
-        );
-    }
-
+ 
     @Patch('perfil/datos-con-bloqueo')
     async actualizarDatosPerfilBloqueo(
         @Headers('authorization') autorizacion: string | undefined,

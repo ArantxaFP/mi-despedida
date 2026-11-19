@@ -25,6 +25,9 @@
         </h1>
 
         <p>
+            @if (nombreSaludo()) {
+                Hola, {{ nombreSaludo() }}<br>
+            }
             Este es el avance de tu despedida.
         </p>
 

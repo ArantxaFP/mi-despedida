@@ -23,8 +23,6 @@ export class Perfil implements OnInit, OnDestroy {
 
     readonly solicitandoBloqueo = signal(false);
 
-    // Activar en la base de pruebas cuando el SQL y la renovación estén preparados
-    private readonly usarBloqueoPerfil = true;
     private bloqueoPerfil: BloqueoEdicionCuenta | null = null;
     private temporizadorRenovacion: number | undefined;
     private perfilDestruido = false;
@@ -126,14 +124,12 @@ export class Perfil implements OnInit, OnDestroy {
     }
 
     cambiarVista(vista: VistaPerfil): void {
-        if (this.usarBloqueoPerfil) {
-            if (this.solicitandoBloqueo() || this.guardando()) {
-                return;
-            }
+        if (this.solicitandoBloqueo() || this.guardando()) {
+            return;
+        }
 
-            if (vista !== 'datos' && this.editandoDatos()) {
-                this.cancelarEdicionDatos();
-            }
+        if (vista !== 'datos' && this.editandoDatos()) {
+            this.cancelarEdicionDatos();
         }
 
         this.vistaActual.set(vista);
@@ -148,7 +144,6 @@ export class Perfil implements OnInit, OnDestroy {
         this.mostrarConfirmacion.set(false);
     }
 
-
     // Preparar la edición de los datos personales
     async iniciarEdicionDatos(): Promise<void> {
         if (
@@ -162,11 +157,6 @@ export class Perfil implements OnInit, OnDestroy {
 
         this.mensaje.set('');
         this.error.set('');
-
-        if (!this.usarBloqueoPerfil) {
-            this.editandoDatos.set(true);
-            return;
-        }
 
         this.solicitandoBloqueo.set(true);
 
@@ -323,58 +313,40 @@ export class Perfil implements OnInit, OnDestroy {
 
         try {
 
-            let mensajeGuardado = 'Tus datos personales se han actualizado correctamente.';
+            const bloqueo = this.bloqueoPerfil;
 
-            if (this.usarBloqueoPerfil) {
-                const bloqueo = this.bloqueoPerfil;
-
-                if (!bloqueo) {
-                    this.error.set(
-                        'La edición ya no tiene un bloqueo válido. ' +
-                        'Copia tus cambios antes de cancelar y volver a pulsar Editar.'
-                    );
-                    return;
-                }
-
-                const { resultado, error, conflicto } =
-                    await this.autenticacion.actualizarDatosPerfilBloqueo(
-                        nombre,
-                        apellidos,
-                        bloqueo
-                    );
-
-                if (error || !resultado) {
-                    if (conflicto) {
-                        this.liberarBloqueoDatos();
-                    }
-
-                    this.error.set(
-                        conflicto
-                            ? 'La edición ha caducado o el perfil ha cambiado. ' +
-                            'Copia tus cambios antes de cancelar y volver a pulsar Editar.'
-                            : error?.message ?? 'No se han podido guardar estos datos.'
-                    );
-                    return;
-                }
-
-                // Nest ya ha liberado el bloqueo, también si los datos coincidían
-                this.detenerRenovacionBloqueo();
-                this.bloqueoPerfil = null;
-                mensajeGuardado = resultado.mensaje;
-            } else {
-                const { error } = await this.autenticacion.actualizarDatosPersonales(
-                    nombre,
-                    apellidos
+            if (!bloqueo) {
+                this.error.set(
+                    'La edición ya no tiene un bloqueo válido. ' +
+                    'Copia tus cambios antes de cancelar y volver a pulsar Editar.'
                 );
-
-                if (error) {
-                    this.error.set(
-                        'No se han podido guardar estos datos. Inténtalo de nuevo.'
-                    );
-                    return;
-                }
+                return;
             }
 
+            const { resultado, error, conflicto } =
+                await this.autenticacion.actualizarDatosPerfilBloqueo(
+                    nombre,
+                    apellidos,
+                    bloqueo
+                );
+
+            if (error || !resultado) {
+                if (conflicto) {
+                    this.liberarBloqueoDatos();
+                }
+
+                this.error.set(
+                    conflicto
+                        ? 'La edición ha caducado o el perfil ha cambiado. ' +
+                        'Copia tus cambios antes de cancelar y volver a pulsar Editar.'
+                        : error?.message ?? 'No se han podido guardar tus datos.'
+                );
+                return;
+            }
+
+            // NestJS ya ha liberado el bloqueo al completar el guardado
+            this.detenerRenovacionBloqueo();
+            this.bloqueoPerfil = null;
 
             this.formularioDatos.patchValue({
                 nombre,
@@ -389,7 +361,7 @@ export class Perfil implements OnInit, OnDestroy {
 
             this.editandoDatos.set(false);
 
-            this.mensaje.set(mensajeGuardado);
+            this.mensaje.set(resultado.mensaje);
 
         } catch {
             this.error.set(

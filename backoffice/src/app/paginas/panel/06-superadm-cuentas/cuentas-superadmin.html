@@ -68,7 +68,7 @@
                         <td>
                             @if (cuentaEnEdicionId() === cuenta.id) {
                             <input class="tabla-cuentas__campo" type="text" aria-label="Nombre" maxlength="100"
-                                [value]="borradorCuenta()?.nombre ?? ''"
+                                [value]="borradorCuenta()?.nombre ?? ''" [readonly]="guardandoEdicion()"
                                 (input)="actualizarCampo('nombre', nombreInput.value)" #nombreInput>
                             } @else {
                             {{ cuenta.nombre }}
@@ -79,23 +79,16 @@
                         <td>
                             @if (cuentaEnEdicionId() === cuenta.id) {
                             <input class="tabla-cuentas__campo" type="text" aria-label="Apellidos" maxlength="150"
-                                [value]="borradorCuenta()?.apellidos ?? ''"
+                                [value]="borradorCuenta()?.apellidos ?? ''" [readonly]="guardandoEdicion()"
                                 (input)="actualizarCampo('apellidos', apellidosInput.value)" #apellidosInput>
+
                             } @else {
                             {{ cuenta.apellidos || '—' }}
                             }
                         </td>
 
-                        <!-- Campo correo -->
-                        <td>
-                            @if (cuentaEnEdicionId() === cuenta.id) {
-                            <input class="tabla-cuentas__campo" type="email" aria-label="Correo electrónico"
-                                [value]="borradorCuenta()?.correo ?? ''"
-                                (input)="actualizarCampo('correo', correoInput.value)" #correoInput>
-                            } @else {
-                            {{ cuenta.correo }}
-                            }
-                        </td>
+                        <!-- Correo de la cuenta. El administrador titular puede cambiarlo desde Mi perfil. -->
+                        <td>{{ cuenta.correo }}</td>
 
                         <!-- ROL: NO EDITABLE -->
                         <td>{{ cuenta.rol }}</td>
@@ -109,21 +102,27 @@
 
                                 @if (cuentaEnEdicionId() === cuenta.id) {
 
-                                <button type="button" class="panel__boton" disabled
-                                    title="Disponible cuando implementemos el guardado seguro en NestJS">
-                                    Guardar
+                                <button type="button" class="panel__boton" (click)="guardarEdicion()"
+                                    [disabled]="!puedeGuardarEdicion()">
+                                    {{ guardandoEdicion() ? 'Guardando...' : 'Guardar datos' }}
                                 </button>
+
+                                <!-- Lo dejo comentado porque de entrada quito el cambio de mail para el MVP                               @if (correoModificado()) {
+                                <p class="panel-pagina__texto-secundario">
+                                    Restablece el correo original para guardar el nombre y los apellidos.
+                                </p>
+                                } -->
+
 
 
                                 <button type="button" class="panel__boton" (click)="previsualizarCambios()"
-                                    [disabled]="!hayCambios() || previsualizando()">
-
+                                    [disabled]="!hayCambios() || previsualizando() || guardandoEdicion()">
                                     {{ previsualizando() ? 'Comprobando...' : 'Previsualizar cambios' }}
-
                                 </button>
 
 
-                                <button type="button" class="panel__boton" (click)="cancelarEdicion()">
+                                <button type="button" class="panel__boton" (click)="cancelarEdicion()"
+                                    [disabled]="guardandoEdicion()">
                                     Cancelar
                                 </button>
 
@@ -149,34 +148,34 @@
 
                             @if (cuentaEnEdicionId() === cuenta.id) {
 
-                            <div class="tabla-cuentas__previsualizacion" role="status">
+                                <div class="tabla-cuentas__previsualizacion" role="status">
 
-                                <strong>Resultado de la previsualización</strong>
-
-                                <p>
-                                    Nombre:
-                                    {{ resultado.camposModificados.nombre ? 'Modificado' : 'Sin cambios' }}
-                                </p>
-
-                                <p>
-                                    Apellidos:
-                                    {{ resultado.camposModificados.apellidos ? 'Modificados' : 'Sin cambios' }}
-                                </p>
-
-                                <p>
-                                    Correo:
-                                    {{ resultado.camposModificados.correo ? 'Modificado' : 'Sin cambios' }}
-                                </p>
-
-                                @if (resultado.requiereVerificacionCorreo) {
-                                <p>
-                                    El nuevo correo electrónico requerirá verificación.
-                                </p>
-                                }
-
-                                <p>Los cambios todavía no se han guardado.</p>
-
-                            </div>
+                                    <strong>Resultado de la previsualización</strong>
+                                
+                                    <p>
+                                        Nombre:
+                                        {{ resultado.camposModificados.nombre ? 'Modificado' : 'Sin cambios' }}
+                                    </p>
+                                
+                                    <p>
+                                        Apellidos:
+                                        {{ resultado.camposModificados.apellidos ? 'Modificados' : 'Sin cambios' }}
+                                    </p>
+                                
+                                    <!-- Previsualización del correo reservada para después del MVP.
+                                    <p>
+                                        Correo:
+                                        {{ resultado.camposModificados.correo ? 'Modificado' : 'Sin cambios' }}
+                                    </p>
+                                
+                                    @if (resultado.requiereVerificacionCorreo) {
+                                        <p>El nuevo correo electrónico requerirá verificación.</p>
+                                    }
+                                    -->
+                                
+                                    <p>Los cambios todavía no se han guardado.</p>
+                                
+                                </div>
 
                             }
 
@@ -197,6 +196,13 @@
             </table>
 
         </div>
+
+
+        @if (mensajeGuardado()) {
+        <p class="panel-pagina__mensaje" role="status">
+            {{ mensajeGuardado() }}
+        </p>
+        }
 
 
         @if (mensajeError()) {

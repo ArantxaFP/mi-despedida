@@ -479,6 +479,45 @@ export class Autenticacion {
             };
         }
     }
+
+    // Coger nombre y posible apellido de administrador para mostrarlo en el panel
+    async obtenerNombreParaSaludo(): Promise<{
+        nombre: string;
+        apellidos: string | null;
+    } | null> {
+        try {
+            const token = await this.obtenerTokenAcceso();
+    
+            if (!token) {
+                return null;
+            }
+    
+            const respuesta = await fetch(
+                `${configuracionBackend.url}/cuentas/mi-acceso`,
+                {
+                    headers: { Authorization: `Bearer ${token}` },
+                    cache: 'no-store'
+                }
+            );
+    
+            if (!respuesta.ok) {
+                return null;
+            }
+    
+            const datos: { nombre?: string; apellidos?: string | null } =
+                await respuesta.json();
+    
+            const nombre = datos.nombre?.trim();
+    
+            return nombre
+                ? { nombre, apellidos: datos.apellidos?.trim() || null }
+                : null;
+        } catch {
+            return null;
+        }
+    }
+
+
     async obtenerDatosPerfil(): Promise<{
         nombre: string;
         apellidos: string | null;
@@ -507,54 +546,36 @@ export class Autenticacion {
     }
 
 
-    // Actualizar nombre o apellido mediante NestJS.
-    async actualizarDatosPersonales(nombre: string, apellidos: string) {
-
-        try {
-            const token = await this.obtenerTokenAcceso();
-
-            if (!token) {
-                return {
-                    error: new Error('No existe una sesión válida.')
-                };
-            }
-
-            const respuesta = await fetch(
-                `${configuracionBackend.url}/cuentas/perfil`,
-                {
-                    method: 'PATCH',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        Authorization: `Bearer ${token}`
-                    },
-                    body: JSON.stringify({
-                        nombre,
-                        apellidos
-                    })
-                }
-            );
-
-            if (!respuesta.ok) {
-                return {
-                    error: new Error(
-                        'No se han podido actualizar tus datos.'
-                    )
-                };
-            }
-
-            return { error: null };
-
-        } catch {
-            return {
-                error: new Error(
-                    'No se ha podido conectar con el backend.'
-                )
-            };
-        }
+    // Guardar el nombre y los apellidos con el bloqueo de edición del titular
+    actualizarDatosPerfilBloqueo(
+        nombre: string,
+        apellidos: string,
+        bloqueo: BloqueoEdicionCuenta
+    ) {
+        return this.guardarDatosConBloqueo(
+            '/cuentas/perfil/datos-con-bloqueo',
+            nombre,
+            apellidos,
+            bloqueo
+        );
     }
 
-    // Guardar el nombre y los apellidos con el bloqueo de edición del titular
-    async actualizarDatosPerfilBloqueo(
+    actualizarDatosCuentaSuperadministrador(
+        cuentaId: string,
+        nombre: string,
+        apellidos: string,
+        bloqueo: BloqueoEdicionCuenta
+    ) {
+        return this.guardarDatosConBloqueo(
+            `/cuentas/superadmin/cuentas/${encodeURIComponent(cuentaId)}/datos-con-bloqueo`,
+            nombre,
+            apellidos,
+            bloqueo
+        );
+    }
+
+    private async guardarDatosConBloqueo(
+        ruta: string,
         nombre: string,
         apellidos: string,
         bloqueo: BloqueoEdicionCuenta
@@ -579,7 +600,7 @@ export class Autenticacion {
             }
 
             const respuesta = await fetch(
-                `${configuracionBackend.url}/cuentas/perfil/datos-con-bloqueo`,
+                `${configuracionBackend.url}${ruta}`,
                 {
                     method: 'PATCH',
                     headers: {

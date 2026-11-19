@@ -1,6 +1,7 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { DashboardApi, LanzadorResumen, DestinatarioResumen, AutorizacionExterna } from '../../../servicios/dashboard-api';
+import { Autenticacion } from '../../../servicios/autenticacion';
 
 @Component({
   selector: 'app-dashboard',
@@ -11,6 +12,9 @@ import { DashboardApi, LanzadorResumen, DestinatarioResumen, AutorizacionExterna
 export class Dashboard implements OnInit {
 
   private readonly api = inject(DashboardApi);
+  
+  private readonly autenticacion = inject(Autenticacion);
+  readonly nombreSaludo = signal('');
 
   readonly lanzadores = signal<LanzadorResumen[]>([]);
   readonly destinatarios = signal<DestinatarioResumen[]>([]);
@@ -77,6 +81,15 @@ export class Dashboard implements OnInit {
 
   ngOnInit(): void {
     void this.cargarDatos();
+
+    void this.autenticacion.obtenerNombreParaSaludo().then(datos => {
+      if (datos) {
+          this.nombreSaludo.set(
+              datos.apellidos ? `${datos.nombre} ${datos.apellidos}` : datos.nombre
+          );
+      }
+  });
+
   }
 
   async cargarDatos(): Promise<void> {

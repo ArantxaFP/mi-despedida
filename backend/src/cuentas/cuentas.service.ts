@@ -71,7 +71,9 @@ export class CuentasService {
             },
             select: {
                 rol: true,
-                estado: true
+                estado: true,
+                nombre: true,
+                apellidos: true
             }
         });
 
@@ -83,7 +85,9 @@ export class CuentasService {
 
         return {
             rol: cuenta.rol,
-            estado: cuenta.estado
+            estado: cuenta.estado,
+            nombre: cuenta.nombre,
+            apellidos: cuenta.apellidos
         };
     }
 
@@ -204,7 +208,7 @@ export class CuentasService {
                 id: true,
                 nombre: true,
                 apellidos: true,
-                correo: true,
+                /*correo: true,*/
                 rol: true,
                 estado: true
             }
@@ -229,14 +233,14 @@ export class CuentasService {
         const propuesta = {
             nombre: datos.nombre.trim(),
             apellidos: datos.apellidos?.trim() || null,
-            correo: datos.correo.trim().toLowerCase()
+            /*correo: datos.correo.trim().toLowerCase()*/
         };
 
         // Identificar qué campos han cambiado
         const cambios = {
             nombre: propuesta.nombre !== cuenta.nombre,
             apellidos: propuesta.apellidos !== cuenta.apellidos,
-            correo: propuesta.correo !== cuenta.correo
+            /*correo: propuesta.correo !== cuenta.correo*/
         };
 
         return {
@@ -245,7 +249,7 @@ export class CuentasService {
             estado: cuenta.estado,
             datosPropuestos: propuesta,
             camposModificados: cambios,
-            requiereVerificacionCorreo: cambios.correo,
+           /* requiereVerificacionCorreo: cambios.correo,*/
             guardado: false
         };
     }
@@ -428,6 +432,26 @@ export class CuentasService {
         return this.bloqueosEdicion.liberarBloqueo(cuentaId, editorId, token);
     }
 
+    // Guardar nombre y apellidos de la cuenta seleccionada por el superadministrador
+    async actualizarDatosCuentaSuperadministrador(
+        autorizacion: string | undefined,
+        cuentaId: string,
+        datos: ActualizarDatosPerfilBloqueoDto
+    ) {
+        const editorId = await this.comprobarSuperadministradorActivo(
+            autorizacion
+        );
+
+        return this.bloqueosEdicion.guardarNombreYApellidosConBloqueo(
+            cuentaId,
+            editorId,
+            datos.token,
+            datos.versionEsperada,
+            datos.nombre,
+            datos.apellidos ?? null
+        );
+    }
+
 
     // Comprobar que el administrador tiene una cuenta activa.
     // Un token válido de Supabase Auth no es suficiente para autorizar operaciones privadas.
@@ -468,89 +492,7 @@ export class CuentasService {
     }
 
 
-    // Actualizar los datos personales de una cuenta activa.
-    // PostgreSQL almacena los datos operativos del administrador.
-    async actualizarDatosPersonales(
-        autorizacion: string | undefined,
-        nombre: string,
-        apellidos?: string
-    ) {
-        if (
-            !autorizacion ||
-            !/^Bearer\s+\S+$/i.test(autorizacion)
-        ) {
-            throw new UnauthorizedException(
-                'Debes iniciar sesión.'
-            );
-        }
-
-        const token = autorizacion.split(/\s+/)[1];
-
-        const { data, error } =
-            await this.supabaseService.verificarUsuario(token);
-
-        if (
-            error ||
-            !data.user ||
-            !data.user.email_confirmed_at
-        ) {
-            throw new UnauthorizedException(
-                'La sesión no es válida.'
-            );
-        }
-
-        await this.comprobarCuentaActiva(data.user.id);
-
-        const nombreLimpio = nombre.trim();
-        const apellidosLimpios = apellidos?.trim() || null;
-
-        if (!nombreLimpio || nombreLimpio.length > 100) {
-            throw new BadRequestException(
-                'El nombre no es válido.'
-            );
-        }
-
-        // Supabase Auth conserva los datos del perfil utilizados por el front
-        const { error: errorAuth } =
-            await this.supabaseService.obtenerCliente()
-                .auth.admin.updateUserById(data.user.id, {
-                    user_metadata: {
-                        ...data.user.user_metadata,
-                        nombre: nombreLimpio,
-                        apellidos: apellidosLimpios ?? ''
-                    }
-                });
-
-        if (errorAuth) {
-            throw new ServiceUnavailableException(
-                'No se han podido actualizar los datos personales.'
-            );
-        }
-
-        // Actualizar también la cuenta propia en Postgre
-        try {
-            await this.prisma.cuentas.updateMany({
-                where: {
-                    id: data.user.id,
-                    estado: 'activa'
-                },
-                data: {
-                    nombre: nombreLimpio,
-                    apellidos: apellidosLimpios
-                }
-            });
-        } catch {
-            throw new ServiceUnavailableException(
-                'No se ha podido completar la actualización del perfil.'
-            );
-        }
-
-        return {
-            mensaje: 'Tus datos personales se han actualizado correctamente.'
-        };
-    }
-
-    // Crear la identidad en Supabase Auth y la cuenta en Postgre
+   // Crear la identidad en Supabase Auth y la cuenta en Postgre
     async registrar(
         datos: DatosRegistroCuenta,
         origen?: string

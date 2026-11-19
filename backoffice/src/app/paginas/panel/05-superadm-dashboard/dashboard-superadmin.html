@@ -2,7 +2,13 @@
 
     <!-- CABECERA -->
     <section class="panel-pagina__bloque panel-pagina__cabecera">
-        <h1>Dashboard de superadministración</h1>
+        <h1>
+            @if (nombreSaludo()) {
+                Hola, usuario SuperAdministrador {{ nombreSaludo() }}.
+            } @else {
+                Inicio SuperAdmin
+            }
+        </h1>
 
         <p>
             Gestiona las cuentas de usuario y supervisa el funcionamiento de Mi Despedida.

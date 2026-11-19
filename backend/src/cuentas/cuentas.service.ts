@@ -1,4 +1,4 @@
-import { BadRequestException, ForbiddenException, Injectable, ServiceUnavailableException, UnauthorizedException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, ServiceUnavailableException, UnauthorizedException, NotFoundException, ConflictException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service';
 import { SupabaseService } from '../supabase/supabase.service';
@@ -7,6 +7,7 @@ import { obtenerUrlBackoffice } from '../configuracion/urls-backoffice';
 import { EditarCuentaSuperadminDto } from './dto/editar-cuenta-superadmin.dto';
 import { BloqueosEdicionCuentasService } from './bloqueos-edicion-cuentas.service';
 import { ActualizarDatosPerfilBloqueoDto } from './dto/actualizar-datos-perfil-bloqueo.dto';
+import { SuspenderCuentaDto } from './dto/suspender-cuenta.dto';
 
 export interface DatosRegistroCuenta {
     nombre: string;
@@ -453,6 +454,93 @@ export class CuentasService {
     }
 
 
+    // Suspender una cuenta
+    async suspenderCuentaSuperadministrador(
+        autorizacion: string | undefined,
+        cuentaId: string,
+        datos: SuspenderCuentaDto
+    ) {
+        const editorId = await this.comprobarSuperadministradorActivo(
+            autorizacion
+        );
+        const motivo = datos.motivo.trim();
+
+        if (!motivo) {
+            throw new BadRequestException('Indica el motivo de la suspensión.');
+        }
+
+        return this.prisma.$transaction(async tx => {
+            const [cuenta] = await tx.$queryRaw<Array<{
+                rol: string;
+                estado: string;
+                version: number;
+            }>>`
+                SELECT rol, estado, version
+                FROM public.cuentas
+                WHERE id = ${cuentaId}::uuid
+                FOR UPDATE
+            `;
+
+            if (!cuenta || cuenta.rol !== 'administrador') {
+                throw new NotFoundException(
+                    'No se ha encontrado esta cuenta de administrador.'
+                );
+            }
+
+            if (cuenta.estado === 'suspendida') {
+                return { estado: 'suspendida', version: cuenta.version };
+            }
+
+            if (cuenta.estado !== 'activa') {
+                throw new ConflictException(
+                    'Solo se pueden suspender cuentas activas.'
+                );
+            }
+
+            const [actualizada] = await tx.$queryRaw<Array<{ version: number }>>`
+                UPDATE public.cuentas
+                SET estado = 'suspendida',
+                    fecha_suspension = clock_timestamp(),
+                    motivo_suspension = ${motivo},
+                    version = version + 1
+                WHERE id = ${cuentaId}::uuid
+                RETURNING version
+            `;
+
+            await tx.$executeRaw`
+                DELETE FROM public.bloqueos_edicion_cuentas
+                WHERE cuenta_id = ${cuentaId}::uuid
+            `;
+
+            await tx.$executeRaw`
+                INSERT INTO public.auditoria_operaciones_cuentas (
+                    cuenta_afectada_id,
+                    actor_id,
+                    rol_actor,
+                    accion,
+                    resultado,
+                    campos_modificados,
+                    version_anterior,
+                    version_nueva
+                )
+                VALUES (
+                    ${cuentaId}::uuid,
+                    ${editorId}::uuid,
+                    'superadministrador',
+                    'suspender_cuenta',
+                    'realizada',
+                    ARRAY['estado', 'fecha_suspension', 'motivo_suspension']::text[],
+                    ${cuenta.version},
+                    ${actualizada.version}
+                )
+            `;
+
+            return { estado: 'suspendida', version: actualizada.version };
+        });
+    }
+    
+    
+    
     // Comprobar que el administrador tiene una cuenta activa.
     // Un token válido de Supabase Auth no es suficiente para autorizar operaciones privadas.
     async comprobarCuentaActiva(

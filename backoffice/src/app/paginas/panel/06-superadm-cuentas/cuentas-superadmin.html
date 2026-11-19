@@ -35,9 +35,10 @@
             </div>
 
             <button type="button" class="panel__boton" (click)="actualizarCuentas()"
-                [disabled]="cargando() || solicitandoBloqueo() || cuentaEnEdicionId() !== null">
+                [disabled]="cargando() || suspendiendo() || solicitandoBloqueo() || cuentaEnEdicionId() !== null">
                 {{ cargando() ? 'Actualizando...' : 'Actualizar' }}
             </button>
+
 
         </div>
 
@@ -98,6 +99,7 @@
 
                         <!-- ACCIONES -->
                         <td>
+
                             <div class="tabla-cuentas__acciones">
 
                                 @if (cuentaEnEdicionId() === cuenta.id) {
@@ -113,13 +115,10 @@
                                 </p>
                                 } -->
 
-
-
                                 <button type="button" class="panel__boton" (click)="previsualizarCambios()"
                                     [disabled]="!hayCambios() || previsualizando() || guardandoEdicion()">
                                     {{ previsualizando() ? 'Comprobando...' : 'Previsualizar cambios' }}
                                 </button>
-
 
                                 <button type="button" class="panel__boton" (click)="cancelarEdicion()"
                                     [disabled]="guardandoEdicion()">
@@ -128,12 +127,48 @@
 
                                 } @else {
 
-                                <button type="button" class="panel__boton" (click)="iniciarEdicion(cuenta)"
-                                    [disabled]="cargando() || solicitandoBloqueo() || cuentaEnEdicionId() !== null">
+                                <button type="button" class="panel__boton" (click)="iniciarEdicion(cuenta)" [disabled]="cargando() || solicitandoBloqueo() || cuentaEnEdicionId() !== null
+                                        || cuenta.estado === 'suspendida'
+                                        || (suspendiendo() && cuentaParaSuspenderId() === cuenta.id)">
                                     Editar
                                 </button>
 
+                                }
 
+                                <!-- La suspensión está disponible aunque la fila se esté editando. -->
+                                @if (cuentaParaSuspenderId() === cuenta.id) {
+                                <form (submit)="$event.preventDefault(); confirmarSuspension(cuenta)">
+                                    <p>Vas a suspender la cuenta de {{ cuenta.correo }}.</p>
+
+                                    <label [attr.for]="'motivo-suspension-' + cuenta.id">
+                                        Motivo de la suspensión
+                                    </label>
+
+                                    <textarea class="tabla-cuentas__campo" [id]="'motivo-suspension-' + cuenta.id"
+                                        rows="3" required [value]="motivoSuspension()" [readonly]="suspendiendo()"
+                                        (input)="motivoSuspension.set(motivoInput.value)" #motivoInput></textarea>
+
+                                    @if (errorSuspension()) {
+                                    <p class="tabla-cuentas__mensaje" role="alert">
+                                        {{ errorSuspension() }}
+                                    </p>
+                                    }
+
+                                    <button type="submit" class="panel__boton"
+                                        [disabled]="cargando() || suspendiendo() || !motivoSuspension().trim()">
+                                        {{ suspendiendo() ? 'Suspendiendo...' : 'Confirmar suspensión' }}
+                                    </button>
+
+                                    <button type="button" class="panel__boton" (click)="cancelarSuspension()"
+                                        [disabled]="suspendiendo()">
+                                        Cancelar suspensión
+                                    </button>
+                                </form>
+                                } @else if (cuenta.rol === 'administrador' && cuenta.estado === 'activa') {
+                                <button type="button" class="panel__boton" (click)="prepararSuspension(cuenta)"
+                                    [disabled]="cargando() || suspendiendo()">
+                                    Suspender
+                                </button>
                                 }
 
                             </div>
@@ -148,21 +183,21 @@
 
                             @if (cuentaEnEdicionId() === cuenta.id) {
 
-                                <div class="tabla-cuentas__previsualizacion" role="status">
+                            <div class="tabla-cuentas__previsualizacion" role="status">
 
-                                    <strong>Resultado de la previsualización</strong>
-                                
-                                    <p>
-                                        Nombre:
-                                        {{ resultado.camposModificados.nombre ? 'Modificado' : 'Sin cambios' }}
-                                    </p>
-                                
-                                    <p>
-                                        Apellidos:
-                                        {{ resultado.camposModificados.apellidos ? 'Modificados' : 'Sin cambios' }}
-                                    </p>
-                                
-                                    <!-- Previsualización del correo reservada para después del MVP.
+                                <strong>Resultado de la previsualización</strong>
+
+                                <p>
+                                    Nombre:
+                                    {{ resultado.camposModificados.nombre ? 'Modificado' : 'Sin cambios' }}
+                                </p>
+
+                                <p>
+                                    Apellidos:
+                                    {{ resultado.camposModificados.apellidos ? 'Modificados' : 'Sin cambios' }}
+                                </p>
+
+                                <!-- Previsualización del correo reservada para después del MVP.
                                     <p>
                                         Correo:
                                         {{ resultado.camposModificados.correo ? 'Modificado' : 'Sin cambios' }}
@@ -172,10 +207,10 @@
                                         <p>El nuevo correo electrónico requerirá verificación.</p>
                                     }
                                     -->
-                                
-                                    <p>Los cambios todavía no se han guardado.</p>
-                                
-                                </div>
+
+                                <p>Los cambios todavía no se han guardado.</p>
+
+                            </div>
 
                             }
 

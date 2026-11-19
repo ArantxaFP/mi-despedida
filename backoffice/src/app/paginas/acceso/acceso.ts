@@ -1,5 +1,5 @@
 import { Component, inject, signal } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Autenticacion } from '../../servicios/autenticacion';
 import { enlaces } from '../../configuracion/enlaces';
@@ -23,6 +23,8 @@ export class Acceso {
   private constructorFormulario = inject(FormBuilder);
   private router = inject(Router);
 
+  private readonly ruta = inject(ActivatedRoute);
+
   readonly urlWebComercial = enlaces.webComercial;
 
   contrasenaVisible = false;
@@ -39,6 +41,18 @@ export class Acceso {
     contrasena: ['', [Validators.required]]
   });
 
+  
+  constructor() {
+    const estado = this.ruta.snapshot.queryParamMap.get('estadoCuenta');
+  
+    if (estado === 'suspendida') {
+      this.mensajeAcceso.set('Tu cuenta está suspendida.');
+    } else if (estado === 'baja') {
+      this.mensajeAcceso.set('Tu cuenta está dada de baja.');
+    }
+  }
+  
+  
   cambiarVisibilidadContrasena(): void {
     this.contrasenaVisible = !this.contrasenaVisible;
   }

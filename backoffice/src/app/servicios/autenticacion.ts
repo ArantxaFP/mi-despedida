@@ -481,9 +481,11 @@ export class Autenticacion {
     }
 
     // Coger nombre y posible apellido de administrador para mostrarlo en el panel
-    async obtenerNombreParaSaludo(): Promise<{
-        nombre: string;
-        apellidos: string | null;
+    async obtenerMiAcceso(): Promise<{
+        rol: string;
+        estado: string;
+        nombre?: string;
+        apellidos?: string | null;
     } | null> {
         try {
             const token = await this.obtenerTokenAcceso();
@@ -504,17 +506,22 @@ export class Autenticacion {
                 return null;
             }
     
-            const datos: { nombre?: string; apellidos?: string | null } =
-                await respuesta.json();
-    
-            const nombre = datos.nombre?.trim();
-    
-            return nombre
-                ? { nombre, apellidos: datos.apellidos?.trim() || null }
-                : null;
+            return await respuesta.json();
         } catch {
             return null;
         }
+    }
+    
+    async obtenerNombreParaSaludo(): Promise<{
+        nombre: string;
+        apellidos: string | null;
+    } | null> {
+        const datos = await this.obtenerMiAcceso();
+        const nombre = datos?.nombre?.trim();
+    
+        return nombre
+            ? { nombre, apellidos: datos?.apellidos?.trim() || null }
+            : null;
     }
 
 

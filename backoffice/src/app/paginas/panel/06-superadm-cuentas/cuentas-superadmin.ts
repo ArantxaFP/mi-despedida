@@ -54,6 +54,11 @@ export class CuentasSuperadmin implements OnInit, OnDestroy {
   readonly guardandoEdicion = signal(false);
   readonly mensajeGuardado = signal('');
 
+  readonly cuentaParaSuspenderId = signal<string | null>(null);
+  readonly motivoSuspension = signal('');
+  readonly suspendiendo = signal(false);
+  readonly errorSuspension = signal('');
+
   private readonly usarBloqueoSuperadministrador = true;
   private bloqueoEdicion: BloqueoEdicionCuenta | null = null;
   private temporizadorRenovacion: number | undefined;
@@ -91,6 +96,9 @@ export class CuentasSuperadmin implements OnInit, OnDestroy {
 
     return this.cuentas().filter(cuenta =>
       cuenta.id === this.cuentaEnEdicionId() ||
+
+      cuenta.id === this.cuentaParaSuspenderId() ||
+
       [
         cuenta.nombre,
         cuenta.apellidos ?? '',
@@ -101,11 +109,117 @@ export class CuentasSuperadmin implements OnInit, OnDestroy {
     );
   });
 
+  // Suspensión de cuenta
+  prepararSuspension(cuenta: CuentaSuperadmin): void {
+    if (
+      this.cargando() ||
+      this.suspendiendo() ||
+      cuenta.rol !== 'administrador' ||
+      cuenta.estado !== 'activa'
+    ) {
+      return;
+    }
+
+    this.motivoSuspension.set('');
+    this.errorSuspension.set('');
+    this.cuentaParaSuspenderId.set(cuenta.id);
+  }
+
+  cancelarSuspension(): void {
+    if (!this.suspendiendo()) {
+      this.cuentaParaSuspenderId.set(null);
+    }
+  }
+
+  async confirmarSuspension(cuenta: CuentaSuperadmin): Promise<void> {
+    if (
+      this.cuentaParaSuspenderId() !== cuenta.id ||
+      this.cargando() ||
+      this.suspendiendo()
+    ) {
+      return;
+    }
+
+    const motivo = this.motivoSuspension().trim();
+
+    if (!motivo) {
+      this.errorSuspension.set('Indica el motivo de la suspensión.');
+      return;
+    }
+
+    this.suspendiendo.set(true);
+    this.errorSuspension.set('');
+    this.mensajeGuardado.set('');
+
+    try {
+      const token = await this.autenticacion.obtenerTokenAcceso();
+
+      if (!token) {
+        this.errorSuspension.set('Tu sesión ha caducado. Vuelve a iniciar sesión.');
+        return;
+      }
+
+      const respuesta = await fetch(
+        `${configuracionBackend.url}/cuentas/superadmin/cuentas/${encodeURIComponent(cuenta.id)}/suspender`,
+        {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ motivo })
+        }
+      );
+
+      if (!respuesta.ok) {
+        this.errorSuspension.set(
+          respuesta.status === 409
+            ? 'La cuenta ya no está activa. Actualiza el listado.'
+            : 'No se ha podido suspender esta cuenta.'
+        );
+        return;
+      }
+
+      const resultado: { estado: string } = await respuesta.json();
+
+      if (resultado.estado !== 'suspendida') {
+        this.errorSuspension.set('El servidor no ha confirmado la suspensión.');
+        return;
+      }
+
+      this.cuentas.update(cuentas => cuentas.map(actual =>
+        actual.id === cuenta.id
+          ? { ...actual, estado: resultado.estado }
+          : actual
+      ));
+
+      if (this.cuentaEnEdicionId() === cuenta.id) {
+        // Nest ya ha eliminado el bloqueo al suspender la cuenta
+        this.bloqueoEdicion = null;
+        this.cancelarEdicion();
+        this.mensajeError.set('');
+      }
+
+      this.cuentaParaSuspenderId.set(null);
+      this.mensajeGuardado.set(`Se ha suspendido la cuenta de ${cuenta.correo}.`);
+    } catch {
+      this.errorSuspension.set(
+        'No se ha podido confirmar la suspensión. Vuelve a intentarlo.'
+      );
+    } finally {
+      this.suspendiendo.set(false);
+    }
+  }
+  
   // Iniciar la edición de una única fila
   async iniciarEdicion(cuenta: CuentaSuperadmin): Promise<void> {
     if (
       this.cargando() ||
       this.solicitandoBloqueo() ||
+
+      cuenta.estado === 'suspendida' ||
+      (this.suspendiendo() && this.cuentaParaSuspenderId() === cuenta.id) ||
+
       this.cuentaEnEdicionId() !== null
     ) {
       return;
@@ -123,7 +237,12 @@ export class CuentasSuperadmin implements OnInit, OnDestroy {
       const { datos: bloqueo, error, conflicto } =
         await this.autenticacion.adquirirBloqueoSuperadministrador(cuenta.id);
 
-      if (this.componenteDestruido) {
+        if (
+          this.componenteDestruido ||
+          this.cuentas().some(actual =>
+            actual.id === cuenta.id && actual.estado === 'suspendida'
+          )
+        ) {
         if (bloqueo) {
           void this.autenticacion.liberarBloqueoSuperadministrador(
             cuenta.id,
@@ -206,11 +325,13 @@ export class CuentasSuperadmin implements OnInit, OnDestroy {
       !this.guardandoEdicion() &&
       !this.previsualizando() &&
       !!this.borradorCuenta()?.nombre.trim() &&
+      !(this.suspendiendo() && this.cuentaParaSuspenderId() === this.cuentaEnEdicionId()) &&
       this.hayCambios(); 
      /* && !this.correoModificado();*/
   }
 
   async guardarEdicion(): Promise<void> {
+    // Conservar la cuenta, el bloqueo y el borrador de esta edición antes de enviar la petición
     const cuentaId = this.cuentaEnEdicionId();
     const bloqueo = this.bloqueoEdicion;
     const borrador = this.borradorCuenta();
@@ -236,6 +357,11 @@ export class CuentasSuperadmin implements OnInit, OnDestroy {
         );
 
       if (error || !resultado) {
+        // Una suspensión puede haber cerrado esta edición mientras se guardaba
+        if (this.cuentaEnEdicionId() !== cuentaId) {
+          return;
+        }
+
         if (conflicto) {
           this.liberarBloqueoEdicion();
         }
@@ -243,26 +369,31 @@ export class CuentasSuperadmin implements OnInit, OnDestroy {
         this.mensajeError.set(
           conflicto
             ? 'Se ha perdido el bloqueo o la cuenta ha cambiado. ' +
-            'Copia tus cambios antes de cancelar y volver a pulsar Editar.'
+              'Copia tus cambios antes de cancelar y volver a pulsar Editar.'
             : error?.message ?? 'No se han podido guardar los datos.'
         );
         return;
       }
 
-      // El servidor ya ha liberado el bloqueo tras completar el guardado
-      this.bloqueoEdicion = null;
-
+      // Reflejar los datos guardados conservando el estado actual de la fila
       this.cuentas.update(cuentas => cuentas.map(cuenta =>
         cuenta.id === cuentaId
           ? { ...cuenta, nombre, apellidos: apellidos || null }
           : cuenta
       ));
 
-      this.cancelarEdicion();
-      this.mensajeGuardado.set(resultado.mensaje);
+      // Cerrar la edición solo si sigue abierta para esta cuenta
+      if (this.cuentaEnEdicionId() === cuentaId) {
+        // El servidor ya ha liberado el bloqueo tras completar el guardado
+        this.bloqueoEdicion = null;
+        this.cancelarEdicion();
+        this.mensajeGuardado.set(resultado.mensaje);
+      }
     } finally {
+      // Restablecer el indicador de guardado también si hubo un error
       this.guardandoEdicion.set(false);
 
+      // Si se salió del panel durante la petición, liberar el bloqueo que quede pendiente
       if (this.componenteDestruido) {
         this.liberarBloqueoEdicion();
       }
@@ -462,6 +593,7 @@ export class CuentasSuperadmin implements OnInit, OnDestroy {
 
     if (
       this.cargando() ||
+      this.suspendiendo() ||
       this.solicitandoBloqueo() ||
       this.cuentaEnEdicionId() !== null
     ) {

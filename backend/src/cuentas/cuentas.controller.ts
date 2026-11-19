@@ -5,6 +5,7 @@ import { RegistrarCuentaDto } from './dto/registrar-cuenta.dto';
 import { EditarCuentaSuperadminDto } from './dto/editar-cuenta-superadmin.dto';
 import { CredencialBloqueoDto } from './dto/credencial-bloqueo.dto';
 import { ActualizarDatosPerfilBloqueoDto } from './dto/actualizar-datos-perfil-bloqueo.dto';
+import { SuspenderCuentaDto } from './dto/suspender-cuenta.dto';
 
 @Controller('cuentas')
 export class CuentasController {
@@ -149,6 +150,29 @@ export class CuentasController {
         );
     }
 
+
+    // Suspender una cuenta
+    @Patch('superadmin/cuentas/:id/suspender')
+    async suspenderCuentaSuperadministrador(
+        @Param('id', new ParseUUIDPipe({ version: 'all' }))
+        cuentaId: string,
+
+        @Headers('authorization')
+        autorizacion: string | undefined,
+
+        @Body(new ValidationPipe({
+            whitelist: true,
+            forbidNonWhitelisted: true,
+            transform: true
+        }))
+        datos: SuspenderCuentaDto
+    ) {
+        return this.cuentasService.suspenderCuentaSuperadministrador(
+            autorizacion,
+            cuentaId,
+            datos
+        );
+    }
 
 
     // Solicitar un bloqueo prioritario para editar el perfil

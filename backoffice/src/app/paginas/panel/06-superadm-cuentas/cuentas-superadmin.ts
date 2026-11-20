@@ -58,6 +58,7 @@ export class CuentasSuperadmin implements OnInit, OnDestroy {
   readonly motivoSuspension = signal('');
   readonly suspendiendo = signal(false);
   readonly errorSuspension = signal('');
+  readonly reactivandoCuentaId = signal<string | null>(null);
 
   private readonly usarBloqueoSuperadministrador = true;
   private bloqueoEdicion: BloqueoEdicionCuenta | null = null;
@@ -211,12 +212,81 @@ export class CuentasSuperadmin implements OnInit, OnDestroy {
     }
   }
   
+  // Reactivar desde el listado y actualizar la fila cuando Nest lo confirme
+  async reactivarCuenta(cuenta: CuentaSuperadmin): Promise<void> {
+    if (
+      this.cargando() ||
+      this.suspendiendo() ||
+      this.reactivandoCuentaId() !== null ||
+      cuenta.rol !== 'administrador' ||
+      cuenta.estado !== 'suspendida'
+    ) {
+      return;
+    }
+
+    this.reactivandoCuentaId.set(cuenta.id);
+    this.mensajeError.set('');
+    this.mensajeGuardado.set('');
+
+    try {
+      const token = await this.autenticacion.obtenerTokenAcceso();
+
+      if (!token) {
+        this.mensajeError.set('Tu sesión ha caducado. Vuelve a iniciar sesión.');
+        return;
+      }
+
+      const respuesta = await fetch(
+        `${configuracionBackend.url}/cuentas/superadmin/cuentas/${encodeURIComponent(cuenta.id)}/reactivar`,
+        {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+
+      if (!respuesta.ok) {
+        this.mensajeError.set(
+          respuesta.status === 409
+            ? 'La cuenta ya no está suspendida. Actualiza el listado.'
+            : 'No se ha podido reactivar esta cuenta.'
+        );
+        return;
+      }
+
+      const resultado: { estado: string } = await respuesta.json();
+
+      if (resultado.estado !== 'activa') {
+        this.mensajeError.set('El servidor no ha confirmado la reactivación.');
+        return;
+      }
+
+      // Actualizar el estado sin reemplazar los demás datos de la fila
+      this.cuentas.update(cuentas => cuentas.map(actual =>
+        actual.id === cuenta.id
+          ? { ...actual, estado: resultado.estado }
+          : actual
+      ));
+
+      this.mensajeGuardado.set(`Se ha reactivado la cuenta de ${cuenta.correo}.`);
+    } catch {
+      this.mensajeError.set(
+        'No se ha podido confirmar la reactivación. Vuelve a intentarlo.'
+      );
+    } finally {
+      this.reactivandoCuentaId.set(null);
+    }
+  }
+  
+  
   // Iniciar la edición de una única fila
   async iniciarEdicion(cuenta: CuentaSuperadmin): Promise<void> {
     if (
       this.cargando() ||
       this.solicitandoBloqueo() ||
-
+      this.guardandoEdicion() ||
+      
       cuenta.estado === 'suspendida' ||
       (this.suspendiendo() && this.cuentaParaSuspenderId() === cuenta.id) ||
 
@@ -588,13 +658,14 @@ export class CuentasSuperadmin implements OnInit, OnDestroy {
   }
 
   // Consultar las cuentas a través de Nest.
-  // Solo superadministradores activos tienen permiso.
+  // Solo superadministradores activos tienen permisos.
   async actualizarCuentas(): Promise<void> {
 
     if (
       this.cargando() ||
       this.suspendiendo() ||
       this.solicitandoBloqueo() ||
+      this.reactivandoCuentaId() !== null ||
       this.cuentaEnEdicionId() !== null
     ) {
       return;

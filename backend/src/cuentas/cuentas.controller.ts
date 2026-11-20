@@ -175,6 +175,37 @@ export class CuentasController {
     }
 
 
+      // Reactivar una cuenta suspendida desde el panel de superadministración
+    @Patch('superadmin/cuentas/:id/reactivar')
+    async reactivarCuentaSuperadministrador(
+        @Param('id', new ParseUUIDPipe({ version: 'all' }))
+        cuentaId: string,
+
+        @Headers('authorization')
+        autorizacion?: string
+    ) {
+        return this.cuentasService.reactivarCuentaSuperadministrador(
+            autorizacion,
+            cuentaId
+        );
+    }
+  
+    // Dar de baja una cuenta de administrador desde superadministración
+    @Patch('superadmin/cuentas/:id/baja')
+    async darDeBajaCuentaSuperadministrador(
+        @Param('id', new ParseUUIDPipe({ version: 'all' }))
+        cuentaId: string,
+
+        @Headers('authorization')
+        autorizacion?: string
+    ) {
+        return this.cuentasService.darDeBajaCuentaSuperadministrador(
+            autorizacion,
+            cuentaId
+        );
+    }
+    
+    
     // Solicitar un bloqueo prioritario para editar el perfil
     @Post('edicion/:id/bloqueo')
     async adquirirBloqueoEdicionPerfil(

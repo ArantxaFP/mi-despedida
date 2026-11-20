@@ -1,10 +1,12 @@
-import { BadRequestException, ConflictException, Injectable, InternalServerErrorException, Logger, ServiceUnavailableException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, InternalServerErrorException, Logger, ServiceUnavailableException, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { randomBytes, createHash } from 'node:crypto';
 import { PrismaService } from '../prisma/prisma.service';
+import { bloquearCuentaActiva, bloquearCuentas } from '../cuentas/bloqueo-cuentas';
 import { CorreoService } from '../correo/correo.service';
 import { CrearInvitacionDto } from './dto/crear-invitacion.dto';
 import { obtenerUrlBackoffice } from '../configuracion/urls-backoffice';
+
 
 @Injectable()
 export class ContactosLanzadoresService {
@@ -111,6 +113,29 @@ export class ContactosLanzadoresService {
                         where: { correo }
                     });
 
+                    // Coordinar el alta o reenvío con la baja de cualquiera de las dos cuentas
+                    const { titularActiva, estadoLanzador } = await bloquearCuentas(
+                        tx,
+                        administradorId,
+                        lanzador?.usuario_id ?? null
+                    );
+
+                    if (!titularActiva) {
+                        throw new ForbiddenException(
+                            'Tu cuenta no está habilitada para realizar esta operación.'
+                        );
+                    }
+
+                    if (
+                        estadoLanzador === 'baja' ||
+                        estadoLanzador === 'finalizada' ||
+                        estadoLanzador === 'finalizada_con_incidencias'
+                    ) {
+                        throw new ConflictException(
+                            'Esta persona no puede recibir una nueva invitación como lanzador.'
+                        );
+                    }
+
                     if (!lanzador) {
                         lanzador = await tx.lanzadores.create({
                             data: {
@@ -120,7 +145,7 @@ export class ContactosLanzadoresService {
                         });
                     }
 
-                    // 2. Impedir que el titular sea su propio lanzador, incluso si ha cambiado de dirección de correo.
+                    // 2. Impedir que el titular sea su propio lanzador, incluso si ha cambiado de dirección de correo
                     if (lanzador.usuario_id === administradorId) {
                         throw new BadRequestException(
                             'No puedes actuar como lanzador de tu propia cuenta.'
@@ -305,7 +330,8 @@ export class ContactosLanzadoresService {
         } catch (error) {
             if (
                 error instanceof BadRequestException ||
-                error instanceof ConflictException
+                error instanceof ConflictException ||
+                error instanceof ForbiddenException
             ) {
                 throw error;
             }
@@ -465,6 +491,8 @@ export class ContactosLanzadoresService {
     ) {
         return this.prisma.$transaction(async (tx) => {
 
+            await bloquearCuentaActiva(tx, administradorId);
+
             const ahora = new Date();
 
             // Modificar exclusivamente una asignación pendiente que pertenezca al administrador
@@ -560,6 +588,8 @@ export class ContactosLanzadoresService {
         asignacionId: string
     ) {
         return this.prisma.$transaction(async (tx) => {
+
+            await bloquearCuentaActiva(tx, administradorId);
 
             const ahora = new Date();
 
@@ -689,6 +719,8 @@ export class ContactosLanzadoresService {
         for (const asignacion of pendientesCaducadas) {
 
             await this.prisma.$transaction(async (tx) => {
+
+                await bloquearCuentaActiva(tx, administradorId);
 
                 // Actualización condicionada para evitar registrar dos veces la misma caducidad
                 const resultado =

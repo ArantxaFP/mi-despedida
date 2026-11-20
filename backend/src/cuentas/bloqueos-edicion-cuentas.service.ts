@@ -2,6 +2,7 @@ import { ConflictException, ForbiddenException, Injectable, NotFoundException, B
 import { createHash, randomBytes } from 'node:crypto';
 import { PrismaService } from '../prisma/prisma.service';
 import type { Prisma } from '../generated/prisma/client';
+import { bloquearFilasCuentas } from './bloqueo-cuentas';
 
 @Injectable()
 export class BloqueosEdicionCuentasService {
@@ -27,21 +28,7 @@ export class BloqueosEdicionCuentasService {
         return this.prisma.$transaction(async (tx) => {
 
             // Bloquear temporalmente la fila de la cuenta
-            const cuentas = await tx.$queryRaw<
-                Array<{
-                    id: string;
-                    rol: string;
-                    version: number;
-                    nombre: string;
-                    apellidos: string | null;
-                }>
-            >`
-                SELECT id, rol, version, nombre, apellidos
-
-                FROM public.cuentas
-                WHERE id = ${cuentaId}::uuid
-                FOR UPDATE
-            `;
+           const cuentas = await bloquearFilasCuentas(tx, cuentaId);
 
             const cuenta = cuentas[0];
 
@@ -55,6 +42,13 @@ export class BloqueosEdicionCuentasService {
             if (cuenta.rol !== 'administrador') {
                 throw new ForbiddenException(
                     'Esta cuenta no puede editarse desde esta sección.'
+                );
+            }
+
+            // Una suspensión o una baja impiden abrir y guardar ediciones del perfil
+            if (cuenta.estado === 'suspendida' || cuenta.estado === 'baja') {
+                throw new ForbiddenException(
+                    'La cuenta está suspendida o dada de baja y no puede editarse.'
                 );
             }
 
@@ -214,6 +208,7 @@ export class BloqueosEdicionCuentasService {
                 AND bloqueo.fecha_caducidad > NOW()
                 AND cuenta.id = bloqueo.cuenta_id
                 AND cuenta.rol = 'administrador'
+                AND cuenta.estado NOT IN ('suspendida', 'baja')
                 AND editor.id = bloqueo.editor_id
                 AND editor.estado = 'activa'
                 AND editor.rol = bloqueo.rol_editor
@@ -301,18 +296,7 @@ export class BloqueosEdicionCuentasService {
             .digest('hex');
 
         // Bloquear la fila de la cuenta hasta que termine la transacción que realizará el guardado
-        const cuentas = await tx.$queryRaw<
-            Array<{
-                id: string;
-                rol: string;
-                version: number;
-            }>
-        >`
-            SELECT id, rol, version
-            FROM public.cuentas
-            WHERE id = ${cuentaId}::uuid
-            FOR UPDATE
-        `;
+        const cuentas = await bloquearFilasCuentas(tx, cuentaId);
 
         const cuenta = cuentas[0];
 
@@ -327,6 +311,13 @@ export class BloqueosEdicionCuentasService {
                 'Esta cuenta no puede editarse desde esta sección.'
             );
         }
+
+        // Una suspensión o una baja impiden abrir y guardar ediciones del perfil
+            if (cuenta.estado === 'suspendida' || cuenta.estado === 'baja') {
+                throw new ForbiddenException(
+                    'La cuenta está suspendida o dada de baja y no puede editarse.'
+                );
+            }
 
         // Comprobar que la cuenta no ha cambiado desde que comenzó la edición
         if (cuenta.version !== versionEsperada) {

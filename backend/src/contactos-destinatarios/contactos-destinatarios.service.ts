@@ -1,5 +1,7 @@
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { bloquearCuentaActiva } from '../cuentas/bloqueo-cuentas';
+
 import { DatosDestinatarioDto } from './dto/datos-destinatario.dto';
 
 @Injectable()
@@ -24,10 +26,11 @@ export class ContactosDestinatariosService {
 
     private async comprobarPropiedad(
         administradorId: string,
-        contactoId: string
+        contactoId: string,
+        cliente: Pick<PrismaService, 'contactos_destinatarios'>
     ) {
         const contacto =
-            await this.prisma.contactos_destinatarios.findFirst({
+            await cliente.contactos_destinatarios.findFirst({
                 where: {
                     id: contactoId,
                     administrador_id: administradorId
@@ -90,10 +93,11 @@ export class ContactosDestinatariosService {
 
     async obtenerFicha(
         administradorId: string,
-        contactoId: string
+        contactoId: string,
+        cliente: Pick<PrismaService, 'contactos_destinatarios'> = this.prisma
     ) {
         const contacto =
-            await this.prisma.contactos_destinatarios.findFirst({
+            await cliente.contactos_destinatarios.findFirst({
                 where: {
                     id: contactoId,
                     administrador_id: administradorId
@@ -117,7 +121,6 @@ export class ContactosDestinatariosService {
             mensaje: contacto.mensajes_destinatarios?.contenido ?? null
         };
     }
-
     async crear(
         administradorId: string,
         datos: DatosDestinatarioDto
@@ -125,21 +128,23 @@ export class ContactosDestinatariosService {
         const valores = this.normalizar(datos);
 
         try {
-            const contacto =
-                await this.prisma.contactos_destinatarios.create({
+            return await this.prisma.$transaction(async tx => {
+                await bloquearCuentaActiva(tx, administradorId);
+
+                const contacto = await tx.contactos_destinatarios.create({
                     data: {
                         administrador_id: administradorId,
                         ...valores
                     }
                 });
 
-            return {
-                id: contacto.id,
-                nombre: contacto.nombre,
-                correo: contacto.correo,
-                tieneMensaje: false
-            };
-
+                return {
+                    id: contacto.id,
+                    nombre: contacto.nombre,
+                    correo: contacto.correo,
+                    tieneMensaje: false
+                };
+            });
         } catch (error) {
             this.gestionarError(error);
         }
@@ -153,8 +158,10 @@ export class ContactosDestinatariosService {
         const valores = this.normalizar(datos);
 
         try {
-            const resultado =
-                await this.prisma.contactos_destinatarios.updateMany({
+            return await this.prisma.$transaction(async tx => {
+                await bloquearCuentaActiva(tx, administradorId);
+
+                const resultado = await tx.contactos_destinatarios.updateMany({
                     where: {
                         id: contactoId,
                         administrador_id: administradorId
@@ -165,14 +172,14 @@ export class ContactosDestinatariosService {
                     }
                 });
 
-            if (resultado.count !== 1) {
-                throw new NotFoundException(
-                    'No se ha encontrado el destinatario.'
-                );
-            }
+                if (resultado.count !== 1) {
+                    throw new NotFoundException(
+                        'No se ha encontrado el destinatario.'
+                    );
+                }
 
-            return this.obtenerFicha(administradorId, contactoId);
-
+                return this.obtenerFicha(administradorId, contactoId, tx);
+            });
         } catch (error) {
             this.gestionarError(error);
         }
@@ -182,23 +189,25 @@ export class ContactosDestinatariosService {
         administradorId: string,
         contactoId: string
     ): Promise<void> {
-        const resultado =
-            await this.prisma.contactos_destinatarios.deleteMany({
+        await this.prisma.$transaction(async tx => {
+            await bloquearCuentaActiva(tx, administradorId);
+
+            const resultado = await tx.contactos_destinatarios.deleteMany({
                 where: {
                     id: contactoId,
                     administrador_id: administradorId
                 }
             });
 
-        if (resultado.count !== 1) {
-            throw new NotFoundException(
-                'No se ha encontrado el destinatario.'
-            );
-        }
+            if (resultado.count !== 1) {
+                throw new NotFoundException(
+                    'No se ha encontrado el destinatario.'
+                );
+            }
 
-        // PostgreSQL elimina también su mensaje personalizado
+            // Postgre elimina también su mensaje personalizado
+        });
     }
-
 
     // --------------------------------------------------
     // Guardar o actualizar el mensaje personal
@@ -211,53 +220,50 @@ export class ContactosDestinatariosService {
     ) {
         const contenido = contenidoOriginal.trim();
 
-        // Comprobar que el destinatario pertenece
-        // al administrador que ha iniciado sesión.
-        await this.comprobarPropiedad(
-            administradorId,
-            contactoId
-        );
+        return this.prisma.$transaction(async tx => {
+            await bloquearCuentaActiva(tx, administradorId);
 
-        // El mensaje es opcional.
-        // Si no hay contenido, no se crea ninguna carta.
-        if (!contenido) {
-            return {
-                mensaje: 'No se ha guardado ningún mensaje personal.'
-            };
-        }
+            // Comprobar que el destinatario pertenece
+            // al administrador que ha iniciado sesión.
+            await this.comprobarPropiedad(administradorId, contactoId, tx);
 
-        // Crear la carta o actualizarla si ya existe.
-        await this.prisma.mensajes_destinatarios.upsert({
-            where: {
-                destinatario_id: contactoId
-            },
-            create: {
-                destinatario_id: contactoId,
-                contenido
-            },
-            update: {
-                contenido,
-                fecha_actualizacion: new Date()
+            // El mensaje es opcional.
+            // Si no hay contenido, no se crea ninguna carta.
+            if (!contenido) {
+                return {
+                    mensaje: 'No se ha guardado ningún mensaje personal.'
+                };
             }
-        });
 
-        return {
-            mensaje: 'El mensaje personal se ha guardado correctamente.'
-        };
+            // Crear la carta o actualizarla si ya existe
+            await tx.mensajes_destinatarios.upsert({
+                where: { destinatario_id: contactoId },
+                create: { destinatario_id: contactoId, contenido },
+                update: { contenido, fecha_actualizacion: new Date() }
+            });
+
+            return {
+                mensaje: 'El mensaje personal se ha guardado correctamente.'
+            };
+        });
     }
 
     async eliminarMensaje(
         administradorId: string,
         contactoId: string
     ): Promise<void> {
-        await this.comprobarPropiedad(administradorId, contactoId);
+        await this.prisma.$transaction(async tx => {
+            await bloquearCuentaActiva(tx, administradorId);
+            await this.comprobarPropiedad(administradorId, contactoId, tx);
 
-        await this.prisma.mensajes_destinatarios.deleteMany({
-            where: {
-                destinatario_id: contactoId
-            }
+            await tx.mensajes_destinatarios.deleteMany({
+                where: { destinatario_id: contactoId }
+            });
         });
+
     }
+
+
 }
 
 

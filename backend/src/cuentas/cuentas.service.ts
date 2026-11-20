@@ -541,6 +541,278 @@ export class CuentasService {
     
     
     
+    // Reactivar una cuenta de administrador suspendida
+    async reactivarCuentaSuperadministrador(
+        autorizacion: string | undefined,
+        cuentaId: string
+    ) {
+        const editorId = await this.comprobarSuperadministradorActivo(
+            autorizacion
+        );
+
+        return this.prisma.$transaction(async tx => {
+            // Usar el mismo bloqueo de fila que la suspensión para ordenar los cambios de estado
+            const [cuenta] = await tx.$queryRaw<Array<{
+                rol: string;
+                estado: string;
+                version: number;
+            }>>`
+                SELECT rol, estado, version
+                FROM public.cuentas
+                WHERE id = ${cuentaId}::uuid
+                FOR UPDATE
+            `;
+
+            if (!cuenta || cuenta.rol !== 'administrador') {
+                throw new NotFoundException(
+                    'No se ha encontrado esta cuenta de administrador.'
+                );
+            }
+
+            // Si se repite una petición que ya se completó, devolver el estado actual
+            if (cuenta.estado === 'activa') {
+                return { estado: 'activa', version: cuenta.version };
+            }
+
+            if (cuenta.estado !== 'suspendida') {
+                throw new ConflictException(
+                    'Solo se pueden reactivar cuentas suspendidas.'
+                );
+            }
+
+            // Conservar la fecha y el motivo de la última suspensión
+            const [actualizada] = await tx.$queryRaw<Array<{ version: number }>>`
+                UPDATE public.cuentas
+                SET estado = 'activa',
+                    version = version + 1
+                WHERE id = ${cuentaId}::uuid
+                RETURNING version
+            `;
+
+            // Confirmar el cambio de estado y su auditoría en la misma transacción
+            await tx.$executeRaw`
+                INSERT INTO public.auditoria_operaciones_cuentas (
+                    cuenta_afectada_id,
+                    actor_id,
+                    rol_actor,
+                    accion,
+                    resultado,
+                    campos_modificados,
+                    version_anterior,
+                    version_nueva
+                )
+                VALUES (
+                    ${cuentaId}::uuid,
+                    ${editorId}::uuid,
+                    'superadministrador',
+                    'reactivar_cuenta',
+                    'realizada',
+                    ARRAY['estado']::text[],
+                    ${cuenta.version},
+                    ${actualizada.version}
+                )
+            `;
+
+            return { estado: 'activa', version: actualizada.version };
+        });
+    }
+    
+    
+        // Dar de baja una cuenta desde superadministración y conservar su identidad
+    async darDeBajaCuentaSuperadministrador(
+        autorizacion: string | undefined,
+        cuentaId: string
+    ) {
+        const actorId = await this.comprobarSuperadministradorActivo(autorizacion);
+
+        return this.prisma.$transaction(async tx => {
+            // Usar el mismo bloqueo de fila que la edición y la suspensión de cuentas
+            const [cuenta] = await tx.$queryRaw<Array<{
+                rol: string;
+                estado: string;
+                version: number;
+            }>>`
+                SELECT rol, estado, version
+                FROM public.cuentas
+                WHERE id = ${cuentaId}::uuid
+                FOR UPDATE
+            `;
+
+            if (!cuenta || cuenta.rol !== 'administrador') {
+                throw new NotFoundException(
+                    'No se ha encontrado esta cuenta de administrador.'
+                );
+            }
+
+            // Una petición repetida devuelve la baja ya registrada
+            if (cuenta.estado === 'baja') {
+                return { estado: 'baja', version: cuenta.version };
+            }
+
+            if (cuenta.estado !== 'activa' && cuenta.estado !== 'suspendida') {
+                throw new ConflictException(
+                    'Solo se pueden dar de baja cuentas activas o suspendidas.'
+                );
+            }
+
+            // Los reintentos y los envíos pendientes de resolución cuentan como proceso en curso
+            const [activacion] = await tx.$queryRaw<Array<{ id: string }>>`
+                SELECT id
+                FROM public.solicitudes_activacion
+                WHERE administrador_id = ${cuentaId}::uuid
+                  AND estado IN (
+                      'pendiente_validacion',
+                      'periodo_seguridad',
+                      'en_procesamiento',
+                      'con_incidencias'
+                  )
+                LIMIT 1
+            `;
+
+            if (activacion) {
+                throw new ConflictException(
+                    'La cuenta tiene una activación en curso y todavía no puede darse de baja.'
+                );
+            }
+
+            // El borrado de los contactos elimina en cascada sus mensajes individuales
+            await tx.contactos_destinatarios.deleteMany({
+                where: { administrador_id: cuentaId }
+            });
+
+            // Retirar las copias de destinatarios y mensajes de las solicitudes canceladas
+            await tx.$executeRaw`
+                DELETE FROM public.comunicaciones_lote AS lote
+                USING public.solicitudes_activacion AS solicitud
+                WHERE lote.solicitud_id = solicitud.id
+                  AND solicitud.administrador_id = ${cuentaId}::uuid
+                  AND solicitud.estado = 'cancelada'
+            `;
+
+            // Conservar la solicitud cancelada y su historial, retirando el contenido preparado
+            await tx.$executeRaw`
+                UPDATE public.solicitudes_activacion
+                SET mensaje_general = NULL,
+                    informacion_ceremonia = NULL
+                WHERE administrador_id = ${cuentaId}::uuid
+                  AND estado = 'cancelada'
+            `;
+
+            // Revocar las asignaciones de esta cuenta e inhabilitar su actuación como lanzador en otras cuentas. 
+            // Conservar el historial en ambos casos.
+            const asignaciones = await tx.$queryRaw<Array<{ asignacion_id: string }>>`
+                WITH anteriores AS (
+                    SELECT
+                        a.id,
+                        a.estado,
+                        CASE
+                            WHEN a.administrador_id = ${cuentaId}::uuid THEN 'revocada'
+                            ELSE 'inhabilitada'
+                        END AS estado_nuevo
+                    FROM public.asignaciones_lanzadores AS a
+                    JOIN public.lanzadores AS l ON l.id = a.lanzador_id
+                    WHERE a.estado IN ('pendiente', 'aceptada')
+                      AND (
+                          a.administrador_id = ${cuentaId}::uuid
+                          OR l.usuario_id = ${cuentaId}::uuid
+                      )
+                    ORDER BY a.id
+                    FOR UPDATE OF a
+                ), cambios AS (
+                    UPDATE public.asignaciones_lanzadores AS a
+                    SET estado = anteriores.estado_nuevo,
+                        fecha_revocacion = CASE
+                            WHEN anteriores.estado_nuevo = 'revocada' THEN clock_timestamp()
+                            ELSE a.fecha_revocacion
+                        END,
+                        updated_at = clock_timestamp()
+                    FROM anteriores
+                    WHERE a.id = anteriores.id
+                    RETURNING a.id, anteriores.estado AS estado_anterior, a.estado AS estado_nuevo
+                )
+                INSERT INTO public.historial_asignaciones (
+                    asignacion_id, actor_usuario_id, evento, estado_anterior, estado_nuevo
+                )
+                SELECT
+                    id,
+                    ${actorId}::uuid,
+                    CASE
+                        WHEN estado_nuevo = 'inhabilitada' THEN 'autorizacion_inhabilitada'
+                        WHEN estado_anterior = 'pendiente' THEN 'invitacion_retirada'
+                        ELSE 'autorizacion_revocada'
+                    END,
+                    estado_anterior,
+                    estado_nuevo
+                FROM cambios
+                RETURNING asignacion_id
+            `;
+
+            if (asignaciones.length > 0) {
+                const asignacionIds = asignaciones.map(fila => fila.asignacion_id);
+                const fechaInvalidacion = new Date();
+
+                // Invalidar los enlaces y verificaciones que siguen sin utilizarse
+                await tx.invitaciones_lanzadores.updateMany({
+                    where: {
+                        asignacion_id: { in: asignacionIds },
+                        fecha_utilizacion: null,
+                        fecha_invalidacion: null
+                    },
+                    data: { fecha_invalidacion: fechaInvalidacion }
+                });
+
+                await tx.verificaciones_invitaciones_lanzadores.updateMany({
+                    where: {
+                        invitaciones_lanzadores: {
+                            asignacion_id: { in: asignacionIds }
+                        },
+                        fecha_utilizacion: null,
+                        fecha_invalidacion: null
+                    },
+                    data: { fecha_invalidacion: fechaInvalidacion }
+                });
+            }
+
+            // Invalidar cualquier edición abierta de la cuenta
+            await tx.bloqueos_edicion_cuentas.deleteMany({
+                where: { cuenta_id: cuentaId }
+            });
+
+            // Mantener el nombre y el correo para que la cuenta siga identificable
+            const actualizada = await tx.cuentas.update({
+                where: { id: cuentaId },
+                data: {
+                    estado: 'baja',
+                    apellidos: null,
+                    fecha_suspension: null,
+                    motivo_suspension: null,
+                    version: { increment: 1 }
+                },
+                select: { version: true }
+            });
+
+            // Registrar la actuación administrativa en la misma transacción que el borrado
+            await tx.auditoria_operaciones_cuentas.create({
+                data: {
+                    cuenta_afectada_id: cuentaId,
+                    actor_id: actorId,
+                    rol_actor: 'superadministrador',
+                    accion: 'dar_de_baja_cuenta',
+                    resultado: 'realizada',
+                    motivo_codigo: 'baja_administrativa',
+                    campos_modificados: [
+                        'estado', 'apellidos', 'fecha_suspension', 'motivo_suspension'
+                    ],
+                    version_anterior: cuenta.version,
+                    version_nueva: actualizada.version
+                }
+            });
+
+            return { estado: 'baja', version: actualizada.version };
+        });
+    }
+    
+    
     // Comprobar que el administrador tiene una cuenta activa.
     // Un token válido de Supabase Auth no es suficiente para autorizar operaciones privadas.
     async comprobarCuentaActiva(

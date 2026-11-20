@@ -35,7 +35,8 @@
             </div>
 
             <button type="button" class="panel__boton" (click)="actualizarCuentas()"
-                [disabled]="cargando() || suspendiendo() || solicitandoBloqueo() || cuentaEnEdicionId() !== null">
+                [disabled]="cargando() || suspendiendo() || reactivandoCuentaId() !== null
+                || solicitandoBloqueo() || cuentaEnEdicionId() !== null">
                 {{ cargando() ? 'Actualizando...' : 'Actualizar' }}
             </button>
 
@@ -127,9 +128,10 @@
 
                                 } @else {
 
-                                <button type="button" class="panel__boton" (click)="iniciarEdicion(cuenta)" [disabled]="cargando() || solicitandoBloqueo() || cuentaEnEdicionId() !== null
-                                        || cuenta.estado === 'suspendida'
-                                        || (suspendiendo() && cuentaParaSuspenderId() === cuenta.id)">
+                                <button type="button" class="panel__boton" (click)="iniciarEdicion(cuenta)" 
+                                [disabled]="cargando() || guardandoEdicion() || solicitandoBloqueo()
+                                || cuentaEnEdicionId() !== null || cuenta.estado === 'suspendida'
+                                || (suspendiendo() && cuentaParaSuspenderId() === cuenta.id)">
                                     Editar
                                 </button>
 
@@ -164,10 +166,17 @@
                                         Cancelar suspensión
                                     </button>
                                 </form>
+                               
                                 } @else if (cuenta.rol === 'administrador' && cuenta.estado === 'activa') {
                                 <button type="button" class="panel__boton" (click)="prepararSuspension(cuenta)"
                                     [disabled]="cargando() || suspendiendo()">
                                     Suspender
+                                </button>
+                                } @else if (cuenta.rol === 'administrador' && cuenta.estado === 'suspendida') {
+                                <!-- La reactivación aparece solo cuando la cuenta está suspendida -->
+                                <button type="button" class="panel__boton" (click)="reactivarCuenta(cuenta)"
+                                    [disabled]="cargando() || suspendiendo() || reactivandoCuentaId() !== null">
+                                    {{ reactivandoCuentaId() === cuenta.id ? 'Reactivando...' : 'Reactivar' }}
                                 </button>
                                 }
 

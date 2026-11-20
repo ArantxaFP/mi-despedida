@@ -2,6 +2,7 @@ import { BadRequestException, ConflictException, ForbiddenException, Injectable,
 import { ConfigService } from '@nestjs/config';
 import { createHash, createHmac, randomBytes, randomInt, timingSafeEqual } from 'node:crypto';
 import { PrismaService } from '../prisma/prisma.service';
+import { bloquearCuentas, type TransaccionCuentas } from '../cuentas/bloqueo-cuentas';
 import { CorreoService } from '../correo/correo.service';
 
 type DecisionInvitacion = 'aceptada' | 'rechazada';
@@ -75,16 +76,52 @@ export class InvitacionesLanzadoresService {
         }
     }
 
+    private async bloquearCuentasDeInvitacion(
+        tx: TransaccionCuentas,
+        tokenHash: string
+    ): Promise<boolean> {
+        const [vinculo] = await tx.$queryRaw<Array<{
+            administrador_id: string;
+            usuario_id: string | null;
+        }>>`
+            SELECT a.administrador_id, l.usuario_id
+            FROM public.invitaciones_lanzadores AS i
+            JOIN public.asignaciones_lanzadores AS a ON a.id = i.asignacion_id
+            JOIN public.lanzadores AS l ON l.id = a.lanzador_id
+            WHERE i.token_hash = ${tokenHash}
+        `;
+
+        if (!vinculo) {
+            return false;
+        }
+
+        const { titularActiva, estadoLanzador } = await bloquearCuentas(
+            tx,
+            vinculo.administrador_id,
+            vinculo.usuario_id
+        );
+
+        // Una persona sin cuenta propia puede seguir respondiendo a la invitación
+        return titularActiva &&
+            estadoLanzador !== 'suspendida' &&
+            estadoLanzador !== 'baja' &&
+            estadoLanzador !== 'finalizada' &&
+            estadoLanzador !== 'finalizada_con_incidencias';
+    }
+
+
+
     // --------------------------------------------------
     // 1.3. Consultar internamente la invitación vigente
     // --------------------------------------------------
 
-    private async obtenerInvitacionVigente(token: string) {
-
-        this.comprobarFormatoToken(token);
+    private async obtenerInvitacionVigente(
+        token: string,
+        cliente: Pick<PrismaService, 'invitaciones_lanzadores'>
+    ) {
 
         const invitacion =
-            await this.prisma.invitaciones_lanzadores.findUnique({
+            await cliente.invitaciones_lanzadores.findUnique({
                 where: {
                     token_hash: this.calcularHash(token)
                 },
@@ -225,6 +262,10 @@ export class InvitacionesLanzadoresService {
 
         const solicitud = await this.prisma.$transaction(
             async (tx) => {
+
+                if (!(await this.bloquearCuentasDeInvitacion(tx, tokenHash))) {
+                    return null;
+                }
 
                 // Bloquear la fila de la invitación.
                 // La segunda solicitud deberá esperar a que termine la primera antes de comprobar los límites.
@@ -457,12 +498,12 @@ export class InvitacionesLanzadoresService {
             );
         }
 
-        const invitacion =
-            await this.obtenerInvitacionVigente(token);
-
-        const ahora = new Date();
+        const tokenHash = this.calcularHash(token);
 
         return this.prisma.$transaction(async (tx) => {
+            if (!(await this.bloquearCuentasDeInvitacion(tx, tokenHash))) {
+                throw new ConflictException('La invitación no está disponible.');
+            }
 
             // Bloquear la fila de la invitación durante la comprobación.
             // Así los intentos simultáneos se contabilizan uno a uno.
@@ -471,9 +512,13 @@ export class InvitacionesLanzadoresService {
             >`
                 SELECT intentos_verificacion
                 FROM public.invitaciones_lanzadores
-                WHERE id = ${invitacion.id}::uuid
+                WHERE token_hash = ${tokenHash}
                 FOR UPDATE
             `;
+
+            // Volver a comprobar la vigencia con las cuentas y la invitación bloqueadas
+            const invitacion = await this.obtenerInvitacionVigente(token, tx);
+            const ahora = new Date();
 
             if (
                 controlIntentos.length !== 1 ||
@@ -662,6 +707,10 @@ export class InvitacionesLanzadoresService {
 
         // Todas las modificaciones se realizan dentro de una transacción para evitar estados parciales
         return this.prisma.$transaction(async (tx) => {
+
+            if (!(await this.bloquearCuentasDeInvitacion(tx, tokenHash))) {
+                throw new ConflictException('La invitación no está disponible.');
+            }
 
             const ahora = new Date();
 

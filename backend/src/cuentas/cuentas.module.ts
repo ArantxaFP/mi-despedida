@@ -5,6 +5,7 @@ import { CuentasController } from './cuentas.controller';
 import { CuentasService } from './cuentas.service';
 
 import { BloqueosEdicionCuentasService } from './bloqueos-edicion-cuentas.service';
+import { CorreoService } from '../correo/correo.service';
 
 @Module({
     imports: [
@@ -13,7 +14,9 @@ import { BloqueosEdicionCuentasService } from './bloqueos-edicion-cuentas.servic
     ],
     controllers: [CuentasController],
     providers: [CuentasService,
-    BloqueosEdicionCuentasService],
+        BloqueosEdicionCuentasService,
+        CorreoService
+    ],
     exports: [CuentasService]
 })
 export class CuentasModule { }

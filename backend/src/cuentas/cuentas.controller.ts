@@ -1,4 +1,4 @@
-import { Body, Controller, Headers, Patch, Post, Get, Param, ParseUUIDPipe, ValidationPipe, Query, DefaultValuePipe, ParseIntPipe } from '@nestjs/common';
+import { Body, Controller, Headers, Patch, Post, Get, Param, ParseUUIDPipe, ValidationPipe, Query, DefaultValuePipe, ParseIntPipe, Delete } from '@nestjs/common';
 import { CuentasService } from './cuentas.service';
 
 import { RegistrarCuentaDto } from './dto/registrar-cuenta.dto';
@@ -57,14 +57,44 @@ export class CuentasController {
     }
 
 
+
+    // Reenviar invitación pendiente de superadministrador
+    @Post('superadmin/superadministradores/:id/reenviar-invitacion')
+    async reenviarInvitacionSuperadministrador(
+        @Headers('authorization')
+        autorizacion: string | undefined,
+
+        @Param('id', new ParseUUIDPipe({ version: 'all' }))
+        cuentaId: string
+    ) {
+        return this.cuentasService.reenviarInvitacionSuperadministrador(
+            autorizacion,
+            cuentaId
+        );
+    }
+
+
+    // Eliminar un superadministrador con protección propia y auditoría
+    @Delete('superadmin/superadministradores/:id')
+    async eliminarSuperadministrador(
+        @Headers('authorization')
+        autorizacion: string | undefined,
+
+        @Param('id', new ParseUUIDPipe({ version: 'all' }))
+        cuentaId: string
+    ) {
+        return this.cuentasService.eliminarSuperadministrador(
+            autorizacion,
+            cuentaId
+        );
+    }
+
+
     // Crear e invitar un superadministrador
     @Post('superadmin/superadministradores')
     async crearSuperadministrador(
         @Headers('authorization')
         autorizacion: string | undefined,
-
-        @Headers('origin')
-        origen: string | undefined,
 
         @Body(new ValidationPipe({
             whitelist: true,
@@ -75,8 +105,7 @@ export class CuentasController {
     ) {
         return this.cuentasService.crearSuperadministrador(
             autorizacion,
-            datos,
-            origen
+            datos
         );
     }
 
@@ -133,26 +162,6 @@ export class CuentasController {
             pagina
         );
     }
-
-    // Consultar el historial de auditoría de cuentas
-    @Get('superadmin/auditoria-cuentas')
-    async listarAuditoriaCuentasSuperadministrador(
-        @Headers('authorization')
-        autorizacion: string | undefined,
-
-        @Query(
-            'pagina',
-            new DefaultValuePipe(1),
-            ParseIntPipe
-        )
-        pagina: number
-    ) {
-        return this.cuentasService.listarAuditoriaCuentasSuperadministrador(
-            autorizacion,
-            pagina
-        );
-    }
-
 
     // Solo permite consultar los cambios propuestos.
     // No guarda modificaciones en la base de datos.

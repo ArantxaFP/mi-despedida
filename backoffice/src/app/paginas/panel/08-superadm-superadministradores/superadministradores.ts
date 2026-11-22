@@ -30,6 +30,15 @@ export class Superadministradores implements OnInit {
     readonly cargando = signal(false);
     readonly error = signal('');
 
+    // Estado de las acciones de gestión de superadministradores
+    readonly usuarioActualId = signal<string | null>(null);
+    readonly reenviandoId = signal<string | null>(null);
+    readonly eliminandoId = signal<string | null>(null);
+    readonly usuarioAEliminar = signal<UsuarioSuperadministrador | null>(null);
+    readonly correoConfirmacion = signal('');
+    readonly errorAccion = signal('');
+    readonly mensajeAccion = signal('');
+
     // Formulario de alta por invitación
     readonly nombreNuevo = signal('');
     readonly apellidosNuevo = signal('');
@@ -41,7 +50,23 @@ export class Superadministradores implements OnInit {
 
 
     ngOnInit(): void {
-        void this.actualizarSuperadministradores();
+        void this.iniciarGestionSuperadministradores();
+    }
+
+    // Identificar al superadministrador conectado para impedir que pueda eliminarse desde su propia sesión.
+    private async iniciarGestionSuperadministradores(): Promise<void> {
+
+        try {
+            const { data } =
+                await this.autenticacion.obtenerUsuario();
+
+            this.usuarioActualId.set(data.user?.id ?? null);
+
+        } catch {
+            this.usuarioActualId.set(null);
+        }
+
+        await this.actualizarSuperadministradores();
     }
 
 
@@ -231,6 +256,189 @@ export class Superadministradores implements OnInit {
 
         } finally {
             this.enviandoInvitacion.set(false);
+        }
+    }
+
+
+
+    // Reenviar una invitación pendiente
+    async reenviarInvitacion(
+        usuario: UsuarioSuperadministrador
+    ): Promise<void> {
+
+        if (
+            this.reenviandoId() ||
+            this.eliminandoId() ||
+            usuario.estado !== 'pendiente_verificacion'
+        ) {
+            return;
+        }
+
+        this.reenviandoId.set(usuario.id);
+        this.errorAccion.set('');
+        this.mensajeAccion.set('');
+
+        try {
+            const token =
+                await this.autenticacion.obtenerTokenAcceso();
+
+            if (!token) {
+                throw new Error('Tu sesión ha caducado.');
+            }
+
+            const respuesta = await fetch(
+                `${configuracionBackend.url}/cuentas/superadmin/superadministradores/${encodeURIComponent(usuario.id)}/reenviar-invitacion`,
+                {
+                    method: 'POST',
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                }
+            );
+
+            if (!respuesta.ok) {
+                const errorServidor: { message?: string } | null =
+                    await respuesta.json().catch(() => null);
+
+                throw new Error(
+                    typeof errorServidor?.message === 'string'
+                        ? errorServidor.message
+                        : 'No se ha podido reenviar la invitación.'
+                );
+            }
+
+            this.mensajeAccion.set(
+                `Se ha solicitado el reenvío de la invitación a ${usuario.correo}.`
+            );
+
+            await this.actualizarSuperadministradores();
+
+        } catch (error) {
+            this.errorAccion.set(
+                error instanceof Error
+                    ? error.message
+                    : 'No se ha podido reenviar la invitación.'
+            );
+
+        } finally {
+            this.reenviandoId.set(null);
+        }
+    }
+
+
+    // Mostrar la confirmación de eliminación
+    seleccionarSuperadministradorAEliminar(
+        usuario: UsuarioSuperadministrador
+    ): void {
+
+        if (
+            this.reenviandoId() ||
+            this.eliminandoId() ||
+            this.usuarioActualId() === usuario.id
+        ) {
+            return;
+        }
+
+        this.usuarioAEliminar.set(usuario);
+        this.correoConfirmacion.set('');
+        this.errorAccion.set('');
+        this.mensajeAccion.set('');
+    }
+
+    cancelarEliminacionSuperadministrador(): void {
+
+        if (this.eliminandoId()) {
+            return;
+        }
+
+        this.usuarioAEliminar.set(null);
+        this.correoConfirmacion.set('');
+    }
+
+
+    // Eliminar definitivamente un superadministrador
+    async confirmarEliminacionSuperadministrador(): Promise<void> {
+
+        const usuario = this.usuarioAEliminar();
+
+        if (
+            !usuario ||
+            this.eliminandoId() ||
+            this.reenviandoId()
+        ) {
+            return;
+        }
+
+        // Exigir que se escriba el correo exacto antes de eliminar
+        if (
+            this.correoConfirmacion().trim().toLowerCase() !==
+            usuario.correo.toLowerCase()
+        ) {
+            this.errorAccion.set(
+                'Debes escribir el correo electrónico de la cuenta que deseas eliminar.'
+            );
+            return;
+        }
+
+        if (this.usuarioActualId() === usuario.id) {
+            this.errorAccion.set(
+                'No puedes eliminar tu propia cuenta.'
+            );
+            return;
+        }
+
+        this.eliminandoId.set(usuario.id);
+        this.errorAccion.set('');
+        this.mensajeAccion.set('');
+
+        try {
+            const token =
+                await this.autenticacion.obtenerTokenAcceso();
+
+            if (!token) {
+                throw new Error('Tu sesión ha caducado.');
+            }
+
+            const respuesta = await fetch(
+                `${configuracionBackend.url}/cuentas/superadmin/superadministradores/${encodeURIComponent(usuario.id)}`,
+                {
+                    method: 'DELETE',
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                }
+            );
+
+            if (!respuesta.ok) {
+                const errorServidor: { message?: string } | null =
+                    await respuesta.json().catch(() => null);
+
+                throw new Error(
+                    typeof errorServidor?.message === 'string'
+                        ? errorServidor.message
+                        : 'No se ha podido eliminar el superadministrador.'
+                );
+            }
+
+            this.usuarioAEliminar.set(null);
+            this.correoConfirmacion.set('');
+
+            this.mensajeAccion.set(
+                `Se ha eliminado la cuenta ${usuario.correo}.`
+            );
+
+        } catch (error) {
+            this.errorAccion.set(
+                error instanceof Error
+                    ? error.message
+                    : 'No se ha podido completar la eliminación.'
+            );
+
+        } finally {
+            this.eliminandoId.set(null);
+
+            // Consultar el estado real tras la operación, también si ha habido fallo entre Postgre y Supabase
+            await this.actualizarSuperadministradores();
         }
     }
 

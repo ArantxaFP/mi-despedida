@@ -158,66 +158,7 @@ export class CuentasService {
         return usuario.id;
     }
 
-    // Consultar la auditoría de cuentas desde superadministración
-    async listarAuditoriaCuentasSuperadministrador(
-        autorizacion: string | undefined,
-        pagina = 1
-    ) {
-        // Solo los superadministradores activos pueden consultar la auditoría
-        await this.comprobarSuperadministradorActivo(autorizacion);
-
-        const tamanoPagina = 50;
-
-        if (
-            !Number.isSafeInteger(pagina) ||
-            pagina < 1 ||
-            !Number.isSafeInteger((pagina - 1) * tamanoPagina)
-        ) {
-            throw new BadRequestException(
-                'La página solicitada no es válida.'
-            );
-        }
-
-        const [total, registros] = await Promise.all([
-            this.prisma.auditoria_operaciones_cuentas.count(),
-
-            this.prisma.auditoria_operaciones_cuentas.findMany({
-                skip: (pagina - 1) * tamanoPagina,
-                take: tamanoPagina,
-
-                // Mostrar primero las operaciones más recientes
-                orderBy: [
-                    { fecha_evento: 'desc' },
-                    { id: 'desc' }
-                ],
-
-                // Nunca devolver el contenido de los campos modificados
-                select: {
-                    id: true,
-                    cuenta_afectada_id: true,
-                    actor_id: true,
-                    rol_actor: true,
-                    accion: true,
-                    resultado: true,
-                    campos_modificados: true,
-                    motivo_codigo: true,
-                    version_anterior: true,
-                    version_nueva: true,
-                    fecha_evento: true
-                }
-            })
-        ]);
-
-        return {
-            registros,
-            total,
-            pagina,
-            tamanoPagina,
-            totalPaginas: Math.ceil(total / tamanoPagina)
-        };
-    }
-
-
+   
     // Consultar la auditoría individual de una cuenta desde el listado de cuentas del panel
     async listarAuditoriaCuentaSuperadministrador(
         autorizacion: string | undefined,
@@ -314,6 +255,369 @@ export class CuentasService {
     }
 
 
+    // Reenviar la invitación de un superadministrador pendiente
+    async reenviarInvitacionSuperadministrador(
+        autorizacion: string | undefined,
+        cuentaId: string
+    ) {
+        const actorId =
+            await this.comprobarSuperadministradorActivo(autorizacion);
+
+        const cuenta = await this.prisma.cuentas.findUnique({
+            where: { id: cuentaId },
+            select: {
+                id: true,
+                nombre: true,
+                correo: true,
+                rol: true,
+                estado: true
+            }
+        });
+
+        if (!cuenta || cuenta.rol !== 'superadministrador') {
+            throw new NotFoundException(
+                'No se ha encontrado el superadministrador.'
+            );
+        }
+
+        if (cuenta.estado !== 'pendiente_verificacion') {
+            throw new ConflictException(
+                'Solo se pueden reenviar invitaciones de cuentas pendientes.'
+            );
+        }
+
+        // Evitar reenvíos repetidos durante el mismo minuto
+        const ultimoEnvio =
+            await this.prisma.auditoria_operaciones_cuentas.findFirst({
+                where: {
+                    cuenta_afectada_id: cuentaId,
+                    accion: 'reenviar_invitacion_superadmin',
+                    resultado: 'realizada',
+                    fecha_evento: {
+                        gte: new Date(Date.now() - 60_000)
+                    }
+                },
+                select: { id: true }
+            });
+
+        if (ultimoEnvio) {
+            throw new ConflictException(
+                'La invitación se ha reenviado recientemente. ' +
+                'Espera un minuto antes de volver a solicitarla.'
+            );
+        }
+
+        const cliente = this.supabaseService.obtenerCliente();
+
+        // Comprobar que la identidad original sigue existiendo en Supabase
+        const { data: consulta, error: errorConsulta } =
+            await cliente.auth.admin.getUserById(cuenta.id);
+
+        const identidad = consulta?.user;
+
+        if (
+            errorConsulta ||
+            !identidad ||
+            identidad.email?.toLowerCase() !== cuenta.correo.toLowerCase()
+        ) {
+            throw new ServiceUnavailableException(
+                'No se ha podido verificar la identidad pendiente.'
+            );
+        }
+
+        // Para una cuenta ya verificada que sigue pendiente hay que completar su activación, no crear una identidad nueva
+        const urlBackoffice = this.configService
+            .getOrThrow<string>('BACKOFFICE_URL_SUPERADMIN')
+            .replace(/\/+$/, '');
+
+        // magiclink genera un nuevo enlace para un usuario que ya existe
+        const { data, error } =
+            await cliente.auth.admin.generateLink({
+                type: 'magiclink',
+                email: cuenta.correo,
+                options: {
+                    redirectTo: `${urlBackoffice}/activar-superadmin`
+                }
+            });
+
+        if (
+            error ||
+            !data?.user ||
+            data.user.id !== cuenta.id ||
+            !data.properties?.action_link
+        ) {
+            throw new ServiceUnavailableException(
+                'No se ha podido generar una nueva invitación válida.'
+            );
+        }
+
+        // Guardar la generación del enlace antes de solicitar el envío
+        await this.prisma.auditoria_operaciones_cuentas.create({
+            data: {
+                cuenta_afectada_id: cuenta.id,
+                actor_id: actorId,
+                rol_actor: 'superadministrador',
+                accion: 'generar_reenvio_superadmin',
+                resultado: 'realizada',
+                campos_modificados: []
+            }
+        });
+
+        try {
+            await this.correoService.enviarInvitacionSuperadministrador(
+                cuenta.correo,
+                cuenta.nombre,
+                data.properties.action_link
+            );
+
+        } catch {
+            // Registrar el fallo sin guardar el enlace ni el correo recibido
+            await this.prisma.auditoria_operaciones_cuentas.create({
+                data: {
+                    cuenta_afectada_id: cuenta.id,
+                    actor_id: actorId,
+                    rol_actor: 'superadministrador',
+                    accion: 'reenviar_invitacion_superadmin',
+                    resultado: 'error',
+                    campos_modificados: [],
+                    motivo_codigo: 'error_envio_correo'
+                }
+            });
+
+            throw new ServiceUnavailableException(
+                'No se ha podido enviar la nueva invitación.'
+            );
+        }
+
+        // El identificador del mensaje permanece en el servicio de correo.
+        // No se devuelve al navegador el enlace de autenticación.
+        await this.prisma.auditoria_operaciones_cuentas.create({
+            data: {
+                cuenta_afectada_id: cuenta.id,
+                actor_id: actorId,
+                rol_actor: 'superadministrador',
+                accion: 'reenviar_invitacion_superadmin',
+                resultado: 'realizada',
+                campos_modificados: []
+            }
+        });
+
+        return {
+            mensaje: 'Se ha solicitado el reenvío de la invitación.',
+            estado: cuenta.estado
+        };
+    }
+
+
+
+    // Eliminar definitivamente un superadministrador
+    async eliminarSuperadministrador(
+        autorizacion: string | undefined,
+        cuentaId: string
+    ) {
+        const actorId =
+            await this.comprobarSuperadministradorActivo(autorizacion);
+
+        // La propia cuenta se protege para evitar que un usuario elimine accidentalmente la sesión desde la que administra
+        if (actorId === cuentaId) {
+            throw new ForbiddenException(
+                'No puedes eliminar tu propia cuenta de superadministrador.'
+            );
+        }
+
+        // Conservar los datos mínimos para poder recuperar una cuenta deshabilitada si Supabase rechaza la eliminación de Auth
+        const cuenta = await this.prisma.$transaction(async tx => {
+
+            // Serializar las eliminaciones de superadministradores
+            await tx.$queryRaw`
+                SELECT pg_advisory_xact_lock(2026, 3101)::text AS bloqueo
+            `;
+
+            // Comprobar de nuevo el actor dentro de la transacción
+            const actor = await tx.cuentas.findUnique({
+                where: { id: actorId },
+                select: {
+                    rol: true,
+                    estado: true
+                }
+            });
+
+            if (
+                !actor ||
+                actor.rol !== 'superadministrador' ||
+                actor.estado !== 'activa'
+            ) {
+                throw new ForbiddenException(
+                    'Tu cuenta ya no está autorizada.'
+                );
+            }
+
+            const objetivo = await tx.cuentas.findUnique({
+                where: { id: cuentaId },
+                select: {
+                    id: true,
+                    nombre: true,
+                    apellidos: true,
+                    correo: true,
+                    rol: true,
+                    estado: true,
+                    version: true,
+                    fecha_registro: true,
+                    fecha_suspension: true,
+                    motivo_suspension: true,
+                    fecha_cierre: true
+                }
+            });
+
+            if (
+                !objetivo ||
+                objetivo.rol !== 'superadministrador'
+            ) {
+                throw new NotFoundException(
+                    'No se ha encontrado el superadministrador.'
+                );
+            }
+
+            // Solo una cuenta activa reduce el número de superadministradores operativos al eliminarse
+            if (objetivo.estado === 'activa') {
+
+                const totalActivos = await tx.cuentas.count({
+                    where: {
+                        rol: 'superadministrador',
+                        estado: 'activa'
+                    }
+                });
+
+                if (totalActivos <= 1) {
+                    throw new ConflictException(
+                        'No se puede eliminar el último superadministrador activo.'
+                    );
+                }
+            }
+
+            // Registrar el inicio antes de eliminar la cuenta.
+            // Esta auditoría no tiene clave foránea a cuentas y se conserva incluso después de eliminar al usuario.
+            await tx.auditoria_operaciones_cuentas.create({
+                data: {
+                    cuenta_afectada_id: objetivo.id,
+                    actor_id: actorId,
+                    rol_actor: 'superadministrador',
+                    accion: 'iniciar_eliminacion_superadmin',
+                    resultado: 'realizada',
+                    campos_modificados: [
+                        'cuenta',
+                        'identidad_auth'
+                    ],
+                    version_anterior: objetivo.version
+                }
+            });
+
+            // Eliminar primero la fila vinculada a auth.users
+            await tx.cuentas.delete({
+                where: { id: objetivo.id }
+            });
+
+            return objetivo;
+        });
+
+        const cliente = this.supabaseService.obtenerCliente();
+
+        // Supabase puede devolver un error o lanzar una excepción.
+        // En ambos casos se intentará recuperar una cuenta sin acceso.
+        let errorAuth = false;
+
+        try {
+            const resultado =
+                await cliente.auth.admin.deleteUser(cuenta.id);
+
+            errorAuth = !!resultado.error;
+
+        } catch {
+            errorAuth = true;
+        }
+
+        if (errorAuth) {
+
+            // Si Supabase sigue conservando la identidad, intentar restaurar una fila deshabilitada para permitir reintentar la eliminación desde el panel
+            let identidadExistente = false;
+
+            try {
+                const { data: consulta, error: errorConsulta } =
+                    await cliente.auth.admin.getUserById(cuenta.id);
+
+                identidadExistente =
+                    !errorConsulta && !!consulta?.user;
+
+            } catch {
+                identidadExistente = false;
+            }
+
+            if (identidadExistente) {
+                try {
+                    await this.prisma.cuentas.create({
+                        data: {
+                            id: cuenta.id,
+                            nombre: cuenta.nombre,
+                            apellidos: cuenta.apellidos,
+                            correo: cuenta.correo,
+                            rol: 'superadministrador',
+                            estado: 'suspendida',
+                            version: cuenta.version + 1,
+                            fecha_registro: cuenta.fecha_registro,
+                            fecha_suspension: new Date(),
+                            motivo_suspension:
+                                'error_eliminacion_superadministrador',
+                            fecha_cierre: cuenta.fecha_cierre
+                        }
+                    });
+                } catch {
+                    // Mantener el error de eliminación y no conceder permisos mediante una recuperación insegura
+                }
+            }
+
+            // Registrar el error sin guardar datos privados
+            await this.prisma.auditoria_operaciones_cuentas.create({
+                data: {
+                    cuenta_afectada_id: cuenta.id,
+                    actor_id: actorId,
+                    rol_actor: 'superadministrador',
+                    accion: 'eliminar_superadministrador',
+                    resultado: 'error',
+                    campos_modificados: [],
+                    motivo_codigo: 'error_eliminacion_auth'
+                }
+            });
+
+            throw new ServiceUnavailableException(
+                'No se ha podido completar la eliminación en Supabase Auth. ' +
+                'Si la cuenta sigue apareciendo, podrás volver a intentarlo.'
+            );
+        }
+
+        // Confirmar en la auditoría la eliminación completa
+        await this.prisma.auditoria_operaciones_cuentas.create({
+            data: {
+                cuenta_afectada_id: cuenta.id,
+                actor_id: actorId,
+                rol_actor: 'superadministrador',
+                accion: 'eliminar_superadministrador',
+                resultado: 'realizada',
+                campos_modificados: [
+                    'cuenta',
+                    'identidad_auth'
+                ],
+                version_anterior: cuenta.version
+            }
+        });
+
+        return {
+            mensaje: 'El superadministrador se ha eliminado correctamente.'
+        };
+    }
+
+
+
+
     // Consultar los usuarios superadministradores
     async listarSuperadministradores(
         autorizacion?: string
@@ -348,8 +652,7 @@ export class CuentasService {
     // Crear un nuevo superadministrador desde el panel mediante invitación por mail
     async crearSuperadministrador(
         autorizacion: string | undefined,
-        datos: CrearSuperadministradorDto,
-        origen?: string
+        datos: CrearSuperadministradorDto
     ) {
         const actorId =
             await this.comprobarSuperadministradorActivo(autorizacion);

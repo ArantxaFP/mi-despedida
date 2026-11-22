@@ -54,7 +54,7 @@
             </div>
 
             <button type="submit" class="panel__boton"
-                [disabled]="enviandoInvitacion() || cargando() || !nombreNuevo().trim() || !correoNuevo().trim()">
+                [disabled]="enviandoInvitacion() || cargando() || reenviandoId() !== null || eliminandoId() !== null || !nombreNuevo().trim() || !correoNuevo().trim()">
                 {{ enviandoInvitacion()
                 ? 'Enviando invitación...'
                 : 'Crear y enviar invitación' }}
@@ -98,7 +98,7 @@
             </p>
 
             <button type="button" class="panel__boton" (click)="actualizarSuperadministradores()"
-                [disabled]="cargando()">
+                [disabled]="cargando() ||  enviandoInvitacion() ||  reenviandoId() !== null ||  eliminandoId() !== null">
 
                 {{ cargando() ? 'Actualizando...' : 'Actualizar' }}
 
@@ -132,6 +132,7 @@
                         <th scope="col">Correo electrónico</th>
                         <th scope="col">Estado</th>
                         <th scope="col">Fecha de alta</th>
+                        <th scope="col">Acciones</th>
                     </tr>
                 </thead>
 
@@ -161,6 +162,49 @@
                             {{ usuario.fecha_registro | date:'dd/MM/yyyy HH:mm' }}
                         </td>
 
+                        <!-- ACCIONES EXCLUSIVAS DE SUPERADMINISTRACIÓN -->
+                        <td data-etiqueta="Acciones">
+
+                            <div class="superadministradores__acciones">
+
+                                <!-- REENVIAR: solo para cuentas pendientes -->
+                                @if (usuario.estado === 'pendiente_verificacion') {
+
+                                <button type="button" class="panel__boton" (click)="reenviarInvitacion(usuario)"
+                                    [disabled]="reenviandoId() !== null || eliminandoId() !== null ||  enviandoInvitacion() || cargando()">
+
+                                    {{ reenviandoId() === usuario.id
+                                    ? 'Reenviando...'
+                                    : 'Reenviar invitación' }}
+
+                                </button>
+
+                                }
+
+                                <!-- No se permite eliminar la propia cuenta por seguridad -->
+                                @if (usuarioActualId() === usuario.id) {
+
+                                <span class="superadministradores__propia">
+                                    Tu cuenta
+                                </span>
+
+                                } @else {
+
+                                <button type="button" class="panel__boton"
+                                    (click)="seleccionarSuperadministradorAEliminar(usuario)"
+                                    [disabled]="reenviandoId() !== null || eliminandoId() !== null ||  enviandoInvitacion() || cargando()"
+                                    [attr.aria-label]="'Eliminar al superadministrador ' + usuario.correo">
+
+                                    Eliminar
+
+                                </button>
+
+                                }
+
+                            </div>
+
+                        </td>
+
                     </tr>
 
                     }
@@ -176,6 +220,84 @@
         <p class="panel-pagina__mensaje" role="status">
             No se han encontrado usuarios superadministradores.
         </p>
+
+        }
+
+        <!-- RESULTADO DE LAS OPERACIONES -->
+        @if (errorAccion()) {
+        <p class="panel__aviso-error" role="alert">
+            {{ errorAccion() }}
+        </p>
+        }
+
+        @if (mensajeAccion()) {
+        <p class="panel-pagina__mensaje" role="status">
+            {{ mensajeAccion() }}
+        </p>
+        }
+
+        <!-- CONFIRMACIÓN DE ELIMINACIÓN -->
+        @if (usuarioAEliminar(); as usuario) {
+
+        <div class="superadministradores__confirmacion" role="group" aria-labelledby="titulo-confirmar-eliminacion">
+
+            <h3 id="titulo-confirmar-eliminacion">
+                Confirmar eliminación de superadministrador
+            </h3>
+
+            <p>
+                Vas a eliminar la cuenta de
+                <strong>{{ usuario.nombre }} {{ usuario.apellidos || '' }}</strong>.
+            </p>
+
+            <p>
+                Correo electrónico:
+                <strong>{{ usuario.correo }}</strong>
+            </p>
+
+            <p>
+                Se eliminará su cuenta y su identidad de acceso.
+                La operación quedará registrada en la auditoría.
+                No se podrá recuperar mediante la opción de reactivación.
+            </p>
+
+            <p>
+                Para confirmarlo, escribe exactamente el correo electrónico de la cuenta que quieres eliminar.
+            </p>
+
+            <div class="superadministradores__campo">
+
+                <label for="correo-confirmar-eliminacion-superadmin">
+                    Confirmar correo electrónico
+                </label>
+
+                <input id="correo-confirmar-eliminacion-superadmin" type="text" autocomplete="off" spellcheck="false"
+                    [value]="correoConfirmacion()" (input)="correoConfirmacion.set(confirmacionInput.value)"
+                    [readonly]="eliminandoId() !== null" #confirmacionInput>
+
+            </div>
+
+            <div class="superadministradores__acciones">
+
+                <button type="button" class="panel__boton" (click)="cancelarEliminacionSuperadministrador()"
+                    [disabled]="eliminandoId() !== null">
+                    Cancelar
+                </button>
+
+                <button type="button" class="panel__boton" (click)="confirmarEliminacionSuperadministrador()"
+                    [disabled]="eliminandoId() !== null ||
+                        correoConfirmacion().trim().toLowerCase() !==
+                        usuario.correo.toLowerCase()">
+
+                    {{ eliminandoId() === usuario.id
+                    ? 'Eliminando...'
+                    : 'Eliminar definitivamente' }}
+
+                </button>
+
+            </div>
+
+        </div>
 
         }
 

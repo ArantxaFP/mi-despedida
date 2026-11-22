@@ -6,6 +6,13 @@ import { obtenerUrlBackoffice } from '../configuracion/urls-backoffice';
 
 import { EditarCuentaSuperadminDto } from './dto/editar-cuenta-superadmin.dto';
 import { BloqueosEdicionCuentasService } from './bloqueos-edicion-cuentas.service';
+import { bloquearFilasCuentas } from './bloqueo-cuentas';
+
+import { CorreoService } from '../correo/correo.service';
+
+import { CrearSuperadministradorDto } from './dto/crear-superadministrador.dto';
+import { ActivarSuperadministradorDto } from './dto/activar-superadministrador.dto';
+
 import { ActualizarDatosPerfilBloqueoDto } from './dto/actualizar-datos-perfil-bloqueo.dto';
 import { SuspenderCuentaDto } from './dto/suspender-cuenta.dto';
 
@@ -25,7 +32,8 @@ export class CuentasService {
         private readonly prisma: PrismaService,
         private readonly supabaseService: SupabaseService,
         private readonly configService: ConfigService,
-        private readonly bloqueosEdicion: BloqueosEdicionCuentasService
+        private readonly bloqueosEdicion: BloqueosEdicionCuentasService,
+        private readonly correoService: CorreoService
     ) { }
 
     // Consulta el rol y el estado de la cuenta autenticada.
@@ -150,6 +158,457 @@ export class CuentasService {
         return usuario.id;
     }
 
+    // Consultar la auditoría de cuentas desde superadministración
+    async listarAuditoriaCuentasSuperadministrador(
+        autorizacion: string | undefined,
+        pagina = 1
+    ) {
+        // Solo los superadministradores activos pueden consultar la auditoría
+        await this.comprobarSuperadministradorActivo(autorizacion);
+
+        const tamanoPagina = 50;
+
+        if (
+            !Number.isSafeInteger(pagina) ||
+            pagina < 1 ||
+            !Number.isSafeInteger((pagina - 1) * tamanoPagina)
+        ) {
+            throw new BadRequestException(
+                'La página solicitada no es válida.'
+            );
+        }
+
+        const [total, registros] = await Promise.all([
+            this.prisma.auditoria_operaciones_cuentas.count(),
+
+            this.prisma.auditoria_operaciones_cuentas.findMany({
+                skip: (pagina - 1) * tamanoPagina,
+                take: tamanoPagina,
+
+                // Mostrar primero las operaciones más recientes
+                orderBy: [
+                    { fecha_evento: 'desc' },
+                    { id: 'desc' }
+                ],
+
+                // Nunca devolver el contenido de los campos modificados
+                select: {
+                    id: true,
+                    cuenta_afectada_id: true,
+                    actor_id: true,
+                    rol_actor: true,
+                    accion: true,
+                    resultado: true,
+                    campos_modificados: true,
+                    motivo_codigo: true,
+                    version_anterior: true,
+                    version_nueva: true,
+                    fecha_evento: true
+                }
+            })
+        ]);
+
+        return {
+            registros,
+            total,
+            pagina,
+            tamanoPagina,
+            totalPaginas: Math.ceil(total / tamanoPagina)
+        };
+    }
+
+
+    // Consultar la auditoría individual de una cuenta desde el listado de cuentas del panel
+    async listarAuditoriaCuentaSuperadministrador(
+        autorizacion: string | undefined,
+        cuentaId: string,
+        pagina = 1
+    ) {
+        // Únicamente un superadministrador activo puede consultar estos registros
+        await this.comprobarSuperadministradorActivo(autorizacion);
+
+        const tamanoPagina = 50;
+        const desplazamiento = (pagina - 1) * tamanoPagina;
+
+        if (
+            !Number.isSafeInteger(pagina) ||
+            pagina < 1 ||
+            !Number.isSafeInteger(desplazamiento)
+        ) {
+            throw new BadRequestException(
+                'La página solicitada no es válida.'
+            );
+        }
+
+        // Comprobar que la cuenta consultada pertenece a un administrador.
+        // Permitir cuentas activas, suspendidas, dadas de baja o finalizadas.
+        const cuenta = await this.prisma.cuentas.findFirst({
+            where: {
+                id: cuentaId,
+                rol: 'administrador'
+            },
+            select: {
+                id: true,
+                nombre: true,
+                apellidos: true,
+                correo: true,
+                estado: true
+            }
+        });
+
+        if (!cuenta) {
+            throw new NotFoundException(
+                'No se ha encontrado esta cuenta de administrador.'
+            );
+        }
+
+        // El filtro se aplica en Postgre.
+        // No se descargan registros pertenecientes a otras cuentas.
+        const filtroAuditoria = {
+            cuenta_afectada_id: cuentaId
+        };
+
+        const [total, registros] = await Promise.all([
+            this.prisma.auditoria_operaciones_cuentas.count({
+                where: filtroAuditoria
+            }),
+
+            this.prisma.auditoria_operaciones_cuentas.findMany({
+                where: filtroAuditoria,
+                skip: desplazamiento,
+                take: tamanoPagina,
+
+                // Orden estable para la paginación
+                orderBy: [
+                    { fecha_evento: 'desc' },
+                    { id: 'desc' }
+                ],
+
+                // No devolver contraseñas, tokens ni valores de datos personales
+                select: {
+                    id: true,
+                    actor_id: true,
+                    rol_actor: true,
+                    accion: true,
+                    resultado: true,
+                    campos_modificados: true,
+                    motivo_codigo: true,
+                    version_anterior: true,
+                    version_nueva: true,
+                    fecha_evento: true
+                }
+            })
+        ]);
+
+        return {
+            cuenta,
+            registros,
+            total,
+            pagina,
+            tamanoPagina,
+            totalPaginas: Math.max(
+                1,
+                Math.ceil(total / tamanoPagina)
+            )
+        };
+    }
+
+
+    // Consultar los usuarios superadministradores
+    async listarSuperadministradores(
+        autorizacion?: string
+    ) {
+        // Solo un superadministrador activo puede consultar las identidades de otros superadministradores
+        await this.comprobarSuperadministradorActivo(
+            autorizacion
+        );
+
+        // No devolver contraseñas, tokens ni metadatos de autenticación.
+        // No confundir con usuarios administradores que se consultan en otra sección.
+        return this.prisma.cuentas.findMany({
+            where: {
+                rol: 'superadministrador'
+            },
+            select: {
+                id: true,
+                nombre: true,
+                apellidos: true,
+                correo: true,
+                estado: true,
+                fecha_registro: true
+            },
+            orderBy: [
+                { nombre: 'asc' },
+                { correo: 'asc' }
+            ]
+        });
+    }
+
+
+    // Crear un nuevo superadministrador desde el panel mediante invitación por mail
+    async crearSuperadministrador(
+        autorizacion: string | undefined,
+        datos: CrearSuperadministradorDto,
+        origen?: string
+    ) {
+        const actorId =
+            await this.comprobarSuperadministradorActivo(autorizacion);
+
+        const nombre = datos.nombre.trim();
+        const apellidos = datos.apellidos?.trim() || null;
+        const correo = datos.correo.trim().toLowerCase();
+
+        if (!nombre || nombre.length > 100) {
+            throw new BadRequestException(
+                'El nombre no es válido.'
+            );
+        }
+
+        if (apellidos && apellidos.length > 150) {
+            throw new BadRequestException(
+                'Los apellidos no son válidos.'
+            );
+        }
+
+        // No convertir nunca una cuenta existente en superadministrador
+        const existente = await this.prisma.cuentas.findUnique({
+            where: { correo },
+            select: { id: true }
+        });
+
+        if (existente) {
+            throw new ConflictException(
+                'Ya existe una cuenta registrada con ese correo.'
+            );
+        }
+
+        // Las invitaciones de superadministradores siempre dirigen al backoffice publicado en Netlify, aunque se generen desde local.
+        // La URL se obtiene de la configuración privada del backend.
+        const urlBackoffice = this.configService
+            .getOrThrow<string>('BACKOFFICE_URL_SUPERADMIN')
+            .replace(/\/+$/, '');
+
+        // Crear una invitación de Supabase sin utilizar su envío de correo.
+        // Brevo será el único responsable de enviar el enlace.
+        const { data, error } =
+            await this.supabaseService.obtenerCliente()
+                .auth.admin.generateLink({
+                    type: 'invite',
+                    email: correo,
+                    options: {
+                        data: {
+                            nombre,
+                            apellidos: apellidos ?? ''
+                        },
+                        redirectTo:
+                            `${urlBackoffice}/activar-superadmin`
+                    }
+                });
+
+        if (
+            error ||
+            !data?.user ||
+            !data.properties?.action_link ||
+            data.user.email?.toLowerCase() !== correo
+        ) {
+            throw new ConflictException(
+                'No se ha podido preparar la invitación. ' +
+                'Comprueba que el correo no pertenezca a una identidad existente.'
+            );
+        }
+
+        const usuarioId = data.user.id;
+        const enlace = data.properties.action_link;
+
+        // La cuenta permanece sin acceso hasta que el invitado verifique el correo y establezca su contraseña
+        try {
+            await this.prisma.$transaction(async tx => {
+
+                await tx.cuentas.create({
+                    data: {
+                        id: usuarioId,
+                        nombre,
+                        apellidos,
+                        correo,
+                        rol: 'superadministrador',
+                        estado: 'pendiente_verificacion'
+                    }
+                });
+
+                // Registrar que superadministrador ha autorizado la creación de la cuenta
+                await tx.auditoria_operaciones_cuentas.create({
+                    data: {
+                        cuenta_afectada_id: usuarioId,
+                        actor_id: actorId,
+                        rol_actor: 'superadministrador',
+                        accion: 'crear_superadministrador',
+                        resultado: 'realizada',
+                        campos_modificados: [
+                            'nombre',
+                            'apellidos',
+                            'correo',
+                            'rol',
+                            'estado'
+                        ],
+                        version_anterior: null,
+                        version_nueva: 1
+                    }
+                });
+            });
+
+        } catch {
+            // Puede quedar una identidad pendiente en Supabase Auth.
+            // Nunca se le conceden permisos sin su fila validada en cuentas.
+            throw new ServiceUnavailableException(
+                'No se ha podido completar el alta pendiente. ' +
+                'La identidad puede requerir recuperación supervisada.'
+            );
+        }
+
+        // Enviar el enlace únicamente después de registrar la cuenta.
+        // No enviarlo ni devolverlo al frontend antes de este punto.
+        try {
+            await this.correoService.enviarInvitacionSuperadministrador(
+                correo,
+                nombre,
+                enlace
+            );
+
+        } catch {
+            // Conservar la cuenta pendiente para permitir gestionar el reenvío sin perder su identidad
+            throw new ServiceUnavailableException(
+                'La cuenta se ha creado pendiente de activación, ' +
+                'pero no se ha podido enviar el correo.'
+            );
+        }
+
+        return {
+            id: usuarioId,
+            estado: 'pendiente_verificacion',
+            mensaje: 'La invitación se ha enviado correctamente.'
+        };
+    }
+
+
+
+    // Activar la invitación y establecer la contraseña
+    async activarSuperadministrador(
+        autorizacion: string | undefined,
+        datos: ActivarSuperadministradorDto
+    ) {
+        if (
+            !autorizacion ||
+            !/^Bearer\s+\S+$/i.test(autorizacion)
+        ) {
+            throw new UnauthorizedException(
+                'Debes acceder desde una invitación válida.'
+            );
+        }
+
+        const token = autorizacion.split(/\s+/)[1];
+
+        // La identidad se obtiene del token verificado en Supabase
+        const { data, error } =
+            await this.supabaseService.verificarUsuario(token);
+
+        const usuario = data?.user;
+
+        if (
+            error ||
+            !usuario ||
+            !usuario.email ||
+            !usuario.email_confirmed_at
+        ) {
+            throw new UnauthorizedException(
+                'La invitación no está verificada o la sesión ha caducado.'
+            );
+        }
+
+        const cuenta = await this.prisma.cuentas.findUnique({
+            where: { id: usuario.id },
+            select: {
+                rol: true,
+                estado: true,
+                correo: true
+            }
+        });
+
+        if (
+            !cuenta ||
+            cuenta.rol !== 'superadministrador' ||
+            cuenta.estado !== 'pendiente_verificacion' ||
+            cuenta.correo.toLowerCase() !== usuario.email.toLowerCase()
+        ) {
+            throw new ForbiddenException(
+                'No existe una invitación pendiente para esta identidad.'
+            );
+        }
+
+        // Establecer la contraseña desde el backend con permisos de servicio
+        const { error: errorContrasena } =
+            await this.supabaseService.obtenerCliente()
+                .auth.admin.updateUserById(
+                    usuario.id,
+                    { password: datos.contrasena }
+                );
+
+        if (errorContrasena) {
+            throw new ServiceUnavailableException(
+                'No se ha podido establecer la contraseña.'
+            );
+        }
+
+
+
+        // Si la operación en Postgre falla, la cuenta continua pendiente y no recibe permisos de superadministración
+        return this.prisma.$transaction(async tx => {
+
+            const [actual] = await bloquearFilasCuentas(
+                tx,
+                usuario.id
+            );
+
+            if (
+                !actual ||
+                actual.rol !== 'superadministrador' ||
+                actual.estado !== 'pendiente_verificacion'
+            ) {
+                throw new ConflictException(
+                    'La invitación ya no está pendiente de activación.'
+                );
+            }
+
+            const actualizada = await tx.cuentas.update({
+                where: { id: usuario.id },
+                data: {
+                    estado: 'activa',
+                    version: { increment: 1 }
+                },
+                select: { version: true }
+            });
+
+            // Registrar la activación por el propio invitado
+            await tx.auditoria_operaciones_cuentas.create({
+                data: {
+                    cuenta_afectada_id: usuario.id,
+                    actor_id: usuario.id,
+                    rol_actor: 'superadministrador',
+                    accion: 'activar_superadministrador',
+                    resultado: 'realizada',
+                    campos_modificados: ['estado'],
+                    version_anterior: actual.version,
+                    version_nueva: actualizada.version
+                }
+            });
+
+            return {
+                estado: 'activa',
+                mensaje: 'Tu cuenta de superadministrador se ha activado.'
+            };
+        });
+    }
+
+
 
     // Consultar las cuentas registradas en la plataforma.
     // Acceso exclusivo para superadministradores activos.
@@ -250,7 +709,7 @@ export class CuentasService {
             estado: cuenta.estado,
             datosPropuestos: propuesta,
             camposModificados: cambios,
-           /* requiereVerificacionCorreo: cambios.correo,*/
+            /* requiereVerificacionCorreo: cambios.correo,*/
             guardado: false
         };
     }
@@ -538,9 +997,9 @@ export class CuentasService {
             return { estado: 'suspendida', version: actualizada.version };
         });
     }
-    
-    
-    
+
+
+
     // Reactivar una cuenta de administrador suspendida
     async reactivarCuentaSuperadministrador(
         autorizacion: string | undefined,
@@ -616,16 +1075,41 @@ export class CuentasService {
             return { estado: 'activa', version: actualizada.version };
         });
     }
-    
-    
-        // Dar de baja una cuenta desde superadministración y conservar su identidad
+
+
+    // Dar de baja una cuenta desde superadministración y conservar su identidad
     async darDeBajaCuentaSuperadministrador(
         autorizacion: string | undefined,
         cuentaId: string
     ) {
         const actorId = await this.comprobarSuperadministradorActivo(autorizacion);
 
+        return this.ejecutarBajaCuenta(
+            actorId,
+            cuentaId,
+            'superadministrador'
+        );
+    }
+
+    // Permitir al administrador solicitar la baja exclusivamente de su propia cuenta
+    async darDeBajaMiCuenta(autorizacion?: string) {
+        const titularId = await this.verificarTitularEdicionPerfil(autorizacion);
+
+        return this.ejecutarBajaCuenta(
+            titularId,
+            titularId,
+            'administrador'
+        );
+    }
+
+    // Procedimiento compartido para la baja voluntaria y la baja administrativa
+    private async ejecutarBajaCuenta(
+        actorId: string,
+        cuentaId: string,
+        rolActor: 'administrador' | 'superadministrador'
+    ) {
         return this.prisma.$transaction(async tx => {
+
             // Usar el mismo bloqueo de fila que la edición y la suspensión de cuentas
             const [cuenta] = await tx.$queryRaw<Array<{
                 rol: string;
@@ -638,11 +1122,17 @@ export class CuentasService {
                 FOR UPDATE
             `;
 
-            if (!cuenta || cuenta.rol !== 'administrador') {
-                throw new NotFoundException(
-                    'No se ha encontrado esta cuenta de administrador.'
+            // La baja voluntaria solo puede tramitarla el titular con su cuenta activa.
+            // El superadministrador también puede dar de baja una cuenta suspendida.
+            if (
+                rolActor === 'administrador' &&
+                cuenta.estado !== 'activa'
+            ) {
+                throw new ForbiddenException(
+                    'Tu cuenta no está habilitada para solicitar la baja.'
                 );
             }
+
 
             // Una petición repetida devuelve la baja ya registrada
             if (cuenta.estado === 'baja') {
@@ -796,10 +1286,18 @@ export class CuentasService {
                 data: {
                     cuenta_afectada_id: cuentaId,
                     actor_id: actorId,
-                    rol_actor: 'superadministrador',
+
+                    // Registrar quién ha solicitado la baja
+                    rol_actor: rolActor,
+
                     accion: 'dar_de_baja_cuenta',
                     resultado: 'realizada',
-                    motivo_codigo: 'baja_administrativa',
+
+                    // Distinguir una baja voluntaria de una administrativa
+                    motivo_codigo: rolActor === 'administrador'
+                        ? 'baja_voluntaria'
+                        : 'baja_administrativa',
+
                     campos_modificados: [
                         'estado', 'apellidos', 'fecha_suspension', 'motivo_suspension'
                     ],
@@ -811,8 +1309,60 @@ export class CuentasService {
             return { estado: 'baja', version: actualizada.version };
         });
     }
-    
-    
+
+
+    // Recuperar el acceso de una cuenta de administrador dada de baja
+    async recuperarCuentaSuperadministrador(
+        autorizacion: string | undefined,
+        cuentaId: string
+    ) {
+        const actorId = await this.comprobarSuperadministradorActivo(autorizacion);
+
+        return this.prisma.$transaction(async tx => {
+            // Coordinar la recuperación con cualquier otro cambio de estado
+            const [cuenta] = await bloquearFilasCuentas(tx, cuentaId);
+
+            if (!cuenta || cuenta.rol !== 'administrador') {
+                throw new NotFoundException(
+                    'No se ha encontrado esta cuenta de administrador.'
+                );
+            }
+
+            if (cuenta.estado !== 'baja') {
+                throw new ConflictException(
+                    'Solo se pueden recuperar cuentas dadas de baja.'
+                );
+            }
+
+            // Recuperar el acceso usando la identidad que se conservó al tramitar la baja
+            const actualizada = await tx.cuentas.update({
+                where: { id: cuentaId },
+                data: {
+                    estado: 'activa',
+                    version: { increment: 1 }
+                },
+                select: { version: true }
+            });
+
+            // Registrar el cambio de estado y la auditoría en la misma transacción
+            await tx.auditoria_operaciones_cuentas.create({
+                data: {
+                    cuenta_afectada_id: cuentaId,
+                    actor_id: actorId,
+                    rol_actor: 'superadministrador',
+                    accion: 'recuperar_cuenta',
+                    resultado: 'realizada',
+                    campos_modificados: ['estado'],
+                    version_anterior: cuenta.version,
+                    version_nueva: actualizada.version
+                }
+            });
+
+            return { estado: 'activa', version: actualizada.version };
+        });
+    }
+
+
     // Comprobar que el administrador tiene una cuenta activa.
     // Un token válido de Supabase Auth no es suficiente para autorizar operaciones privadas.
     async comprobarCuentaActiva(
@@ -852,7 +1402,7 @@ export class CuentasService {
     }
 
 
-   // Crear la identidad en Supabase Auth y la cuenta en Postgre
+    // Crear la identidad en Supabase Auth y la cuenta en Postgre
     async registrar(
         datos: DatosRegistroCuenta,
         origen?: string

@@ -1,0 +1,39 @@
+.activar-superadmin {
+
+    &__formulario {
+        display: flex;
+        flex-direction: column;
+        gap: var(--espacio-md);
+        max-width: 30rem;
+        margin-top: var(--espacio-md);
+    }
+
+    &__campo {
+        display: flex;
+        flex-direction: column;
+        gap: var(--espacio-xs);
+
+        label {
+            font-weight: 500;
+        }
+
+        input {
+            width: 100%;
+            min-height: 3rem;
+            padding: var(--espacio-sm) var(--espacio-md);
+
+            border: 1px solid var(--color-boton-borde);
+            border-radius: var(--radio-campo);
+
+            background: var(--color-superficie);
+            color: var(--color-principal);
+            font: inherit;
+        }
+    }
+
+    &__opcion {
+        display: flex;
+        align-items: center;
+        gap: var(--espacio-sm);
+    }
+}

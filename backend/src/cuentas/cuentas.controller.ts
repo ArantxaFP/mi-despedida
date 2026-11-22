@@ -1,4 +1,4 @@
-import { Body, Controller, Headers, Patch, Post, Get, Param, ParseUUIDPipe, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, Headers, Patch, Post, Get, Param, ParseUUIDPipe, ValidationPipe, Query, DefaultValuePipe, ParseIntPipe } from '@nestjs/common';
 import { CuentasService } from './cuentas.service';
 
 import { RegistrarCuentaDto } from './dto/registrar-cuenta.dto';
@@ -6,6 +6,8 @@ import { EditarCuentaSuperadminDto } from './dto/editar-cuenta-superadmin.dto';
 import { CredencialBloqueoDto } from './dto/credencial-bloqueo.dto';
 import { ActualizarDatosPerfilBloqueoDto } from './dto/actualizar-datos-perfil-bloqueo.dto';
 import { SuspenderCuentaDto } from './dto/suspender-cuenta.dto';
+import { CrearSuperadministradorDto } from './dto/crear-superadministrador.dto';
+import { ActivarSuperadministradorDto } from './dto/activar-superadministrador.dto';
 
 @Controller('cuentas')
 export class CuentasController {
@@ -42,6 +44,62 @@ export class CuentasController {
         return this.cuentasService.obtenerMiAcceso(autorizacion);
     }
 
+
+    // Listado exclusivo de usuarios superadministradores
+    @Get('superadmin/superadministradores')
+    async listarSuperadministradores(
+        @Headers('authorization')
+        autorizacion?: string
+    ) {
+        return this.cuentasService.listarSuperadministradores(
+            autorizacion
+        );
+    }
+
+
+    // Crear e invitar un superadministrador
+    @Post('superadmin/superadministradores')
+    async crearSuperadministrador(
+        @Headers('authorization')
+        autorizacion: string | undefined,
+
+        @Headers('origin')
+        origen: string | undefined,
+
+        @Body(new ValidationPipe({
+            whitelist: true,
+            forbidNonWhitelisted: true,
+            transform: true
+        }))
+        datos: CrearSuperadministradorDto
+    ) {
+        return this.cuentasService.crearSuperadministrador(
+            autorizacion,
+            datos,
+            origen
+        );
+    }
+
+    // Activar una invitación después de verificar el correo.
+    // La identidad del invitado se obtiene de su sesión Supabase.
+    @Post('superadmin/activar-invitacion')
+    async activarSuperadministrador(
+        @Headers('authorization')
+        autorizacion: string | undefined,
+
+        @Body(new ValidationPipe({
+            whitelist: true,
+            forbidNonWhitelisted: true,
+            transform: true
+        }))
+        datos: ActivarSuperadministradorDto
+    ) {
+        return this.cuentasService.activarSuperadministrador(
+            autorizacion,
+            datos
+        );
+    }
+
     // Listado de cuentas exclusivo del superadministrador
     @Get('superadmin/listado')
     async listarCuentasSuperadministrador(
@@ -51,6 +109,50 @@ export class CuentasController {
             autorizacion
         );
     }
+
+
+    // Consultar la auditoría de una cuenta concreta
+    @Get('superadmin/cuentas/:id/auditoria')
+    async listarAuditoriaCuentaSuperadministrador(
+        @Param('id', new ParseUUIDPipe({ version: 'all' }))
+        cuentaId: string,
+
+        @Headers('authorization')
+        autorizacion: string | undefined,
+
+        @Query(
+            'pagina',
+            new DefaultValuePipe(1),
+            ParseIntPipe
+        )
+        pagina: number
+    ) {
+        return this.cuentasService.listarAuditoriaCuentaSuperadministrador(
+            autorizacion,
+            cuentaId,
+            pagina
+        );
+    }
+
+    // Consultar el historial de auditoría de cuentas
+    @Get('superadmin/auditoria-cuentas')
+    async listarAuditoriaCuentasSuperadministrador(
+        @Headers('authorization')
+        autorizacion: string | undefined,
+
+        @Query(
+            'pagina',
+            new DefaultValuePipe(1),
+            ParseIntPipe
+        )
+        pagina: number
+    ) {
+        return this.cuentasService.listarAuditoriaCuentasSuperadministrador(
+            autorizacion,
+            pagina
+        );
+    }
+
 
     // Solo permite consultar los cambios propuestos.
     // No guarda modificaciones en la base de datos.
@@ -175,7 +277,7 @@ export class CuentasController {
     }
 
 
-      // Reactivar una cuenta suspendida desde el panel de superadministración
+    // Reactivar una cuenta suspendida desde el panel de superadministración
     @Patch('superadmin/cuentas/:id/reactivar')
     async reactivarCuentaSuperadministrador(
         @Param('id', new ParseUUIDPipe({ version: 'all' }))
@@ -189,7 +291,7 @@ export class CuentasController {
             cuentaId
         );
     }
-  
+
     // Dar de baja una cuenta de administrador desde superadministración
     @Patch('superadmin/cuentas/:id/baja')
     async darDeBajaCuentaSuperadministrador(
@@ -204,8 +306,23 @@ export class CuentasController {
             cuentaId
         );
     }
-    
-    
+
+    // Recuperar una cuenta dada de baja desde superadministración
+    @Patch('superadmin/cuentas/:id/recuperar')
+    async recuperarCuentaSuperadministrador(
+        @Param('id', new ParseUUIDPipe({ version: 'all' }))
+        cuentaId: string,
+
+        @Headers('authorization')
+        autorizacion?: string
+    ) {
+        return this.cuentasService.recuperarCuentaSuperadministrador(
+            autorizacion,
+            cuentaId
+        );
+    }
+
+
     // Solicitar un bloqueo prioritario para editar el perfil
     @Post('edicion/:id/bloqueo')
     async adquirirBloqueoEdicionPerfil(
@@ -222,7 +339,7 @@ export class CuentasController {
     }
 
 
-    // Renovar el bloqueo de edición del administrador titular.
+    // Renovar el bloqueo de edición del administrador titular
     @Post('edicion/:id/bloqueo/renovar')
     async renovarBloqueoEdicionPerfil(
         @Param('id', new ParseUUIDPipe({ version: 'all' }))
@@ -276,8 +393,21 @@ export class CuentasController {
         return this.cuentasService.obtenerDatosPerfil(autorizacion);
     }
 
+
+    // Baja voluntaria solicitada desde Mi perfil.
+    // El backend identifica al titular mediante su sesión, sin aceptar el identificador de otra cuenta desde el frontend.
+    @Patch('perfil/baja')
+    async darDeBajaMiCuenta(
+        @Headers('authorization')
+        autorizacion?: string
+    ) {
+        return this.cuentasService.darDeBajaMiCuenta(
+            autorizacion
+        );
+    }
+
+
     // Actualizar nombre y apellidos del administrador
- 
     @Patch('perfil/datos-con-bloqueo')
     async actualizarDatosPerfilBloqueo(
         @Headers('authorization') autorizacion: string | undefined,

@@ -1,0 +1,137 @@
+<section class="panel-pagina activar-superadmin"
+    aria-labelledby="titulo-activar-superadmin">
+
+    <header class="panel-pagina__bloque panel-pagina__cabecera">
+
+        <h1 id="titulo-activar-superadmin">
+            Activar cuenta de superadministrador
+        </h1>
+
+        <p>
+            Verifica tu invitación y establece una contraseña para acceder a Mi despedida.
+        </p>
+
+    </header>
+
+    @if (comprobando()) {
+
+    <section class="panel-pagina__bloque">
+        <p role="status">Comprobando invitación...</p>
+    </section>
+
+    } @else if (activada()) {
+
+    <!-- La cuenta ya se ha activado en Postgre -->
+    <section class="panel-pagina__bloque">
+
+        <h2>Cuenta activada</h2>
+
+        <p>
+            Tu cuenta de superadministrador se ha activado correctamente.
+            Ya puedes iniciar sesión con tu correo y contraseña.
+        </p>
+
+        @if (error()) {
+        <p class="panel__aviso-error" role="alert">
+            {{ error() }}
+        </p>
+        }
+
+        <a class="panel__boton" routerLink="/acceso">
+            Ir a iniciar sesión
+        </a>
+
+    </section>
+
+    } @else if (invitacionValida()) {
+
+    <section class="panel-pagina__bloque"
+        aria-labelledby="titulo-contrasena-superadmin">
+
+        <h2 id="titulo-contrasena-superadmin">
+            Establecer contraseña
+        </h2>
+
+        <p class="panel-pagina__texto-secundario">
+            Utiliza al menos 10 caracteres, con mayúsculas, minúsculas, números y símbolos.
+        </p>
+
+        <form class="activar-superadmin__formulario"
+            (submit)="$event.preventDefault(); activarCuenta()">
+
+            <div class="activar-superadmin__campo">
+
+                <label for="contrasena-superadmin">
+                    Contraseña
+                </label>
+
+                <input id="contrasena-superadmin"
+                    [type]="mostrarContrasena() ? 'text' : 'password'"
+                    autocomplete="new-password"
+                    minlength="10"
+                    maxlength="128"
+                    required
+                    [value]="contrasena()"
+                    (input)="contrasena.set(contrasenaInput.value)"
+                    [readonly]="guardando()"
+                    #contrasenaInput>
+            </div>
+
+            <div class="activar-superadmin__campo">
+
+                <label for="confirmacion-superadmin">
+                    Confirmar contraseña
+                </label>
+
+                <input id="confirmacion-superadmin"
+                    [type]="mostrarContrasena() ? 'text' : 'password'"
+                    autocomplete="new-password"
+                    required
+                    [value]="confirmacion()"
+                    (input)="confirmacion.set(confirmacionInput.value)"
+                    [readonly]="guardando()"
+                    #confirmacionInput>
+            </div>
+
+            <label class="activar-superadmin__opcion">
+                <input type="checkbox"
+                    [checked]="mostrarContrasena()"
+                    (change)="mostrarContrasena.set(!mostrarContrasena())">
+                Mostrar contraseñas
+            </label>
+
+            <button type="submit" class="panel__boton"
+                [disabled]="guardando() || !contrasena() || !confirmacion()">
+
+                {{ guardando()
+                    ? 'Activando cuenta...'
+                    : 'Establecer contraseña y activar cuenta' }}
+            </button>
+
+        </form>
+
+        @if (error()) {
+        <p class="panel__aviso-error" role="alert">
+            {{ error() }}
+        </p>
+        }
+
+    </section>
+
+    } @else {
+
+    <section class="panel-pagina__bloque">
+
+        <p class="panel__aviso-error" role="alert">
+            {{ error() || 'No se ha podido verificar la invitación.' }}
+        </p>
+
+        <a routerLink="/acceso">
+            Volver al acceso
+        </a>
+
+    </section>
+
+    }
+
+</section>

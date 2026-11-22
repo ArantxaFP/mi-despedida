@@ -305,6 +305,116 @@ export class CorreoService {
             );
         }
     }
+
+
+    // --------------------------------------------------
+    // 3. Enviar invitación para crear una cuenta de superadministrador
+    // --------------------------------------------------
+
+    async enviarInvitacionSuperadministrador(
+        correo: string,
+        nombre: string,
+        enlace: string
+    ): Promise<string> {
+
+        const nombreSeguro = this.escaparHtml(nombre);
+        const enlaceSeguro = this.escaparHtml(enlace);
+
+        // El enlace original no se guarda en Postgre ni se devuelve al navegador.
+        // Supabase controla su utilización y caducidad.
+        const htmlContent = `
+            <!DOCTYPE html>
+            <html lang="es">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1">
+                <title>Invitación a Mi despedida</title>
+            </head>
+            <body style="font-family:Arial,sans-serif;line-height:1.6;color:#273244;
+                         background-color:#f5f7fa;padding:24px;">
+                <div style="max-width:600px;margin:auto;padding:32px;
+                            background-color:#ffffff;border-radius:12px;">
+                    <h1 style="color:#071d49;">Mi despedida</h1>
+
+                    <p>Hola, ${nombreSeguro}.</p>
+
+                    <p>
+                        Has recibido una invitación para incorporarte
+                        a Mi despedida como superadministrador.
+                    </p>
+
+                    <p>
+                        Para verificar tu correo y establecer tu contraseña,
+                        utiliza el siguiente enlace:
+                    </p>
+
+                    <p>
+                        <a href="${enlaceSeguro}"
+                           style="display:inline-block;padding:12px 20px;
+                                  background-color:#071d49;color:#ffffff;
+                                  text-decoration:none;border-radius:6px;">
+                            Activar mi cuenta
+                        </a>
+                    </p>
+
+                    <p>
+                        El enlace es de un solo uso y 
+                        caduca 1 hora después de su creación.
+                    </p>
+
+                    <p>
+                        Si no esperabas esta invitación, puedes ignorarla.
+                        No compartas este enlace.
+                    </p>
+                </div>
+            </body>
+            </html>
+        `;
+
+        try {
+            const resultado =
+                await this.brevo.transactionalEmails.sendTransacEmail({
+                    sender: {
+                        name: this.remitenteNombre,
+                        email: this.remitenteEmail
+                    },
+                    to: [{
+                        email: correo,
+                        name: nombre
+                    }],
+                    subject: 'Mi despedida - Invitación de superadministrador',
+                    htmlContent,
+                    textContent:
+                        `Hola, ${nombre}.\n\n` +
+                        'Has sido invitado a Mi despedida como superadministrador.\n' +
+                        'Verifica tu correo y establece tu contraseña aquí:\n' +
+                        `${enlace}\n\n` +
+                        'Este enlace es de un solo uso y ' +
+                        'caduca 1 hora después de su creación.\n\n' +
+                        'Si no esperabas esta invitación, ignórala.'
+
+                });
+
+            if (!resultado.messageId) {
+                throw new Error(
+                    'Brevo no ha confirmado la solicitud de envío.'
+                );
+            }
+
+            // Solo devolver el identificador del envío
+            return resultado.messageId;
+
+        } catch (error) {
+            this.logger.error(
+                'Error al enviar la invitación de superadministrador',
+                error instanceof Error ? error.message : String(error)
+            );
+
+            throw new InternalServerErrorException(
+                'No se ha podido enviar la invitación.'
+            );
+        }
+    }
 }
 
 

@@ -424,18 +424,17 @@
 
             </label>
 
-            <button class="perfil__boton perfil__boton--peligro" type="button" disabled
-                aria-describedby="aviso-baja-pendiente">
-
-                Confirmar la baja
-
+            <!-- La baja solo puede solicitarse después de marcar la confirmación.
+                  El botón se bloquea mientras Nest tramita la petición. -->
+            <button class="perfil__boton perfil__boton--peligro" type="button" (click)="confirmarBaja()"
+                [disabled]="guardando() || formularioBaja.invalid" aria-describedby="aviso-baja-pendiente">
+                {{ guardando() ? 'Tramitando baja...' : 'Confirmar la baja' }}
             </button>
 
+            <!-- Avisar de las restricciones y consecuencias de la baja voluntaria -->
             <p id="aviso-baja-pendiente" class="perfil__nota">
-
-                La baja definitiva estará disponible cuando se complete el procedimiento seguro de eliminación de datos
-                y revocación de permisos.
-
+                No podrás darte de baja mientras exista una activación en curso.
+                Si das de baja la cuenta, los contactos y mensajes no podrán recuperarse.
             </p>
 
             <button class="perfil__boton" type="button" (click)="cambiarVista('datos')">

@@ -42,6 +42,14 @@ export const routes: Routes = [
     component: NuevaContrasena
   },
 
+  // Activación inicial de una cuenta de superadministrador
+  {
+    path: 'activar-superadmin',
+    loadComponent: () =>
+      import('./paginas/activar-superadmin/activar-superadmin')
+        .then(m => m.ActivarSuperadmin)
+  },
+
   {
     path: 'panel',
     component: EstructuraPanel,
@@ -103,6 +111,23 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./paginas/panel/06-superadm-cuentas/cuentas-superadmin')
             .then(m => m.CuentasSuperadmin)
+      },
+
+      // Auditoría individual de la cuenta seleccionada.
+      // Solo pueden acceder los superadministradores.
+      {
+        path: 'cuentas/:id/auditoria',
+        loadComponent: () =>
+          import('./paginas/panel/07-superadm-auditoria/auditoria-cuentas')
+            .then(m => m.AuditoriaCuentas)
+      },
+
+      // Gestión exclusiva de usuarios superadministradores
+      {
+        path: 'superadministradores',
+        loadComponent: () =>
+          import('./paginas/panel/08-superadm-superadministradores/superadministradores')
+            .then(m => m.Superadministradores)
       }
 
     ]

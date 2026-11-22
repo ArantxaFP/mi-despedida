@@ -1,0 +1,184 @@
+<section class="panel-pagina superadministradores">
+
+    <!-- CABECERA DE LA PÁGINA -->
+    <header class="panel-pagina__bloque panel-pagina__cabecera">
+
+        <h1>Gestión de superadministradores</h1>
+
+        <p>
+            Consulta las cuentas con permisos de superadministración de Mi Despedida.
+        </p>
+
+    </header>
+
+    <!-- CREAR UN SUPERADMINISTRADOR -->
+    <section class="panel-pagina__bloque" aria-labelledby="titulo-crear-superadministrador">
+
+        <h2 id="titulo-crear-superadministrador">
+            Crear superadministrador
+        </h2>
+
+        <p class="panel-pagina__texto-secundario">
+            Introduce los datos de la persona que recibirá la invitación.
+            Su cuenta permanecerá pendiente hasta que verifique el correo y establezca su contraseña.
+        </p>
+
+        <form class="superadministradores__formulario" (submit)="$event.preventDefault(); enviarInvitacion()">
+
+            <div class="superadministradores__campo">
+                <label for="nuevo-superadmin-nombre">Nombre</label>
+
+                <input id="nuevo-superadmin-nombre" type="text" autocomplete="given-name" maxlength="100" required
+                    [value]="nombreNuevo()" (input)="nombreNuevo.set(nombreInput.value)"
+                    [readonly]="enviandoInvitacion()" #nombreInput>
+            </div>
+
+            <div class="superadministradores__campo">
+                <label for="nuevo-superadmin-apellidos">
+                    Apellidos (opcional)
+                </label>
+
+                <input id="nuevo-superadmin-apellidos" type="text" autocomplete="family-name" maxlength="150"
+                    [value]="apellidosNuevo()" (input)="apellidosNuevo.set(apellidosInput.value)"
+                    [readonly]="enviandoInvitacion()" #apellidosInput>
+            </div>
+
+            <div class="superadministradores__campo">
+                <label for="nuevo-superadmin-correo">
+                    Correo electrónico
+                </label>
+
+                <input id="nuevo-superadmin-correo" type="email" autocomplete="email" maxlength="254" required
+                    [value]="correoNuevo()" (input)="correoNuevo.set(correoInput.value)"
+                    [readonly]="enviandoInvitacion()" #correoInput>
+            </div>
+
+            <button type="submit" class="panel__boton"
+                [disabled]="enviandoInvitacion() || cargando() || !nombreNuevo().trim() || !correoNuevo().trim()">
+                {{ enviandoInvitacion()
+                ? 'Enviando invitación...'
+                : 'Crear y enviar invitación' }}
+            </button>
+
+        </form>
+
+        @if (errorAlta()) {
+        <p class="panel__aviso-error" role="alert">
+            {{ errorAlta() }}
+        </p>
+        }
+
+        @if (mensajeAlta()) {
+        <p class="panel-pagina__mensaje" role="status">
+            {{ mensajeAlta() }}
+        </p>
+        }
+
+    </section>
+
+
+    <!-- LISTADO DE SUPERADMINISTRADORES -->
+    <section class="panel-pagina__bloque" aria-labelledby="titulo-superadministradores">
+
+        <h2 id="titulo-superadministradores">
+            Usuarios superadministradores
+        </h2>
+
+        <p class="panel-pagina__texto-secundario">
+            Los superadministradores tienen acceso a las funciones de gestión y supervisión de la plataforma.
+            Su creación y eliminación se realizarán mediante procedimientos autorizados.
+        </p>
+
+        <!-- HERRAMIENTAS DEL LISTADO -->
+        <div class="superadministradores__herramientas">
+
+            <p>
+                Total de superadministradores:
+                <strong>{{ usuarios().length }}</strong>
+            </p>
+
+            <button type="button" class="panel__boton" (click)="actualizarSuperadministradores()"
+                [disabled]="cargando()">
+
+                {{ cargando() ? 'Actualizando...' : 'Actualizar' }}
+
+            </button>
+
+        </div>
+
+        @if (error()) {
+        <p class="panel__aviso-error" role="alert">
+            {{ error() }}
+        </p>
+        }
+
+        @if (cargando()) {
+        <p class="panel-pagina__mensaje" role="status">
+            Cargando superadministradores...
+        </p>
+        }
+
+        <!-- TABLA DE CONSULTA -->
+        @if (usuarios().length > 0) {
+
+        <div class="panel-pagina__tabla-responsive">
+
+            <table class="tabla-superadministradores">
+
+                <thead>
+                    <tr>
+                        <th scope="col">Nombre</th>
+                        <th scope="col">Apellidos</th>
+                        <th scope="col">Correo electrónico</th>
+                        <th scope="col">Estado</th>
+                        <th scope="col">Fecha de alta</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    @for (usuario of usuarios(); track usuario.id) {
+
+                    <tr>
+
+                        <td data-etiqueta="Nombre">
+                            {{ usuario.nombre }}
+                        </td>
+
+                        <td data-etiqueta="Apellidos">
+                            {{ usuario.apellidos || '—' }}
+                        </td>
+
+                        <td data-etiqueta="Correo">
+                            {{ usuario.correo }}
+                        </td>
+
+                        <td data-etiqueta="Estado">
+                            {{ mostrarEstado(usuario.estado) }}
+                        </td>
+
+                        <td data-etiqueta="Fecha de alta">
+                            {{ usuario.fecha_registro | date:'dd/MM/yyyy HH:mm' }}
+                        </td>
+
+                    </tr>
+
+                    }
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+        } @else if (!cargando() && !error()) {
+
+        <p class="panel-pagina__mensaje" role="status">
+            No se han encontrado usuarios superadministradores.
+        </p>
+
+        }
+
+    </section>
+
+</section>

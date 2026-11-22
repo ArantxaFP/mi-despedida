@@ -1,6 +1,8 @@
 import { Component, inject, OnInit, signal, OnDestroy } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Autenticacion, type BloqueoEdicionCuenta } from '../../../servicios/autenticacion';
+import { Router } from '@angular/router';
+import { configuracionBackend } from '../../../configuracion/backend';
 
 type VistaPerfil = 'datos' | 'correo' | 'contrasena' | 'baja';
 
@@ -13,6 +15,9 @@ type VistaPerfil = 'datos' | 'correo' | 'contrasena' | 'baja';
 export class Perfil implements OnInit, OnDestroy {
     private autenticacion = inject(Autenticacion);
     private constructorFormulario = inject(FormBuilder);
+
+    // Redirigir al acceso cuando se haya confirmado la baja de la cuenta
+    private router = inject(Router);
 
     vistaActual = signal<VistaPerfil>('datos');
     cargando = signal(true);
@@ -486,6 +491,127 @@ export class Perfil implements OnInit, OnDestroy {
                 'No se ha podido conectar con el servicio.'
             );
         } finally {
+            this.guardando.set(false);
+        }
+    }
+
+    // Solicitar la baja voluntaria de la cuenta
+    async confirmarBaja(): Promise<void> {
+
+        // Evitar peticiones duplicadas y exigir la confirmación expresa
+        if (
+            this.cargando() ||
+            this.guardando() ||
+            this.vistaActual() !== 'baja'
+        ) {
+            return;
+        }
+
+        if (this.formularioBaja.invalid) {
+            this.formularioBaja.markAllAsTouched();
+            return;
+        }
+
+        this.guardando.set(true);
+        this.mensaje.set('');
+        this.error.set('');
+
+        // Distinguir un error de la petición de un error posterior al cerrar sesión
+        let bajaConfirmada = false;
+
+        try {
+            const token = await this.autenticacion.obtenerTokenAcceso();
+
+            if (!token) {
+                this.error.set(
+                    'Tu sesión ha caducado. Vuelve a iniciar sesión.'
+                );
+                return;
+            }
+
+            // Nest identifica al administrador desde su sesión.
+            // No se envía ningún identificador de cuenta desde el navegador.
+            const respuesta = await fetch(
+                `${configuracionBackend.url}/cuentas/perfil/baja`,
+                {
+                    method: 'PATCH',
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    },
+                    cache: 'no-store'
+                }
+            );
+
+            if (!respuesta.ok) {
+
+                // Mostrar el motivo si hay una activación en curso
+                const datosError: { message?: unknown } | null =
+                    await respuesta.json().catch(() => null);
+
+                this.error.set(
+                    respuesta.status === 409 &&
+                        typeof datosError?.message === 'string'
+                        ? datosError.message
+                        : 'No se ha podido tramitar la baja de tu cuenta.'
+                );
+
+                return;
+            }
+
+            const resultado: { estado: string } =
+                await respuesta.json();
+
+            // No cerrar la sesión hasta que Nest confirme la baja
+            if (resultado.estado !== 'baja') {
+                this.error.set(
+                    'El servidor no ha confirmado la baja.'
+                );
+                return;
+            }
+
+            bajaConfirmada = true;
+
+            // La cuenta ya está dada de baja.
+            // Cerrar la sesión local de Supabase.
+            const cierreSesion =
+                await this.autenticacion.cerrarSesion();
+
+            if (cierreSesion.error) {
+                this.error.set(
+                    'La baja se ha realizado, pero no se ha podido cerrar ' +
+                    'la sesión automáticamente.'
+                );
+            }
+
+            // Salir del panel sin permitir volver mediante el historial
+            await this.router.navigate(['/acceso'], {
+                queryParams: {
+                    estadoCuenta: 'baja'
+                },
+                replaceUrl: true
+            });
+
+        } catch {
+
+            if (bajaConfirmada) {
+
+                // La baja ya se aplicó: no indicar que ha fallado el borrado
+                this.error.set(
+                    'La baja se ha realizado, pero ha ocurrido un problema ' +
+                    'al cerrar la sesión. Sal del panel e inicia una nueva sesión.'
+                );
+
+            } else {
+
+                this.error.set(
+                    'No se ha podido conectar con el servicio. ' +
+                    'No se ha confirmado la baja.'
+                );
+            }
+
+        } finally {
+
+            // Permitir volver a intentarlo si la baja no se ha confirmado
             this.guardando.set(false);
         }
     }

@@ -1,8 +1,25 @@
 -- ============================================================
--- OJO PENDIENTE DE TENER NOTA PAC 2 PARA NO AFECTAR FUNCIONAMIENTO 
+-- PENDIENTE DE TENER NOTA PAC 2 PARA NO AFECTAR FUNCIONAMIENTO 
 -- Cambios pendientes de aplicar a Postgre
 -- Este archivo es de preparación
 -- PENDIENTE DE EJECUTARLO CUANDO SE PUEDA ALTERAR SUPABASE Y LA BBDD
+-- ============================================================
+
+-- ============================================================
+-- PAC3 - CONTROL DE VERSIONES, BLOQUEOS Y AUDITORÍA DE CUENTAS
+--
+-- ESTADO: IMPLEMENTADO EN SUPABASE
+-- Fecha de comprobación: 21/11/2026
+--
+-- Los 21 elementos del inventario han sido localizados:
+-- - Columna de versionado
+-- - Tablas de bloqueos y auditoría
+-- - Restricciones CHECK
+-- - Índices
+-- - RLS y restricciones de permisos de cliente
+--
+-- ARCHIVO HISTÓRICO DE IMPLEMENTACIÓN
+-- NO VOLVER A EJECUTAR COMPLETO SOBRE LA BASE DE DATOS.
 -- ============================================================
 
 -- 1. CONTROL DE VERSIONES COMPARTIDO DE LAS CUENTAS

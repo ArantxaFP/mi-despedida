@@ -1,0 +1,163 @@
+// Hay estilos compartidos para todo el panel.
+// Aquí se definen únicamente los estilos de auditoría de cuentas accesibles a los superadministradores.
+
+.auditoria-cuentas {
+
+    &__volver {
+        display: inline-flex;
+        margin-top: var(--espacio-md);
+        color: var(--color-principal);
+        text-decoration: underline;
+        text-underline-offset: 0.2rem;
+    }
+
+    &__ficha {
+        display: flex;
+        flex-direction: column;
+        gap: var(--espacio-sm);
+        overflow-wrap: anywhere;
+    }
+
+    &__herramientas {
+        display: flex;
+        flex-direction: column;
+        gap: var(--espacio-md);
+        margin-block: var(--espacio-md);
+    }
+
+    &__paginacion {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: var(--espacio-md);
+        margin-top: var(--espacio-md);
+    }
+}
+
+
+// --------------------------------------------------
+// Auditoría: diseño mobile first
+// --------------------------------------------------
+
+.tabla-auditoria {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+
+    // En móvil, ocultar la cabecera visual de la tabla.
+    // Cada campo tendrá su propia etiqueta.
+    thead {
+        display: none;
+    }
+
+    tbody,
+    tr {
+        display: block;
+    }
+
+    tr {
+        margin-bottom: var(--espacio-md);
+        padding: var(--espacio-sm);
+
+        border: 1px solid var(--color-boton-borde);
+        border-radius: var(--radio-campo);
+
+        background: var(--color-superficie);
+    }
+
+    td {
+        display: grid;
+        grid-template-columns: minmax(6.5rem, 35%) minmax(0, 1fr);
+        gap: var(--espacio-sm);
+
+        padding: var(--espacio-sm);
+        border-bottom: 1px solid var(--color-boton-borde);
+
+        color: var(--color-principal);
+        overflow-wrap: anywhere;
+    }
+
+    td::before {
+        content: attr(data-etiqueta);
+        font-weight: 600;
+    }
+
+    td:last-child {
+        border-bottom: 0;
+    }
+
+    &__identificador {
+        overflow-wrap: anywhere;
+        font-size: var(--texto-pequeno);
+    }
+}
+
+
+// --------------------------------------------------
+// Tablet: distribuir las herramientas horizontalmente
+// --------------------------------------------------
+
+@media (min-width: 48rem) {
+
+    .auditoria-cuentas {
+
+        &__herramientas {
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+        }
+    }
+}
+
+
+// --------------------------------------------------
+// Desktop: recuperar la presentación de tabla tradicional
+// --------------------------------------------------
+
+@media (min-width: 72rem) {
+
+    .tabla-auditoria {
+
+        thead {
+            display: table-header-group;
+        }
+
+        tbody {
+            display: table-row-group;
+        }
+
+        tr {
+            display: table-row;
+            margin: 0;
+            padding: 0;
+            border: 0;
+            border-radius: 0;
+            background: transparent;
+        }
+
+        th,
+        td {
+            padding: var(--espacio-md);
+            border-bottom: 1px solid var(--color-boton-borde);
+            vertical-align: middle;
+        }
+
+        th {
+            color: var(--color-principal);
+            font-weight: 600;
+        }
+
+        td {
+            display: table-cell;
+        }
+
+        td::before {
+            content: none;
+        }
+
+        tbody tr:hover {
+            background: var(--color-fondo);
+        }
+    }
+}

@@ -1,0 +1,204 @@
+<section class="panel-pagina auditoria-cuentas">
+
+    <!-- CABECERA DE LA PÁGINA -->
+    <header class="panel-pagina__bloque panel-pagina__cabecera">
+
+        <h1>Auditoría de cuenta</h1>
+
+        <p>
+            Consulta el historial de operaciones registradas sobre la cuenta seleccionada.
+        </p>
+
+        <a class="auditoria-cuentas__volver"
+            routerLink="/superadmin/cuentas">
+            ← Volver a Gestión de cuentas
+        </a>
+
+    </header>
+
+    <!-- IDENTIFICACIÓN DE LA CUENTA -->
+    @if (cuenta(); as datosCuenta) {
+
+    <section class="panel-pagina__bloque" aria-labelledby="titulo-cuenta-auditada">
+
+        <h2 id="titulo-cuenta-auditada">Cuenta consultada</h2>
+
+        <div class="auditoria-cuentas__ficha">
+
+            <p>
+                <strong>Administrador:</strong>
+                {{ datosCuenta.nombre }} {{ datosCuenta.apellidos ?? '' }}
+            </p>
+
+            <p>
+                <strong>Correo:</strong>
+                {{ datosCuenta.correo }}
+            </p>
+
+            <p>
+                <strong>Estado actual:</strong>
+                {{ datosCuenta.estado }}
+            </p>
+
+        </div>
+
+    </section>
+
+    }
+
+    <!-- HISTORIAL DE AUDITORÍA -->
+    <section class="panel-pagina__bloque" aria-labelledby="titulo-historial">
+
+        <h2 id="titulo-historial">Historial de operaciones</h2>
+
+        <p class="panel-pagina__texto-secundario">
+            Esta información es de solo lectura.
+            No se muestran los valores anteriores ni los nuevos de los datos personales.
+        </p>
+
+        <!-- ACTUALIZAR LOS REGISTROS -->
+        <div class="auditoria-cuentas__herramientas">
+
+            <p>
+                Registros encontrados:
+                <strong>{{ total() }}</strong>
+            </p>
+
+            <button type="button" class="panel__boton"
+                (click)="cargarAuditoria(pagina())"
+                [disabled]="cargando()">
+                {{ cargando() ? 'Actualizando...' : 'Actualizar' }}
+            </button>
+
+        </div>
+
+        @if (error()) {
+        <p class="panel__aviso-error" role="alert">
+            {{ error() }}
+        </p>
+        }
+
+        @if (cargando()) {
+        <p class="panel-pagina__mensaje" role="status">
+            Cargando auditoría...
+        </p>
+        }
+
+        <!-- TABLA DE OPERACIONES -->
+        @if (registros().length > 0) {
+
+        <div class="panel-pagina__tabla-responsive">
+
+            <table class="tabla-auditoria">
+
+                <thead>
+                    <tr>
+                        <th scope="col">Fecha</th>
+                        <th scope="col">Actor</th>
+                        <th scope="col">Rol</th>
+                        <th scope="col">Operación</th>
+                        <th scope="col">Resultado</th>
+                        <th scope="col">Motivo</th>
+                        <th scope="col">Campos</th>
+                        <th scope="col">Versiones</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    @for (registro of registros(); track registro.id) {
+
+                    <tr>
+
+                        <td data-etiqueta="Fecha">
+                            <span>
+                                {{ registro.fecha_evento | date:'dd/MM/yyyy HH:mm:ss' }}
+                            </span>
+                        </td>
+
+                        <td data-etiqueta="Actor">
+                            <span class="tabla-auditoria__identificador">
+                                {{ registro.actor_id ?? 'Sistema' }}
+                            </span>
+                        </td>
+
+                        <td data-etiqueta="Rol">
+                            <span>{{ registro.rol_actor }}</span>
+                        </td>
+
+                        <td data-etiqueta="Operación">
+                            <span>
+                                {{ formatearOperacion(registro.accion) }}
+                            </span>
+                        </td>
+
+                        <td data-etiqueta="Resultado">
+                            <span>{{ registro.resultado }}</span>
+                        </td>
+
+                        <td data-etiqueta="Motivo">
+                            <span>{{ registro.motivo_codigo ?? '—' }}</span>
+                        </td>
+
+                        <td data-etiqueta="Campos">
+                            <span>
+                                {{ registro.campos_modificados.length
+                                    ? registro.campos_modificados.join(', ')
+                                    : '—' }}
+                            </span>
+                        </td>
+
+                        <td data-etiqueta="Versiones">
+                            <span>
+                                {{ registro.version_anterior ?? '—' }}
+                                →
+                                {{ registro.version_nueva ?? '—' }}
+                            </span>
+                        </td>
+
+                    </tr>
+
+                    }
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+        } @else if (!cargando() && !error() && cuenta()) {
+
+        <p class="panel-pagina__mensaje" role="status">
+            Todavía no existen operaciones de auditoría registradas para esta cuenta.
+        </p>
+
+        }
+
+        <!-- PAGINACIÓN DE 50 REGISTROS -->
+        @if (total() > 0) {
+
+        <nav class="auditoria-cuentas__paginacion" aria-label="Paginación de auditoría">
+
+            <button type="button" class="panel__boton"
+                (click)="cargarAuditoria(pagina() - 1)"
+                [disabled]="cargando() || pagina() <= 1">
+                Anterior
+            </button>
+
+            <span>
+                Página {{ pagina() }} de {{ totalPaginas() }}
+            </span>
+
+            <button type="button" class="panel__boton"
+                (click)="cargarAuditoria(pagina() + 1)"
+                [disabled]="cargando() || pagina() >= totalPaginas()">
+                Siguiente
+            </button>
+
+        </nav>
+
+        }
+
+    </section>
+
+</section>

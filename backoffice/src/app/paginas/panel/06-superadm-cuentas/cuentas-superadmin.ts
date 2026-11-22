@@ -1,6 +1,7 @@
 import { Component, computed, inject, OnInit, signal, OnDestroy } from '@angular/core';
 import { Autenticacion, type BloqueoEdicionCuenta } from '../../../servicios/autenticacion';
 import { configuracionBackend } from '../../../configuracion/backend';
+import { RouterLink } from '@angular/router';
 
 interface CuentaSuperadmin {
   id: string;
@@ -33,6 +34,7 @@ interface PrevisualizacionEdicion {
 @Component({
   selector: 'app-cuentas-superadmin',
   standalone: true,
+  imports: [RouterLink],
   templateUrl: './cuentas-superadmin.html',
   styleUrl: './cuentas-superadmin.scss'
 })
@@ -59,6 +61,17 @@ export class CuentasSuperadmin implements OnInit, OnDestroy {
   readonly suspendiendo = signal(false);
   readonly errorSuspension = signal('');
   readonly reactivandoCuentaId = signal<string | null>(null);
+
+  readonly cuentaParaBajaId = signal<string | null>(null);
+  readonly dandoDeBaja = signal(false);
+  readonly errorBaja = signal('');
+
+  // Evitar que coincidan dos cambios de estado desde este panel
+  readonly cambiandoEstadoCuenta = computed(() =>
+    this.suspendiendo() ||
+    this.reactivandoCuentaId() !== null ||
+    this.dandoDeBaja()
+  );
 
   private readonly usarBloqueoSuperadministrador = true;
   private bloqueoEdicion: BloqueoEdicionCuenta | null = null;
@@ -100,6 +113,8 @@ export class CuentasSuperadmin implements OnInit, OnDestroy {
 
       cuenta.id === this.cuentaParaSuspenderId() ||
 
+      cuenta.id === this.cuentaParaBajaId() ||
+
       [
         cuenta.nombre,
         cuenta.apellidos ?? '',
@@ -114,13 +129,13 @@ export class CuentasSuperadmin implements OnInit, OnDestroy {
   prepararSuspension(cuenta: CuentaSuperadmin): void {
     if (
       this.cargando() ||
-      this.suspendiendo() ||
+      this.cambiandoEstadoCuenta() ||
       cuenta.rol !== 'administrador' ||
       cuenta.estado !== 'activa'
     ) {
       return;
     }
-
+    this.cancelarBaja();
     this.motivoSuspension.set('');
     this.errorSuspension.set('');
     this.cuentaParaSuspenderId.set(cuenta.id);
@@ -136,7 +151,7 @@ export class CuentasSuperadmin implements OnInit, OnDestroy {
     if (
       this.cuentaParaSuspenderId() !== cuenta.id ||
       this.cargando() ||
-      this.suspendiendo()
+      this.cambiandoEstadoCuenta()
     ) {
       return;
     }
@@ -212,14 +227,23 @@ export class CuentasSuperadmin implements OnInit, OnDestroy {
     }
   }
   
-  // Reactivar desde el listado y actualizar la fila cuando Nest lo confirme
-  async reactivarCuenta(cuenta: CuentaSuperadmin): Promise<void> {
+  
+  // Reactivar desde el listado y actualizar la fila cuando Nest lo confirme.
+  // Recuperar una cuenta de baja usa una ruta distinta y comparte la actualización del listado.
+  async reactivarCuenta(
+    cuenta: CuentaSuperadmin,
+    accion: 'reactivar' | 'recuperar' = 'reactivar'
+  ): Promise<void> {
+    const esRecuperacion = accion === 'recuperar';
+    const estadoEsperado = esRecuperacion ? 'baja' : 'suspendida';
+    const operacion = esRecuperacion ? 'recuperación' : 'reactivación';
+
     if (
       this.cargando() ||
-      this.suspendiendo() ||
-      this.reactivandoCuentaId() !== null ||
+      this.cambiandoEstadoCuenta() ||
+      (esRecuperacion && this.guardandoEdicion()) ||
       cuenta.rol !== 'administrador' ||
-      cuenta.estado !== 'suspendida'
+      cuenta.estado !== estadoEsperado
     ) {
       return;
     }
@@ -237,7 +261,7 @@ export class CuentasSuperadmin implements OnInit, OnDestroy {
       }
 
       const respuesta = await fetch(
-        `${configuracionBackend.url}/cuentas/superadmin/cuentas/${encodeURIComponent(cuenta.id)}/reactivar`,
+        `${configuracionBackend.url}/cuentas/superadmin/cuentas/${encodeURIComponent(cuenta.id)}/${accion}`,
         {
           method: 'PATCH',
           headers: {
@@ -249,8 +273,8 @@ export class CuentasSuperadmin implements OnInit, OnDestroy {
       if (!respuesta.ok) {
         this.mensajeError.set(
           respuesta.status === 409
-            ? 'La cuenta ya no está suspendida. Actualiza el listado.'
-            : 'No se ha podido reactivar esta cuenta.'
+            ? 'El estado de la cuenta ha cambiado. Actualiza el listado.'
+            : `No se ha podido ${accion} esta cuenta.`
         );
         return;
       }
@@ -258,7 +282,7 @@ export class CuentasSuperadmin implements OnInit, OnDestroy {
       const resultado: { estado: string } = await respuesta.json();
 
       if (resultado.estado !== 'activa') {
-        this.mensajeError.set('El servidor no ha confirmado la reactivación.');
+        this.mensajeError.set(`El servidor no ha confirmado la ${operacion}.`);
         return;
       }
 
@@ -269,16 +293,121 @@ export class CuentasSuperadmin implements OnInit, OnDestroy {
           : actual
       ));
 
-      this.mensajeGuardado.set(`Se ha reactivado la cuenta de ${cuenta.correo}.`);
+      const resultadoAccion = esRecuperacion ? 'recuperado' : 'reactivado';
+      this.mensajeGuardado.set(`Se ha ${resultadoAccion} la cuenta de ${cuenta.correo}.`);
     } catch {
       this.mensajeError.set(
-        'No se ha podido confirmar la reactivación. Vuelve a intentarlo.'
+        `No se ha podido confirmar la ${operacion}. Vuelve a intentarlo.`
       );
     } finally {
       this.reactivandoCuentaId.set(null);
     }
   }
+
   
+  // El servidor vuelve a comprobar el rol y el estado antes de aplicar la baja
+  puedeDarDeBaja(cuenta: CuentaSuperadmin): boolean {
+    return cuenta.rol === 'administrador' &&
+      (cuenta.estado === 'activa' || cuenta.estado === 'suspendida');
+  }
+
+  prepararBaja(cuenta: CuentaSuperadmin): void {
+    if (
+      this.cargando() ||
+      this.cambiandoEstadoCuenta() ||
+      !this.puedeDarDeBaja(cuenta)
+    ) {
+      return;
+    }
+
+    // Dejar abierta una sola confirmación de cambio de estado
+    this.cancelarSuspension();
+    this.errorBaja.set('');
+    this.cuentaParaBajaId.set(cuenta.id);
+  }
+
+  cancelarBaja(): void {
+    if (!this.dandoDeBaja()) {
+      this.cuentaParaBajaId.set(null);
+    }
+  }
+
+  async confirmarBaja(cuenta: CuentaSuperadmin): Promise<void> {
+    if (
+      this.cuentaParaBajaId() !== cuenta.id ||
+      this.cargando() ||
+      this.cambiandoEstadoCuenta() ||
+      !this.puedeDarDeBaja(cuenta)
+    ) {
+      return;
+    }
+
+    this.dandoDeBaja.set(true);
+    this.errorBaja.set('');
+    this.mensajeGuardado.set('');
+
+    try {
+      const token = await this.autenticacion.obtenerTokenAcceso();
+
+      if (!token) {
+        this.errorBaja.set('Tu sesión ha caducado. Vuelve a iniciar sesión.');
+        return;
+      }
+
+      const respuesta = await fetch(
+        `${configuracionBackend.url}/cuentas/superadmin/cuentas/${encodeURIComponent(cuenta.id)}/baja`,
+        {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+
+      if (!respuesta.ok) {
+        // Mostrar el motivo del conflicto, incluída una activación en curso
+        const error: { message?: unknown } | null =
+          await respuesta.json().catch(() => null);
+
+        this.errorBaja.set(
+          respuesta.status === 409 && typeof error?.message === 'string'
+            ? error.message
+            : 'No se ha podido dar de baja esta cuenta.'
+        );
+        return;
+      }
+
+      const resultado: { estado: string } = await respuesta.json();
+
+      if (resultado.estado !== 'baja') {
+        this.errorBaja.set('El servidor no ha confirmado la baja.');
+        return;
+      }
+
+      // Conservar el nombre y el correo en el listado y retirar los apellidos que eran opcionales
+      this.cuentas.update(cuentas => cuentas.map(actual =>
+        actual.id === cuenta.id
+          ? { ...actual, estado: resultado.estado, apellidos: null }
+          : actual
+      ));
+
+      if (this.cuentaEnEdicionId() === cuenta.id) {
+        // Nest ya ha invalidado el bloqueo de la edición al confirmar la baja
+        this.bloqueoEdicion = null;
+        this.cancelarEdicion();
+        this.mensajeError.set('');
+      }
+
+      this.cuentaParaBajaId.set(null);
+      this.mensajeGuardado.set(`Se ha dado de baja la cuenta de ${cuenta.correo}.`);
+    } catch {
+      this.errorBaja.set(
+        'No se ha podido confirmar la baja. Vuelve a intentarlo.'
+      );
+    } finally {
+      this.dandoDeBaja.set(false);
+    }
+  }
   
   // Iniciar la edición de una única fila
   async iniciarEdicion(cuenta: CuentaSuperadmin): Promise<void> {
@@ -286,10 +415,10 @@ export class CuentasSuperadmin implements OnInit, OnDestroy {
       this.cargando() ||
       this.solicitandoBloqueo() ||
       this.guardandoEdicion() ||
-      
       cuenta.estado === 'suspendida' ||
+      cuenta.estado === 'baja' ||
       (this.suspendiendo() && this.cuentaParaSuspenderId() === cuenta.id) ||
-
+      (this.dandoDeBaja() && this.cuentaParaBajaId() === cuenta.id) ||
       this.cuentaEnEdicionId() !== null
     ) {
       return;
@@ -307,12 +436,14 @@ export class CuentasSuperadmin implements OnInit, OnDestroy {
       const { datos: bloqueo, error, conflicto } =
         await this.autenticacion.adquirirBloqueoSuperadministrador(cuenta.id);
 
-        if (
-          this.componenteDestruido ||
-          this.cuentas().some(actual =>
-            actual.id === cuenta.id && actual.estado === 'suspendida'
-          )
-        ) {
+      // La cuenta puede haber cambiado de estado mientras se solicitaba el bloqueo.
+      if (
+        this.componenteDestruido ||
+        this.cuentas().some(actual =>
+          actual.id === cuenta.id &&
+          (actual.estado === 'suspendida' || actual.estado === 'baja')
+        )
+      ) {
         if (bloqueo) {
           void this.autenticacion.liberarBloqueoSuperadministrador(
             cuenta.id,
@@ -347,8 +478,6 @@ export class CuentasSuperadmin implements OnInit, OnDestroy {
     } finally {
       this.solicitandoBloqueo.set(false);
     }
-
-    
   }
 
   private abrirEdicion(cuenta: CuentaSuperadmin): void {
@@ -396,6 +525,7 @@ export class CuentasSuperadmin implements OnInit, OnDestroy {
       !this.previsualizando() &&
       !!this.borradorCuenta()?.nombre.trim() &&
       !(this.suspendiendo() && this.cuentaParaSuspenderId() === this.cuentaEnEdicionId()) &&
+      !(this.dandoDeBaja() && this.cuentaParaBajaId() === this.cuentaEnEdicionId()) &&
       this.hayCambios(); 
      /* && !this.correoModificado();*/
   }
@@ -448,7 +578,11 @@ export class CuentasSuperadmin implements OnInit, OnDestroy {
       // Reflejar los datos guardados conservando el estado actual de la fila
       this.cuentas.update(cuentas => cuentas.map(cuenta =>
         cuenta.id === cuentaId
-          ? { ...cuenta, nombre, apellidos: apellidos || null }
+          ? {
+              ...cuenta,
+              nombre,
+              apellidos: cuenta.estado === 'baja' ? null : apellidos || null
+          }
           : cuenta
       ));
 
@@ -663,9 +797,8 @@ export class CuentasSuperadmin implements OnInit, OnDestroy {
 
     if (
       this.cargando() ||
-      this.suspendiendo() ||
+      this.cambiandoEstadoCuenta() ||
       this.solicitandoBloqueo() ||
-      this.reactivandoCuentaId() !== null ||
       this.cuentaEnEdicionId() !== null
     ) {
       return;

@@ -1,0 +1,164 @@
+// Hay estilos compartidos para todo el panel.
+// Aquí se definen los estilos específicos de gestión de usuarios rol superadministradores.
+
+.superadministradores {
+
+    &__herramientas {
+        display: flex;
+        flex-direction: column;
+        gap: var(--espacio-md);
+        margin-block: var(--espacio-md);
+    }
+
+    // Formulario para invitar nuevos superadministradores
+    &__formulario {
+        display: flex;
+        flex-direction: column;
+        gap: var(--espacio-md);
+        max-width: 32rem;
+        margin-top: var(--espacio-md);
+    }
+
+    &__campo {
+        display: flex;
+        flex-direction: column;
+        gap: var(--espacio-xs);
+
+        label {
+            font-weight: 500;
+            color: var(--color-principal);
+        }
+
+        input {
+            width: 100%;
+            min-height: 3rem;
+            padding: var(--espacio-sm) var(--espacio-md);
+
+            border: 1px solid var(--color-boton-borde);
+            border-radius: var(--radio-campo);
+
+            background: var(--color-superficie);
+            color: var(--color-principal);
+            font: inherit;
+        }
+    }
+}
+
+// ---------------------------------------------------------
+// Tabla mobile first: cada usuario se muestra como ficha
+// ---------------------------------------------------------
+
+.tabla-superadministradores {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+
+    thead {
+        display: none;
+    }
+
+    tbody,
+    tr {
+        display: block;
+    }
+
+    tr {
+        margin-bottom: var(--espacio-md);
+        padding: var(--espacio-sm);
+
+        border: 1px solid var(--color-boton-borde);
+        border-radius: var(--radio-campo);
+
+        background: var(--color-superficie);
+    }
+
+    td {
+        display: grid;
+        grid-template-columns: minmax(6.5rem, 35%) minmax(0, 1fr);
+        gap: var(--espacio-sm);
+
+        padding: var(--espacio-sm);
+        border-bottom: 1px solid var(--color-boton-borde);
+
+        color: var(--color-principal);
+        overflow-wrap: anywhere;
+    }
+
+    td::before {
+        content: attr(data-etiqueta);
+        font-weight: 600;
+    }
+
+    td:last-child {
+        border-bottom: 0;
+    }
+}
+
+
+// ---------------------------------------------------------
+// Tablet
+// ---------------------------------------------------------
+
+@media (min-width: 48rem) {
+
+    .superadministradores {
+
+        &__herramientas {
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+        }
+    }
+}
+
+
+// ---------------------------------------------------------
+// Desktop: presentación de tabla
+// ---------------------------------------------------------
+
+@media (min-width: 72rem) {
+
+    .tabla-superadministradores {
+
+        thead {
+            display: table-header-group;
+        }
+
+        tbody {
+            display: table-row-group;
+        }
+
+        tr {
+            display: table-row;
+            margin: 0;
+            padding: 0;
+            border: 0;
+            border-radius: 0;
+            background: transparent;
+        }
+
+        th,
+        td {
+            padding: var(--espacio-md);
+            border-bottom: 1px solid var(--color-boton-borde);
+            vertical-align: middle;
+        }
+
+        th {
+            color: var(--color-principal);
+            font-weight: 600;
+        }
+
+        td {
+            display: table-cell;
+        }
+
+        td::before {
+            content: none;
+        }
+
+        tbody tr:hover {
+            background: var(--color-fondo);
+        }
+    }
+}

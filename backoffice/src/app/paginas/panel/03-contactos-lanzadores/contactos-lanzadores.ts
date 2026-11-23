@@ -44,6 +44,41 @@ export class ContactosLanzadores implements OnInit {
     vistaActual = signal<VistaLanzadores>('listado');
 
     lanzadores = signal<AsignacionLanzador[]>([]);
+
+
+    // Búsqueda de lanzadores por nombre, correo o estado
+    filtroBusqueda = signal('');
+
+    lanzadoresFiltrados = computed(() => {
+        const texto = this.normalizarBusqueda(this.filtroBusqueda());
+
+        if (!texto) {
+            return this.lanzadores();
+        }
+
+        return this.lanzadores().filter(lanzador =>
+            [
+                lanzador.nombre,
+                lanzador.correo,
+                this.nombreEstado(lanzador.estado),
+                lanzador.estado === 'aceptada' && !lanzador.habilitada
+                    ? 'No habilitada'
+                    : ''
+            ].some(valor =>
+                this.normalizarBusqueda(valor).includes(texto)
+            )
+        );
+    });
+
+    // Ignorar mayúsculas y acentos en la búsqueda
+    private normalizarBusqueda(valor: string): string {
+        return valor
+            .trim()
+            .toLowerCase()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '');
+    }
+
     datosConectados = signal(false);
 
     correoTitular = signal('');

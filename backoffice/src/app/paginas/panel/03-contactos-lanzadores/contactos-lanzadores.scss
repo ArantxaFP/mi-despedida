@@ -229,3 +229,55 @@
         transition: none;
     }
 }
+
+
+// Buscador y filtro de lanzadores (mobile first)
+.lanzadores__buscador {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+
+    max-width: 34rem;
+    margin: 1.25rem 0 0.75rem;
+
+    label {
+        font-weight: 600;
+    }
+
+    input {
+        width: 100%;
+        min-height: 2.75rem;
+        padding: 0.65rem 0.85rem;
+
+        font: inherit;
+        color: inherit;
+        background: transparent;
+
+        border: 1px solid var(--color-boton-borde, #9ca3af);
+        border-radius: 0.6rem;
+        box-sizing: border-box;
+    }
+}
+
+.lanzadores__filtro-aplicado {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+
+    margin: 0.75rem 0 1.25rem;
+
+    p {
+        margin: 0;
+        overflow-wrap: anywhere;
+    }
+}
+
+@media (min-width: 768px) {
+    .lanzadores__filtro-aplicado {
+        flex-direction: row;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+}

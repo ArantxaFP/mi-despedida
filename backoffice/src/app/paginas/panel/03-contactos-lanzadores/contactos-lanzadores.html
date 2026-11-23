@@ -83,6 +83,52 @@
 
         </button>
 
+        <!-- BUSCADOR DE LANZADORES -->
+        @if (datosConectados() && lanzadores().length > 0) {
+
+        <div class="lanzadores__buscador">
+
+            <label for="buscar-lanzadores">
+                Buscar lanzadores
+            </label>
+
+            <input id="buscar-lanzadores" type="search" placeholder="Nombre, correo o estado" [value]="filtroBusqueda()"
+                (input)="filtroBusqueda.set(busquedaLanzadores.value)" #busquedaLanzadores>
+
+        </div>
+
+        <!-- FILTRO ACTIVO Y RESULTADOS BUSCADOR DE LANZADORES-->
+        @if (filtroBusqueda().trim()) {
+
+        <div class="lanzadores__filtro-aplicado">
+
+            <p>
+                Filtro aplicado:
+                <strong>{{ filtroBusqueda().trim() }}</strong>
+            </p>
+
+            <p role="status">
+                Mostrando
+                <strong>{{ lanzadoresFiltrados().length }}</strong>
+                de
+                <strong>{{ lanzadores().length }}</strong>
+                lanzadores
+            </p>
+
+            <button type="button" class="panel__boton" (click)="filtroBusqueda.set('')"
+                aria-label="Quitar filtro y mostrar todos los lanzadores">
+
+                <span aria-hidden="true">✕</span>
+                Quitar filtro
+
+            </button>
+
+        </div>
+
+        }
+
+        }
+
         @if (!datosConectados()) {
 
         @if (cargandoLanzadores()) {
@@ -100,6 +146,13 @@
 
         <p>
             Todavía no has invitado a ninguna persona como lanzadora.
+        </p>
+
+        } @else if (lanzadoresFiltrados().length === 0) {
+
+        <p class="lanzadores__aviso" role="status">
+            No se han encontrado lanzadores que coincidan con esta búsqueda.
+            Puedes quitar el filtro para volver a verlos todos.
         </p>
 
         } @else {
@@ -124,7 +177,7 @@
                 </thead>
 
                 <tbody>
-                    @for (lanzador of lanzadores(); track lanzador.id) {
+                    @for (lanzador of lanzadoresFiltrados(); track lanzador.id) {
 
                     <tr>
                         <td>{{ lanzador.nombre }}</td>
@@ -195,7 +248,7 @@
         <!-- Tabla mobile -->
         <div class="lanzadores__fichas">
 
-            @for (lanzador of lanzadores(); track lanzador.id) {
+            @for (lanzador of lanzadoresFiltrados(); track lanzador.id) {
 
             <article class="lanzadores__ficha">
 

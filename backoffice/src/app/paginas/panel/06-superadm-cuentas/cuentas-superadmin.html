@@ -41,6 +41,40 @@
 
         </div>
 
+        <!-- INFORMACIÓN DEL FILTRO DE BÚSQUEDA -->
+        @if (filtro().trim()) {
+
+        <div class="cuentas-superadmin__filtro-aplicado">
+
+            <div class="cuentas-superadmin__filtro-informacion">
+
+                <p>
+                    Filtro aplicado:
+                    <strong>{{ filtro().trim() }}</strong>
+                </p>
+
+                <p role="status">
+                    Mostrando
+                    <strong>{{ cuentasFiltradas().length }}</strong>
+                    de
+                    <strong>{{ cuentas().length }}</strong>
+                    cuentas
+                </p>
+
+            </div>
+
+            <button type="button" class="cuentas-superadmin__quitar-filtro" (click)="filtro.set('')"
+                aria-label="Quitar filtro de búsqueda y mostrar todas las cuentas">
+
+                <span aria-hidden="true">✕</span>
+                Quitar filtro
+
+            </button>
+
+        </div>
+
+        }
+
         <div class="panel-pagina__tabla-responsive">
 
             <table class="tabla-cuentas">
@@ -99,14 +133,14 @@
 
                         <!-- AUDITORÍA: consulta cuenta individual de solo lectura -->
                         <td>
-                        <button type="button" class="panel__boton"
-                        [routerLink]="['/superadmin/cuentas', cuenta.id, 'auditoria']"
-                        [disabled]="cargando() || solicitandoBloqueo() || guardandoEdicion() || cambiandoEstadoCuenta()"
-                        [attr.aria-label]="'Ver la auditoría de ' + cuenta.correo">
-                        Ver
-                        </button>
+                            <button type="button" class="panel__boton"
+                                [routerLink]="['/superadmin/cuentas', cuenta.id, 'auditoria']"
+                                [disabled]="cargando() || solicitandoBloqueo() || guardandoEdicion() || cambiandoEstadoCuenta()"
+                                [attr.aria-label]="'Ver la auditoría de ' + cuenta.correo">
+                                Ver
+                            </button>
                         </td>
-            
+
                         <!-- ACCIONES -->
                         <td>
 
@@ -137,8 +171,7 @@
 
                                 } @else {
 
-                                <button type="button" class="panel__boton" (click)="iniciarEdicion(cuenta)" 
-                                [disabled]="cargando() || guardandoEdicion() || solicitandoBloqueo()
+                                <button type="button" class="panel__boton" (click)="iniciarEdicion(cuenta)" [disabled]="cargando() || guardandoEdicion() || solicitandoBloqueo()
                                 || cuentaEnEdicionId() !== null
                                 || cuenta.estado === 'suspendida' || cuenta.estado === 'baja'
                                 || (suspendiendo() && cuentaParaSuspenderId() === cuenta.id)
@@ -177,63 +210,61 @@
                                         Cancelar suspensión
                                     </button>
                                 </form>
-                               
+
                                 } @else if (cuenta.rol === 'administrador' && cuenta.estado === 'activa') {
-                                
+
                                 <button type="button" class="panel__boton" (click)="prepararSuspension(cuenta)"
                                     [disabled]="cargando() || cambiandoEstadoCuenta()">
                                     Suspender
                                 </button>
 
                                 } @else if (cuenta.rol === 'administrador' && cuenta.estado === 'suspendida') {
-                                
-                                    <!-- La reactivación aparece solo cuando la cuenta está suspendida -->
+
+                                <!-- La reactivación aparece solo cuando la cuenta está suspendida -->
                                 <button type="button" class="panel__boton" (click)="reactivarCuenta(cuenta)"
                                     [disabled]="cargando() || cambiandoEstadoCuenta()">
                                     {{ reactivandoCuentaId() === cuenta.id ? 'Reactivando...' : 'Reactivar' }}
                                 </button>
                                 } @else if (cuenta.rol === 'administrador' && cuenta.estado === 'baja') {
-                                
-                                    <!-- Recuperar el acceso de una cuenta dada de baja -->
+
+                                <!-- Recuperar el acceso de una cuenta dada de baja -->
                                 <button type="button" class="panel__boton"
                                     (click)="reactivarCuenta(cuenta, 'recuperar')"
                                     [disabled]="cargando() || cambiandoEstadoCuenta() || guardandoEdicion()">
                                     {{ reactivandoCuentaId() === cuenta.id ? 'Recuperando...' : 'Recuperar cuenta' }}
                                 </button>
                                 }
-                                
+
                                 <!-- Confirmar la baja mostrando la cuenta y los datos que se eliminarán -->
                                 @if (puedeDarDeBaja(cuenta)) {
-                                    @if (cuentaParaBajaId() === cuenta.id) {
-                                    <p>
-                                        Vas a dar de baja la cuenta de {{ cuenta.correo }}.
-                                        Sus contactos y mensajes se eliminarán de forma definitiva.
-                                        El nombre y el correo seguirán visibles en superadministración.
-                                    </p>
+                                @if (cuentaParaBajaId() === cuenta.id) {
+                                <p>
+                                    Vas a dar de baja la cuenta de {{ cuenta.correo }}.
+                                    Sus contactos y mensajes se eliminarán de forma definitiva.
+                                    El nombre y el correo seguirán visibles en superadministración.
+                                </p>
 
-                                    @if (errorBaja()) {
-                                    <p class="tabla-cuentas__mensaje" role="alert">
-                                        {{ errorBaja() }}
-                                    </p>
-                                    }
+                                @if (errorBaja()) {
+                                <p class="tabla-cuentas__mensaje" role="alert">
+                                    {{ errorBaja() }}
+                                </p>
+                                }
 
-                                    <button type="button" class="panel__boton"
-                                        (click)="confirmarBaja(cuenta)"
-                                        [disabled]="cargando() || cambiandoEstadoCuenta()">
-                                        {{ dandoDeBaja() ? 'Tramitando baja...' : 'Confirmar baja' }}
-                                    </button>
+                                <button type="button" class="panel__boton" (click)="confirmarBaja(cuenta)"
+                                    [disabled]="cargando() || cambiandoEstadoCuenta()">
+                                    {{ dandoDeBaja() ? 'Tramitando baja...' : 'Confirmar baja' }}
+                                </button>
 
-                                    <button type="button" class="panel__boton"
-                                        (click)="cancelarBaja()" [disabled]="dandoDeBaja()">
-                                        Cancelar baja
-                                    </button>
-                                    } @else {
-                                    <button type="button" class="panel__boton"
-                                        (click)="prepararBaja(cuenta)"
-                                        [disabled]="cargando() || cambiandoEstadoCuenta()">
-                                        Dar de baja
-                                    </button>
-                                    }
+                                <button type="button" class="panel__boton" (click)="cancelarBaja()"
+                                    [disabled]="dandoDeBaja()">
+                                    Cancelar baja
+                                </button>
+                                } @else {
+                                <button type="button" class="panel__boton" (click)="prepararBaja(cuenta)"
+                                    [disabled]="cargando() || cambiandoEstadoCuenta()">
+                                    Dar de baja
+                                </button>
+                                }
                                 }
                             </div>
 

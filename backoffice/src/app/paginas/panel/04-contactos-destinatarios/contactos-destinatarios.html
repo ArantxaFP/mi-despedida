@@ -22,6 +22,53 @@
             Añadir destinatario
         </button>
 
+        <!-- BUSCADOR DE DESTINATARIOS -->
+        @if (datosConectados() && contactos().length > 0) {
+
+        <div class="destinatarios__buscador">
+
+            <label for="buscar-destinatarios">
+                Buscar destinatarios
+            </label>
+
+            <input id="buscar-destinatarios" type="search" placeholder="Nombre o correo electrónico"
+                [value]="filtroBusqueda()" (input)="filtroBusqueda.set(busquedaDestinatarios.value)"
+                #busquedaDestinatarios>
+
+        </div>
+
+        <!-- FILTRO ACTIVO Y RESULTADOS DEL BUSCADOR DE DESTINATARIOS-->
+        @if (filtroBusqueda().trim()) {
+
+        <div class="destinatarios__filtro-aplicado">
+
+            <p>
+                Filtro aplicado:
+                <strong>{{ filtroBusqueda().trim() }}</strong>
+            </p>
+
+            <p role="status">
+                Mostrando
+                <strong>{{ contactosFiltrados().length }}</strong>
+                de
+                <strong>{{ contactos().length }}</strong>
+                destinatarios
+            </p>
+
+            <button type="button" class="panel__boton" (click)="filtroBusqueda.set('')"
+                aria-label="Quitar filtro y mostrar todos los destinatarios">
+
+                <span aria-hidden="true">✕</span>
+                Quitar filtro
+
+            </button>
+
+        </div>
+
+        }
+
+        }
+
         @if (!datosConectados()) {
 
         <p class="panel-pagina__mensaje" role="status">
@@ -34,6 +81,13 @@
 
         <p class="panel-pagina__mensaje">
             Todavía no has añadido ningún destinatario.
+        </p>
+
+        } @else if (contactosFiltrados().length === 0) {
+
+        <p class="panel-pagina__mensaje" role="status">
+            No se han encontrado destinatarios que coincidan con esta búsqueda.
+            Puedes quitar el filtro para volver a verlos todos.
         </p>
 
         } @else {
@@ -59,7 +113,7 @@
                 </thead>
 
                 <tbody>
-                    @for (contacto of contactos(); track contacto.id) {
+                    @for (contacto of contactosFiltrados(); track contacto.id) {
 
                     <tr>
                         <td>{{ contacto.nombre }}</td>
@@ -100,7 +154,7 @@
         <!-- FICHAS SOLO MOBILE -->
         <div class="destinatarios__fichas">
 
-            @for (contacto of contactos(); track contacto.id) {
+            @for (contacto of contactosFiltrados(); track contacto.id) {
 
             <article class="destinatarios__ficha">
                 <h3>{{ contacto.nombre }}</h3>

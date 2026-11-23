@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ContactosDestinatariosApi, ContactoDestinatario } from '../../../servicios/contactos-destinatarios-api';
 
@@ -19,6 +19,37 @@ export class ContactosDestinatarios implements OnInit {
 
     contactos = signal<ContactoDestinatario[]>([]);
     contactoSeleccionado = signal<ContactoDestinatario | null>(null);
+
+
+
+    // Búsqueda de destinatarios por nombre o correo
+    filtroBusqueda = signal('');
+
+    contactosFiltrados = computed(() => {
+        const texto = this.normalizarBusqueda(this.filtroBusqueda());
+
+        if (!texto) {
+            return this.contactos();
+        }
+
+        return this.contactos().filter(contacto =>
+            [
+                contacto.nombre,
+                contacto.correo
+            ].some(valor =>
+                this.normalizarBusqueda(valor).includes(texto)
+            )
+        );
+    });
+
+    // Ignorar mayúsculas y acentos durante la búsqueda
+    private normalizarBusqueda(valor: string): string {
+        return valor
+            .trim()
+            .toLowerCase()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '');
+    }
 
     cargando = signal(false);
     guardando = signal(false);

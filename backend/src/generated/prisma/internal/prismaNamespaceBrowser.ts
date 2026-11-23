@@ -649,6 +649,8 @@ export const Auditoria_operaciones_cuentasScalarFieldEnum = {
   id: 'id',
   cuenta_afectada_id: 'cuenta_afectada_id',
   actor_id: 'actor_id',
+  correo_cuenta_eliminada: 'correo_cuenta_eliminada',
+  correo_actor: 'correo_actor',
   rol_actor: 'rol_actor',
   accion: 'accion',
   resultado: 'resultado',

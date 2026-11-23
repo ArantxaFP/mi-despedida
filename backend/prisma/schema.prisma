@@ -745,6 +745,10 @@ model auditoria_operaciones_cuentas {
   cuenta_afectada_id String   @db.Uuid
   actor_id           String?  @db.Uuid
 
+  // Identificación de las eliminaciones definitivas de superadministradores
+  correo_cuenta_eliminada String? @db.VarChar(254)
+  correo_actor            String? @db.VarChar(254)
+  
   // Información de la operación
   rol_actor          String   @db.VarChar(20)
   accion             String   @db.VarChar(60)

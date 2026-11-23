@@ -438,7 +438,8 @@ export class CuentasService {
                 where: { id: actorId },
                 select: {
                     rol: true,
-                    estado: true
+                    estado: true,
+                    correo: true
                 }
             });
 
@@ -503,6 +504,8 @@ export class CuentasService {
                     actor_id: actorId,
                     rol_actor: 'superadministrador',
                     accion: 'iniciar_eliminacion_superadmin',
+                    correo_cuenta_eliminada: objetivo.correo,
+                    correo_actor: actor.correo,
                     resultado: 'realizada',
                     campos_modificados: [
                         'cuenta',
@@ -517,7 +520,11 @@ export class CuentasService {
                 where: { id: objetivo.id }
             });
 
-            return objetivo;
+            return {
+                ...objetivo,
+                correoActor: actor.correo
+            };
+
         });
 
         const cliente = this.supabaseService.obtenerCliente();
@@ -583,6 +590,8 @@ export class CuentasService {
                     rol_actor: 'superadministrador',
                     accion: 'eliminar_superadministrador',
                     resultado: 'error',
+                    correo_cuenta_eliminada: cuenta.correo,
+                    correo_actor: cuenta.correoActor,
                     campos_modificados: [],
                     motivo_codigo: 'error_eliminacion_auth'
                 }
@@ -602,6 +611,8 @@ export class CuentasService {
                 rol_actor: 'superadministrador',
                 accion: 'eliminar_superadministrador',
                 resultado: 'realizada',
+                correo_cuenta_eliminada: cuenta.correo,
+                correo_actor: cuenta.correoActor,
                 campos_modificados: [
                     'cuenta',
                     'identidad_auth'

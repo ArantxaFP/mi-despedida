@@ -40,6 +40,8 @@ export type Auditoria_operaciones_cuentasMinAggregateOutputType = {
   id: string | null
   cuenta_afectada_id: string | null
   actor_id: string | null
+  correo_cuenta_eliminada: string | null
+  correo_actor: string | null
   rol_actor: string | null
   accion: string | null
   resultado: string | null
@@ -53,6 +55,8 @@ export type Auditoria_operaciones_cuentasMaxAggregateOutputType = {
   id: string | null
   cuenta_afectada_id: string | null
   actor_id: string | null
+  correo_cuenta_eliminada: string | null
+  correo_actor: string | null
   rol_actor: string | null
   accion: string | null
   resultado: string | null
@@ -66,6 +70,8 @@ export type Auditoria_operaciones_cuentasCountAggregateOutputType = {
   id: number
   cuenta_afectada_id: number
   actor_id: number
+  correo_cuenta_eliminada: number
+  correo_actor: number
   rol_actor: number
   accion: number
   resultado: number
@@ -92,6 +98,8 @@ export type Auditoria_operaciones_cuentasMinAggregateInputType = {
   id?: true
   cuenta_afectada_id?: true
   actor_id?: true
+  correo_cuenta_eliminada?: true
+  correo_actor?: true
   rol_actor?: true
   accion?: true
   resultado?: true
@@ -105,6 +113,8 @@ export type Auditoria_operaciones_cuentasMaxAggregateInputType = {
   id?: true
   cuenta_afectada_id?: true
   actor_id?: true
+  correo_cuenta_eliminada?: true
+  correo_actor?: true
   rol_actor?: true
   accion?: true
   resultado?: true
@@ -118,6 +128,8 @@ export type Auditoria_operaciones_cuentasCountAggregateInputType = {
   id?: true
   cuenta_afectada_id?: true
   actor_id?: true
+  correo_cuenta_eliminada?: true
+  correo_actor?: true
   rol_actor?: true
   accion?: true
   resultado?: true
@@ -219,6 +231,8 @@ export type Auditoria_operaciones_cuentasGroupByOutputType = {
   id: string
   cuenta_afectada_id: string
   actor_id: string | null
+  correo_cuenta_eliminada: string | null
+  correo_actor: string | null
   rol_actor: string
   accion: string
   resultado: string
@@ -256,6 +270,8 @@ export type auditoria_operaciones_cuentasWhereInput = {
   id?: Prisma.UuidFilter<"auditoria_operaciones_cuentas"> | string
   cuenta_afectada_id?: Prisma.UuidFilter<"auditoria_operaciones_cuentas"> | string
   actor_id?: Prisma.UuidNullableFilter<"auditoria_operaciones_cuentas"> | string | null
+  correo_cuenta_eliminada?: Prisma.StringNullableFilter<"auditoria_operaciones_cuentas"> | string | null
+  correo_actor?: Prisma.StringNullableFilter<"auditoria_operaciones_cuentas"> | string | null
   rol_actor?: Prisma.StringFilter<"auditoria_operaciones_cuentas"> | string
   accion?: Prisma.StringFilter<"auditoria_operaciones_cuentas"> | string
   resultado?: Prisma.StringFilter<"auditoria_operaciones_cuentas"> | string
@@ -270,6 +286,8 @@ export type auditoria_operaciones_cuentasOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   cuenta_afectada_id?: Prisma.SortOrder
   actor_id?: Prisma.SortOrderInput | Prisma.SortOrder
+  correo_cuenta_eliminada?: Prisma.SortOrderInput | Prisma.SortOrder
+  correo_actor?: Prisma.SortOrderInput | Prisma.SortOrder
   rol_actor?: Prisma.SortOrder
   accion?: Prisma.SortOrder
   resultado?: Prisma.SortOrder
@@ -287,6 +305,8 @@ export type auditoria_operaciones_cuentasWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.auditoria_operaciones_cuentasWhereInput | Prisma.auditoria_operaciones_cuentasWhereInput[]
   cuenta_afectada_id?: Prisma.UuidFilter<"auditoria_operaciones_cuentas"> | string
   actor_id?: Prisma.UuidNullableFilter<"auditoria_operaciones_cuentas"> | string | null
+  correo_cuenta_eliminada?: Prisma.StringNullableFilter<"auditoria_operaciones_cuentas"> | string | null
+  correo_actor?: Prisma.StringNullableFilter<"auditoria_operaciones_cuentas"> | string | null
   rol_actor?: Prisma.StringFilter<"auditoria_operaciones_cuentas"> | string
   accion?: Prisma.StringFilter<"auditoria_operaciones_cuentas"> | string
   resultado?: Prisma.StringFilter<"auditoria_operaciones_cuentas"> | string
@@ -301,6 +321,8 @@ export type auditoria_operaciones_cuentasOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   cuenta_afectada_id?: Prisma.SortOrder
   actor_id?: Prisma.SortOrderInput | Prisma.SortOrder
+  correo_cuenta_eliminada?: Prisma.SortOrderInput | Prisma.SortOrder
+  correo_actor?: Prisma.SortOrderInput | Prisma.SortOrder
   rol_actor?: Prisma.SortOrder
   accion?: Prisma.SortOrder
   resultado?: Prisma.SortOrder
@@ -323,6 +345,8 @@ export type auditoria_operaciones_cuentasScalarWhereWithAggregatesInput = {
   id?: Prisma.UuidWithAggregatesFilter<"auditoria_operaciones_cuentas"> | string
   cuenta_afectada_id?: Prisma.UuidWithAggregatesFilter<"auditoria_operaciones_cuentas"> | string
   actor_id?: Prisma.UuidNullableWithAggregatesFilter<"auditoria_operaciones_cuentas"> | string | null
+  correo_cuenta_eliminada?: Prisma.StringNullableWithAggregatesFilter<"auditoria_operaciones_cuentas"> | string | null
+  correo_actor?: Prisma.StringNullableWithAggregatesFilter<"auditoria_operaciones_cuentas"> | string | null
   rol_actor?: Prisma.StringWithAggregatesFilter<"auditoria_operaciones_cuentas"> | string
   accion?: Prisma.StringWithAggregatesFilter<"auditoria_operaciones_cuentas"> | string
   resultado?: Prisma.StringWithAggregatesFilter<"auditoria_operaciones_cuentas"> | string
@@ -337,6 +361,8 @@ export type auditoria_operaciones_cuentasCreateInput = {
   id?: string
   cuenta_afectada_id: string
   actor_id?: string | null
+  correo_cuenta_eliminada?: string | null
+  correo_actor?: string | null
   rol_actor: string
   accion: string
   resultado: string
@@ -351,6 +377,8 @@ export type auditoria_operaciones_cuentasUncheckedCreateInput = {
   id?: string
   cuenta_afectada_id: string
   actor_id?: string | null
+  correo_cuenta_eliminada?: string | null
+  correo_actor?: string | null
   rol_actor: string
   accion: string
   resultado: string
@@ -365,6 +393,8 @@ export type auditoria_operaciones_cuentasUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   cuenta_afectada_id?: Prisma.StringFieldUpdateOperationsInput | string
   actor_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  correo_cuenta_eliminada?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  correo_actor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rol_actor?: Prisma.StringFieldUpdateOperationsInput | string
   accion?: Prisma.StringFieldUpdateOperationsInput | string
   resultado?: Prisma.StringFieldUpdateOperationsInput | string
@@ -379,6 +409,8 @@ export type auditoria_operaciones_cuentasUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   cuenta_afectada_id?: Prisma.StringFieldUpdateOperationsInput | string
   actor_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  correo_cuenta_eliminada?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  correo_actor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rol_actor?: Prisma.StringFieldUpdateOperationsInput | string
   accion?: Prisma.StringFieldUpdateOperationsInput | string
   resultado?: Prisma.StringFieldUpdateOperationsInput | string
@@ -393,6 +425,8 @@ export type auditoria_operaciones_cuentasCreateManyInput = {
   id?: string
   cuenta_afectada_id: string
   actor_id?: string | null
+  correo_cuenta_eliminada?: string | null
+  correo_actor?: string | null
   rol_actor: string
   accion: string
   resultado: string
@@ -407,6 +441,8 @@ export type auditoria_operaciones_cuentasUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   cuenta_afectada_id?: Prisma.StringFieldUpdateOperationsInput | string
   actor_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  correo_cuenta_eliminada?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  correo_actor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rol_actor?: Prisma.StringFieldUpdateOperationsInput | string
   accion?: Prisma.StringFieldUpdateOperationsInput | string
   resultado?: Prisma.StringFieldUpdateOperationsInput | string
@@ -421,6 +457,8 @@ export type auditoria_operaciones_cuentasUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   cuenta_afectada_id?: Prisma.StringFieldUpdateOperationsInput | string
   actor_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  correo_cuenta_eliminada?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  correo_actor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rol_actor?: Prisma.StringFieldUpdateOperationsInput | string
   accion?: Prisma.StringFieldUpdateOperationsInput | string
   resultado?: Prisma.StringFieldUpdateOperationsInput | string
@@ -435,6 +473,8 @@ export type auditoria_operaciones_cuentasCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   cuenta_afectada_id?: Prisma.SortOrder
   actor_id?: Prisma.SortOrder
+  correo_cuenta_eliminada?: Prisma.SortOrder
+  correo_actor?: Prisma.SortOrder
   rol_actor?: Prisma.SortOrder
   accion?: Prisma.SortOrder
   resultado?: Prisma.SortOrder
@@ -454,6 +494,8 @@ export type auditoria_operaciones_cuentasMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   cuenta_afectada_id?: Prisma.SortOrder
   actor_id?: Prisma.SortOrder
+  correo_cuenta_eliminada?: Prisma.SortOrder
+  correo_actor?: Prisma.SortOrder
   rol_actor?: Prisma.SortOrder
   accion?: Prisma.SortOrder
   resultado?: Prisma.SortOrder
@@ -467,6 +509,8 @@ export type auditoria_operaciones_cuentasMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   cuenta_afectada_id?: Prisma.SortOrder
   actor_id?: Prisma.SortOrder
+  correo_cuenta_eliminada?: Prisma.SortOrder
+  correo_actor?: Prisma.SortOrder
   rol_actor?: Prisma.SortOrder
   accion?: Prisma.SortOrder
   resultado?: Prisma.SortOrder
@@ -496,6 +540,8 @@ export type auditoria_operaciones_cuentasSelect<ExtArgs extends runtime.Types.Ex
   id?: boolean
   cuenta_afectada_id?: boolean
   actor_id?: boolean
+  correo_cuenta_eliminada?: boolean
+  correo_actor?: boolean
   rol_actor?: boolean
   accion?: boolean
   resultado?: boolean
@@ -510,6 +556,8 @@ export type auditoria_operaciones_cuentasSelectCreateManyAndReturn<ExtArgs exten
   id?: boolean
   cuenta_afectada_id?: boolean
   actor_id?: boolean
+  correo_cuenta_eliminada?: boolean
+  correo_actor?: boolean
   rol_actor?: boolean
   accion?: boolean
   resultado?: boolean
@@ -524,6 +572,8 @@ export type auditoria_operaciones_cuentasSelectUpdateManyAndReturn<ExtArgs exten
   id?: boolean
   cuenta_afectada_id?: boolean
   actor_id?: boolean
+  correo_cuenta_eliminada?: boolean
+  correo_actor?: boolean
   rol_actor?: boolean
   accion?: boolean
   resultado?: boolean
@@ -538,6 +588,8 @@ export type auditoria_operaciones_cuentasSelectScalar = {
   id?: boolean
   cuenta_afectada_id?: boolean
   actor_id?: boolean
+  correo_cuenta_eliminada?: boolean
+  correo_actor?: boolean
   rol_actor?: boolean
   accion?: boolean
   resultado?: boolean
@@ -548,7 +600,7 @@ export type auditoria_operaciones_cuentasSelectScalar = {
   fecha_evento?: boolean
 }
 
-export type auditoria_operaciones_cuentasOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "cuenta_afectada_id" | "actor_id" | "rol_actor" | "accion" | "resultado" | "campos_modificados" | "motivo_codigo" | "version_anterior" | "version_nueva" | "fecha_evento", ExtArgs["result"]["auditoria_operaciones_cuentas"]>
+export type auditoria_operaciones_cuentasOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "cuenta_afectada_id" | "actor_id" | "correo_cuenta_eliminada" | "correo_actor" | "rol_actor" | "accion" | "resultado" | "campos_modificados" | "motivo_codigo" | "version_anterior" | "version_nueva" | "fecha_evento", ExtArgs["result"]["auditoria_operaciones_cuentas"]>
 
 export type $auditoria_operaciones_cuentasPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "auditoria_operaciones_cuentas"
@@ -557,6 +609,8 @@ export type $auditoria_operaciones_cuentasPayload<ExtArgs extends runtime.Types.
     id: string
     cuenta_afectada_id: string
     actor_id: string | null
+    correo_cuenta_eliminada: string | null
+    correo_actor: string | null
     rol_actor: string
     accion: string
     resultado: string
@@ -991,6 +1045,8 @@ export interface auditoria_operaciones_cuentasFieldRefs {
   readonly id: Prisma.FieldRef<"auditoria_operaciones_cuentas", 'String'>
   readonly cuenta_afectada_id: Prisma.FieldRef<"auditoria_operaciones_cuentas", 'String'>
   readonly actor_id: Prisma.FieldRef<"auditoria_operaciones_cuentas", 'String'>
+  readonly correo_cuenta_eliminada: Prisma.FieldRef<"auditoria_operaciones_cuentas", 'String'>
+  readonly correo_actor: Prisma.FieldRef<"auditoria_operaciones_cuentas", 'String'>
   readonly rol_actor: Prisma.FieldRef<"auditoria_operaciones_cuentas", 'String'>
   readonly accion: Prisma.FieldRef<"auditoria_operaciones_cuentas", 'String'>
   readonly resultado: Prisma.FieldRef<"auditoria_operaciones_cuentas", 'String'>

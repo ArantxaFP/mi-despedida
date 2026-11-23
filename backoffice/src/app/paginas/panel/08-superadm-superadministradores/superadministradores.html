@@ -303,4 +303,162 @@
 
     </section>
 
+    <!-- HISTÓRICO DE SUPERADMINISTRADORES -->
+    <section class="panel-pagina__bloque" aria-labelledby="titulo-historico-superadministradores">
+
+        <h2 id="titulo-historico-superadministradores">
+            Histórico de superadministradores
+        </h2>
+
+        <p class="panel-pagina__texto-secundario">
+            Consulta las eliminaciones de cuentas de superadministradores,
+            quién las realizó, cuándo se produjeron y su resultado.
+            Este histórico es de solo lectura.
+        </p>
+
+        <!-- HERRAMIENTAS DEL HISTÓRICO -->
+        <div class="superadministradores__herramientas">
+
+            <p>
+                Eliminaciones registradas:
+                <strong>{{ totalHistorico() }}</strong>
+            </p>
+
+            <button type="button" class="panel__boton" (click)="actualizarHistoricoSuperadministradores()"
+                [disabled]="cargandoHistorico()">
+
+                {{ cargandoHistorico()
+                ? 'Actualizando...'
+                : 'Actualizar histórico' }}
+
+            </button>
+
+        </div>
+
+        <!-- ESTADOS DE CARGA Y ERROR -->
+        @if (cargandoHistorico()) {
+        <p class="panel-pagina__mensaje" role="status">
+            Cargando histórico de superadministradores...
+        </p>
+        }
+
+        @if (errorHistorico()) {
+        <p class="panel__aviso-error" role="alert">
+            {{ errorHistorico() }}
+        </p>
+        }
+
+        @if (!cargandoHistorico() && !errorHistorico() && totalHistorico() === 0) {
+        <p class="panel-pagina__mensaje" role="status">
+            Todavía no hay eliminaciones de superadministradores registradas.
+        </p>
+        }
+
+        <!-- TABLA DEL HISTÓRICO DE SUPERADMINISTRADORES -->
+        @if (!errorHistorico() && historicoSuperadministradores().length > 0) {
+
+        <div class="panel-pagina__tabla-responsive">
+
+            <table class="tabla-superadministradores">
+
+                <thead>
+                    <tr>
+                        <th scope="col">Fecha</th>
+                        <th scope="col">Superadministrador eliminado</th>
+                        <th scope="col">Eliminado por</th>
+                        <th scope="col">Resultado</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    @for (registro of historicoSuperadministradores(); track registro.id) {
+
+                    <tr>
+
+                        <td data-etiqueta="Fecha">
+                            {{ registro.fecha_evento | date:'dd/MM/yyyy HH:mm' }}
+                        </td>
+
+                        <td data-etiqueta="Superadministrador eliminado">
+
+                            @if (registro.correo_cuenta_eliminada) {
+                            {{ registro.correo_cuenta_eliminada }}
+                            } @else {
+                            <span>Correo no registrado</span>
+                            <small>
+                                ID: {{ registro.cuenta_afectada_id }}
+                            </small>
+                            }
+
+                        </td>
+
+                        <td data-etiqueta="Eliminado por">
+
+                            @if (registro.correo_actor) {
+                            {{ registro.correo_actor }}
+                            } @else {
+                            <span>Correo no registrado</span>
+                            @if (registro.actor_id) {
+                            <small>
+                                ID: {{ registro.actor_id }}
+                            </small>
+                            }
+                            }
+
+                        </td>
+
+                        <td data-etiqueta="Resultado">
+
+                            @if (registro.resultado === 'realizada') {
+                            Completada
+                            } @else {
+                            Con incidencias
+                            }
+
+                        </td>
+
+                    </tr>
+
+                    }
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+        }
+
+        <!-- PAGINACIÓN DEL HISTÓRICO -->
+        @if (totalPaginasHistorico() > 1) {
+
+        <div class="superadministradores__acciones">
+
+            <button type="button" class="panel__boton" (click)="cambiarPaginaHistorico(paginaHistorico() - 1)"
+                [disabled]="cargandoHistorico() || paginaHistorico() <= 1">
+
+                Anterior
+
+            </button>
+
+            <span>
+                Página {{ paginaHistorico() }}
+                de {{ totalPaginasHistorico() }}
+            </span>
+
+            <button type="button" class="panel__boton" (click)="cambiarPaginaHistorico(paginaHistorico() + 1)"
+                [disabled]="cargandoHistorico() ||
+                    paginaHistorico() >= totalPaginasHistorico()">
+
+                Siguiente
+
+            </button>
+
+        </div>
+
+        }
+
+    </section>
+
 </section>

@@ -14,6 +14,25 @@ interface UsuarioSuperadministrador {
     fecha_registro: string;
 }
 
+// Registro histórico de eliminación de un superadministrador que proviene de auditoría
+interface RegistroHistoricoSuperadministrador {
+    id: string;
+    cuenta_afectada_id: string;
+    actor_id: string | null;
+    correo_cuenta_eliminada: string | null;
+    correo_actor: string | null;
+    resultado: string;
+    fecha_evento: string;
+}
+
+interface RespuestaHistoricoSuperadministradores {
+    registros: RegistroHistoricoSuperadministrador[];
+    total: number;
+    pagina: number;
+    tamanoPagina: number;
+    totalPaginas: number;
+}
+
 @Component({
     selector: 'app-superadministradores',
     standalone: true,
@@ -29,6 +48,16 @@ export class Superadministradores implements OnInit {
 
     readonly cargando = signal(false);
     readonly error = signal('');
+
+
+    // Estado del histórico de superadministradores
+    readonly historicoSuperadministradores = signal<RegistroHistoricoSuperadministrador[]>([]);
+    readonly cargandoHistorico = signal(false);
+    readonly errorHistorico = signal('');
+    readonly paginaHistorico = signal(1);
+    readonly totalHistorico = signal(0);
+    readonly totalPaginasHistorico = signal(1);
+
 
     // Estado de las acciones de gestión de superadministradores
     readonly usuarioActualId = signal<string | null>(null);
@@ -67,6 +96,8 @@ export class Superadministradores implements OnInit {
         }
 
         await this.actualizarSuperadministradores();
+
+        await this.actualizarHistoricoSuperadministradores();
     }
 
 
@@ -427,6 +458,7 @@ export class Superadministradores implements OnInit {
                 `Se ha eliminado la cuenta ${usuario.correo}.`
             );
 
+
         } catch (error) {
             this.errorAccion.set(
                 error instanceof Error
@@ -439,8 +471,85 @@ export class Superadministradores implements OnInit {
 
             // Consultar el estado real tras la operación, también si ha habido fallo entre Postgre y Supabase
             await this.actualizarSuperadministradores();
+
+            // Actualizar también el histórico para mostrar posibles incidencias
+            await this.actualizarHistoricoSuperadministradores(1);
+        }
+
+
+    }
+
+
+    // Consultar el histórico de eliminaciones definitivas de superadministradores
+    async actualizarHistoricoSuperadministradores(
+        pagina = this.paginaHistorico()
+    ): Promise<void> {
+
+        if (this.cargandoHistorico()) {
+            return;
+        }
+
+        this.cargandoHistorico.set(true);
+        this.errorHistorico.set('');
+
+        try {
+            const token =
+                await this.autenticacion.obtenerTokenAcceso();
+
+            if (!token) {
+                throw new Error('Tu sesión ha caducado.');
+            }
+
+            const respuesta = await fetch(
+                `${configuracionBackend.url}/cuentas/superadmin/superadministradores/historico?pagina=${pagina}`,
+                {
+                    method: 'GET',
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    },
+                    cache: 'no-store'
+                }
+            );
+
+            if (!respuesta.ok) {
+                throw new Error(
+                    'No se ha podido consultar el histórico de superadministradores.'
+                );
+            }
+
+            const datos: RespuestaHistoricoSuperadministradores =
+                await respuesta.json();
+
+            this.historicoSuperadministradores.set(datos.registros);
+            this.paginaHistorico.set(datos.pagina);
+            this.totalHistorico.set(datos.total);
+            this.totalPaginasHistorico.set(datos.totalPaginas);
+
+        } catch (error) {
+            this.errorHistorico.set(
+                error instanceof Error
+                    ? error.message
+                    : 'No se ha podido cargar el histórico.'
+            );
+
+        } finally {
+            this.cargandoHistorico.set(false);
         }
     }
 
+    // Cambiar de página sin recargar el resto del panel
+    async cambiarPaginaHistorico(pagina: number): Promise<void> {
+
+        if (
+            this.cargandoHistorico() ||
+            pagina < 1 ||
+            pagina > this.totalPaginasHistorico() ||
+            pagina === this.paginaHistorico()
+        ) {
+            return;
+        }
+
+        await this.actualizarHistoricoSuperadministradores(pagina);
+    }
 
 }

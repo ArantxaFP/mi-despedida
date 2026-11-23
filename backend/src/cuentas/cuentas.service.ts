@@ -158,7 +158,7 @@ export class CuentasService {
         return usuario.id;
     }
 
-   
+
     // Consultar la auditoría individual de una cuenta desde el listado de cuentas del panel
     async listarAuditoriaCuentaSuperadministrador(
         autorizacion: string | undefined,
@@ -657,6 +657,71 @@ export class CuentasService {
                 { correo: 'asc' }
             ]
         });
+    }
+
+    // Histórico de eliminaciones de superadministradores
+    async listarHistoricoSuperadministradores(
+        autorizacion: string | undefined,
+        pagina = 1
+    ) {
+        await this.comprobarSuperadministradorActivo(autorizacion);
+
+        const tamanoPagina = 25;
+        const desplazamiento = (pagina - 1) * tamanoPagina;
+
+        if (
+            !Number.isSafeInteger(pagina) ||
+            pagina < 1 ||
+            !Number.isSafeInteger(desplazamiento)
+        ) {
+            throw new BadRequestException(
+                'La página solicitada no es válida.'
+            );
+        }
+
+        // Consultar únicamente los resultados de las eliminaciones.
+        const filtro = {
+            accion: 'eliminar_superadministrador'
+        };
+
+        const [total, registros] = await Promise.all([
+            this.prisma.auditoria_operaciones_cuentas.count({
+                where: filtro
+            }),
+
+            this.prisma.auditoria_operaciones_cuentas.findMany({
+                where: filtro,
+                skip: desplazamiento,
+                take: tamanoPagina,
+
+                orderBy: [
+                    { fecha_evento: 'desc' },
+                    { id: 'desc' }
+                ],
+
+                // Devolver los datos necesarios para el histórico
+                select: {
+                    id: true,
+                    cuenta_afectada_id: true,
+                    actor_id: true,
+                    correo_cuenta_eliminada: true,
+                    correo_actor: true,
+                    resultado: true,
+                    fecha_evento: true
+                }
+            })
+        ]);
+
+        return {
+            registros,
+            total,
+            pagina,
+            tamanoPagina,
+            totalPaginas: Math.max(
+                1,
+                Math.ceil(total / tamanoPagina)
+            )
+        };
     }
 
 

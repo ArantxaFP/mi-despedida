@@ -58,6 +58,26 @@ export class CuentasController {
 
 
 
+    // Consultar el histórico de superadministradores eliminados
+    @Get('superadmin/superadministradores/historico')
+    async listarHistoricoSuperadministradores(
+        @Headers('authorization')
+        autorizacion: string | undefined,
+
+        @Query(
+            'pagina',
+            new DefaultValuePipe(1),
+            ParseIntPipe
+        )
+        pagina: number
+    ) {
+        return this.cuentasService.listarHistoricoSuperadministradores(
+            autorizacion,
+            pagina
+        );
+    }
+
+
     // Reenviar invitación pendiente de superadministrador
     @Post('superadmin/superadministradores/:id/reenviar-invitacion')
     async reenviarInvitacionSuperadministrador(

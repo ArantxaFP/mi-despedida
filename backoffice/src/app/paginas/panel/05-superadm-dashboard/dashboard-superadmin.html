@@ -1,8 +1,30 @@
-<div class="panel-pagina">
+<section class="panel-pagina dashboard-superadmin"
+    aria-labelledby="titulo-dashboard-superadmin">
+
+    <!-- GRADIENTE COMPARTIDO PARA LOS ICONOS -->
+    <svg class="dashboard-superadmin__gradiente-svg"
+        width="0" height="0" aria-hidden="true" focusable="false">
+
+        <defs>
+            <linearGradient id="dashboardSuperadminGradiente"
+                gradientUnits="userSpaceOnUse"
+                x1="0" y1="0" x2="48" y2="48">
+
+                <stop offset="0%" stop-color="#59f0dd" />
+                <stop offset="45%" stop-color="#ffa38c" />
+                <stop offset="100%" stop-color="#476987" />
+
+            </linearGradient>
+        </defs>
+    </svg>
+
 
     <!-- CABECERA -->
-    <section class="panel-pagina__bloque panel-pagina__cabecera">
-        <h1>
+    <header class="panel-pagina__bloque
+                   panel-pagina__cabecera
+                   dashboard-superadmin__bienvenida">
+
+        <h1 id="titulo-dashboard-superadmin">
             @if (nombreSaludo()) {
                 Hola, usuario SuperAdministrador {{ nombreSaludo() }}.
             } @else {
@@ -13,12 +35,17 @@
         <p>
             Gestiona las cuentas de usuario y supervisa el funcionamiento de Mi Despedida.
         </p>
-    </section>
+
+    </header>
+
 
     <!-- RESUMEN -->
-    <section class="panel-pagina__bloque">
+    <section class="panel-pagina__bloque"
+        aria-labelledby="titulo-gestion-plataforma">
 
-        <h2>Gestión de la plataforma</h2>
+        <h2 id="titulo-gestion-plataforma">
+            Gestión de la plataforma
+        </h2>
 
         <p>
             Desde este panel se pueden consultar las cuentas, los lanzadores, las activaciones, los envíos, las
@@ -27,6 +54,189 @@
             pueden consultar desde Supabase.
         </p>
 
+        <p>
+            Consulta el estado general de la aplicación Mi Despedida y accede a las funciones de gestión de la plataforma.
+        </p>
+
     </section>
 
-</div>
+    <!-- CABECERA DEL RESUMEN -->
+    <div class="dashboard-superadmin__resumen-cabecera">
+
+        <h2>Resumen de la plataforma</h2>
+
+        <button type="button"
+            class="panel__boton"
+            (click)="actualizarResumen()"
+            [disabled]="cargandoResumen()">
+
+            {{ cargandoResumen()
+                ? 'Actualizando...'
+                : 'Actualizar datos' }}
+
+        </button>
+
+    </div>
+
+    @if (cargandoResumen()) {
+
+        <p class="panel-pagina__mensaje" role="status">
+            Consultando el estado de la plataforma...
+        </p>
+
+    } @else if (errorResumen()) {
+
+        <p class="panel__aviso-error" role="alert">
+            {{ errorResumen() }}
+        </p>
+
+    } @else if (resumen(); as datos) {
+
+        <!-- TARJETAS PRINCIPALES -->
+        <div class="panel-pagina__cuadricula
+                    dashboard-superadmin__cuadricula">
+
+            <!-- CUENTAS DE ADMINISTRADORES ACTIVAS -->
+            <article class="panel-pagina__bloque
+                            dashboard-superadmin__tarjeta"
+                aria-labelledby="titulo-cuentas-activas">
+
+                <div class="dashboard-superadmin__tarjeta-cabecera">
+
+                    <div class="dashboard-superadmin__icono"
+                        aria-hidden="true">
+
+                        <svg viewBox="0 0 48 48">
+                            <circle cx="18" cy="15" r="7" />
+                            <path d="M5 39v-4c0-8 6-13 13-13s13 5 13 13v4H5Z" />
+                            <path d="M32 10a7 7 0 0 1 0 14" />
+                            <path d="M34 27c6 1 9 5 9 12h-8" />
+                        </svg>
+
+                    </div>
+
+                    <h2 id="titulo-cuentas-activas">
+                        Cuentas activas
+                    </h2>
+
+                </div>
+
+                <p class="panel-pagina__texto-secundario
+                          dashboard-superadmin__descripcion">
+                    Cuentas de administradores titulares que están actualmente activas.
+                </p>
+
+                <div class="dashboard-superadmin__valor">
+                    {{ datos.cuentasActivas }}
+                </div>
+
+                <a class="panel__boton
+                          dashboard-superadmin__enlace"
+                    routerLink="/superadmin/cuentas">
+
+                    Gestionar cuentas
+
+                    <span aria-hidden="true">→</span>
+                </a>
+
+            </article>
+
+
+            <!-- SUPERADMINISTRADORES ACTIVOS -->
+            <article class="panel-pagina__bloque
+                            dashboard-superadmin__tarjeta"
+                aria-labelledby="titulo-superadmins-activos">
+
+                <div class="dashboard-superadmin__tarjeta-cabecera">
+
+                    <div class="dashboard-superadmin__icono"
+                        aria-hidden="true">
+
+                        <svg viewBox="0 0 48 48">
+                            <path d="M24 4L40 10V22
+                                     C40 32 33 39 24 44
+                                     C15 39 8 32 8 22V10Z" />
+
+                            <path d="M16 24L22 30L33 18" />
+                        </svg>
+
+                    </div>
+
+                    <h2 id="titulo-superadmins-activos">
+                        Superadministradores activos
+                    </h2>
+
+                </div>
+
+                <p class="panel-pagina__texto-secundario
+                          dashboard-superadmin__descripcion">
+                    Usuarios con permisos de superadministración y acceso habilitado.
+                </p>
+
+                <div class="dashboard-superadmin__valor">
+                    {{ datos.superadministradoresActivos }}
+                </div>
+
+                <a class="panel__boton
+                          dashboard-superadmin__enlace"
+                    routerLink="/superadmin/superadministradores"
+                    fragment="titulo-crear-superadministrador">
+
+                    Crear superadministrador
+
+                    <span aria-hidden="true">→</span>
+                </a>
+
+            </article>
+
+
+            <!-- HISTÓRICO DE SUPERADMINISTRADORES -->
+            <article class="panel-pagina__bloque
+                            dashboard-superadmin__tarjeta"
+                aria-labelledby="titulo-superadmins-eliminados">
+
+                <div class="dashboard-superadmin__tarjeta-cabecera">
+
+                    <div class="dashboard-superadmin__icono"
+                        aria-hidden="true">
+
+                        <svg viewBox="0 0 48 48">
+                            <path d="M8 15A18 18 0 1 1 6 26" />
+                            <path d="M8 5V15H18" />
+                            <path d="M24 13V25L32 30" />
+                        </svg>
+
+                    </div>
+
+                    <h2 id="titulo-superadmins-eliminados">
+                        Superadministradores eliminados
+                    </h2>
+
+                </div>
+
+                <p class="panel-pagina__texto-secundario
+                          dashboard-superadmin__descripcion">
+                    Eliminaciones definitivas completadas y registradas en la auditoría.
+                </p>
+
+                <div class="dashboard-superadmin__valor">
+                    {{ datos.superadministradoresEliminados }}
+                </div>
+
+                <a class="panel__boton
+                          dashboard-superadmin__enlace"
+                    routerLink="/superadmin/superadministradores"
+                    fragment="titulo-historico-superadministradores">
+
+                    Consultar histórico
+
+                    <span aria-hidden="true">→</span>
+                </a>
+
+            </article>
+
+        </div>
+
+    }
+
+</section>

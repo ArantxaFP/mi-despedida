@@ -1,0 +1,188 @@
+// Hay estilos compartidos para todos el panel
+// Aquí los estilos específicos de la página de dashboard de superadmins
+
+.dashboard-superadmin {
+
+    // Gradiente SVG para los iconos
+    &__gradiente-svg {
+        position: absolute;
+        width: 0;
+        height: 0;
+        overflow: hidden;
+        pointer-events: none;
+    }
+
+    // Bienvenida
+    &__bienvenida {
+        p {
+            max-width: 65rem;
+        }
+    }
+
+    // Cabecera del resumen
+    &__resumen-cabecera {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--espacio-md);
+
+        h2 {
+            margin: 0;
+        }
+    }
+
+    // Cuadrícula de tarjetas
+    &__cuadricula {
+        > * {
+            min-width: 0;
+        }
+    }
+
+    // Tarjetas
+    &__tarjeta {
+        display: flex;
+        flex-direction: column;
+        gap: var(--espacio-md);
+
+        min-width: 0;
+    }
+
+    // Cabecera de cada tarjeta
+    &__tarjeta-cabecera {
+        display: flex;
+        align-items: center;
+        gap: var(--espacio-md);
+
+        width: 100%;
+        min-width: 0;
+
+        h2 {
+            flex: 1;
+            min-width: 0;
+
+            margin: 0;
+            font-size: var(--texto-h3);
+            line-height: 1.4;
+            overflow-wrap: break-word;
+        }
+    }
+
+    // Iconos
+    &__icono {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+
+        flex: 0 0 60px;
+
+        width: 60px;
+        height: 60px;
+
+        svg {
+            display: block;
+
+            width: 60px;
+            height: 60px;
+
+            fill: none;
+            stroke: #59f0dd;
+            stroke-width: 1.8;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+
+            transition: stroke 0.3s ease;
+        }
+    }
+
+    // Gradiente al interactuar con las tarjetas
+    &__tarjeta:hover &__icono svg,
+    &__tarjeta:focus-within &__icono svg {
+        stroke: url(#dashboardSuperadminGradiente);
+    }
+
+    // Descripción
+    &__descripcion {
+        width: 100%;
+        min-width: 0;
+
+        margin: 0;
+    }
+
+    // Cifras principales
+    &__valor {
+        margin-block: var(--espacio-sm);
+
+        font-size: clamp(2.8rem, 6vw, 4rem);
+        font-weight: 500;
+        line-height: 1;
+        font-variant-numeric: tabular-nums;
+    }
+
+    // Accesos rápidos
+    &__enlace {
+        justify-content: space-between;
+        gap: var(--espacio-md);
+
+        width: 100%;
+        margin-top: auto;
+
+        overflow-wrap: anywhere;
+
+        span {
+            flex: 0 0 auto;
+            font-size: 1.35rem;
+            line-height: 1;
+        }
+    }
+}
+
+
+// --------------------------------------------------
+// TABLET
+// --------------------------------------------------
+
+@media (min-width: 48rem) {
+
+    .dashboard-superadmin {
+
+        &__cuadricula {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        &__resumen-cabecera {
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+        }
+    }
+}
+
+
+// --------------------------------------------------
+// ESCRITORIO
+// --------------------------------------------------
+
+@media (min-width: 80rem) {
+
+    .dashboard-superadmin {
+
+        &__cuadricula {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+    }
+}
+
+
+// --------------------------------------------------
+// ACCESIBILIDAD
+// --------------------------------------------------
+
+@media (prefers-reduced-motion: reduce) {
+
+    .dashboard-superadmin {
+
+        &__icono svg {
+            transition: none;
+        }
+    }
+}

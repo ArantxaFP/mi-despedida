@@ -658,6 +658,51 @@ export class CuentasService {
             ]
         });
     }
+    
+
+    // Resumen estadístico del panel de superadministración
+    async obtenerResumenSuperadministracion(
+        autorizacion?: string
+    ) {
+        await this.comprobarSuperadministradorActivo(autorizacion);
+
+        const [
+            cuentasActivas,
+            superadministradoresActivos,
+            superadministradoresEliminados
+        ] = await Promise.all([
+
+            // Cuentas de administradores titulares activas
+            this.prisma.cuentas.count({
+                where: {
+                    rol: 'administrador',
+                    estado: 'activa'
+                }
+            }),
+
+            // Superadministradores con acceso habilitado
+            this.prisma.cuentas.count({
+                where: {
+                    rol: 'superadministrador',
+                    estado: 'activa'
+                }
+            }),
+
+            // Eliminaciones definitivas completadas
+            this.prisma.auditoria_operaciones_cuentas.count({
+                where: {
+                    accion: 'eliminar_superadministrador',
+                    resultado: 'realizada'
+                }
+            })
+        ]);
+
+        return {
+            cuentasActivas,
+            superadministradoresActivos,
+            superadministradoresEliminados
+        };
+    }
 
     // Histórico de eliminaciones de superadministradores
     async listarHistoricoSuperadministradores(

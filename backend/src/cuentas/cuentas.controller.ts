@@ -58,6 +58,17 @@ export class CuentasController {
 
 
 
+    // Resumen de la plataforma para el inicio dashboard de superadministración
+    @Get('superadmin/resumen')
+    async obtenerResumenSuperadministracion(
+        @Headers('authorization')
+        autorizacion?: string
+    ) {
+       return this.cuentasService.obtenerResumenSuperadministracion(
+            autorizacion
+        );
+    }
+    
     // Consultar el histórico de superadministradores eliminados
     @Get('superadmin/superadministradores/historico')
     async listarHistoricoSuperadministradores(

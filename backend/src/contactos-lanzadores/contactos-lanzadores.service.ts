@@ -1,6 +1,6 @@
-import { BadRequestException, ConflictException, Injectable, InternalServerErrorException, Logger, ServiceUnavailableException, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, InternalServerErrorException, Logger, ServiceUnavailableException, NotFoundException, ForbiddenException, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { randomBytes, createHash } from 'node:crypto';
+import { randomBytes, createHash, createHmac, randomInt, randomUUID, timingSafeEqual } from 'node:crypto';
 import { PrismaService } from '../prisma/prisma.service';
 import { bloquearCuentaActiva, bloquearCuentas } from '../cuentas/bloqueo-cuentas';
 import { CorreoService } from '../correo/correo.service';
@@ -614,6 +614,31 @@ export class ContactosLanzadoresService {
                 );
             }
 
+            // Invalidar los enlaces de acceso pendientes de esta autorización.
+            // Los enlaces de otras asignaciones del lanzador no se modifican.
+            await tx.credenciales_acceso_lanzadores.updateMany({
+                where: {
+                    asignacion_id: asignacionId,
+                    utilizado_en: null,
+                    invalidado_en: null
+                },
+                data: {
+                    invalidado_en: ahora
+                }
+            });
+
+            // Revocar inmediatamente las sesiones de esta autorización.
+            // No se revocan las sesiones pertenecientes a otras asignaciones.
+            await tx.sesiones_lanzadores.updateMany({
+                where: {
+                    asignacion_id: asignacionId,
+                    revocado_en: null
+                },
+                data: {
+                    revocado_en: ahora
+                }
+            });
+
             // Registrar el cambio sin eliminar la asignación
             await tx.historial_asignaciones.create({
                 data: {
@@ -795,6 +820,520 @@ export class ContactosLanzadoresService {
             });
         }
     }
+
+
+
+    // --------------------------------------------------
+    // 8. Acceso temporal de lanzadores, separado de invitaciones
+    // --------------------------------------------------
+
+    private readonly respuestaAccesoGenerica = {
+        mensaje: 'Si el correo tiene autorizaciones vigentes, recibirás un correo con las instrucciones.'
+    };
+
+    private readonly duracionCodigoAccesoMs = 10 * 60 * 1000;
+    private readonly duracionSeleccionMs = 10 * 60 * 1000;
+    private readonly duracionEnlaceAccesoMs = 7 * 24 * 60 * 60 * 1000;
+    private readonly duracionSesionMs = 60 * 60 * 1000;
+
+    private hashTokenAcceso(token: string): string {
+        return createHash('sha256').update(token).digest('hex');
+    }
+
+    private hashCodigoAcceso(credencialId: string, codigo: string): string {
+        const secreto = this.config.getOrThrow<string>('CODIGOS_VERIFICACION_SECRET');
+        if (!/^[a-f0-9]{64}$/i.test(secreto)) {
+            throw new InternalServerErrorException('Configuración de verificación incorrecta.');
+        }
+        return createHmac('sha256', Buffer.from(secreto, 'hex'))
+            .update(`acceso-lanzador:${credencialId}:${codigo}`)
+            .digest('hex');
+    }
+
+    private tokenValido(token: string | undefined): token is string {
+        return typeof token === 'string' && /^[a-f0-9]{64}$/.test(token);
+    }
+
+    // Se aplicará también a cada acción futura de solicitud y confirmación.
+    // No comprobar fecha_caducidad de una asignación aceptada.
+    // Esa fecha limita la invitación, no la autorización aceptada.
+    private async obtenerAutorizacionesHabilitadas(lanzadorId: string) {
+        const lanzador = await this.prisma.lanzadores.findUnique({
+            where: { id: lanzadorId },
+            select: { id: true, usuario_id: true }
+        });
+        if (!lanzador) return [];
+
+        // Una persona con cuenta propia suspendida, de baja o finalizada no puede eludir ese estado accediendo como lanzador
+        if (lanzador.usuario_id) {
+            const cuentaPropia = await this.prisma.cuentas.findUnique({
+                where: { id: lanzador.usuario_id },
+                select: { estado: true }
+            });
+            if (!cuentaPropia || cuentaPropia.estado !== 'activa') return [];
+        }
+
+        const asignaciones = await this.prisma.asignaciones_lanzadores.findMany({
+            where: { lanzador_id: lanzadorId, estado: 'aceptada' },
+            select: { id: true, administrador_id: true }
+        });
+        if (asignaciones.length === 0) return [];
+
+        const titulares = await this.prisma.cuentas.findMany({
+            where: {
+                id: { in: asignaciones.map(a => a.administrador_id) },
+                rol: 'administrador',
+                estado: 'activa'
+            },
+            select: { id: true, nombre: true, apellidos: true }
+        });
+        const titularesPorId = new Map(titulares.map(c => [c.id, c]));
+
+        return asignaciones.flatMap(asignacion => {
+            if (lanzador.usuario_id === asignacion.administrador_id) return [];
+            const titular = titularesPorId.get(asignacion.administrador_id);
+            return titular ? [{
+                asignacionId: asignacion.id,
+                administradorId: titular.id,
+                administradorNombre: `${titular.nombre} ${titular.apellidos ?? ''}`.trim()
+            }] : [];
+        });
+    }
+
+    // Petición pública: nunca revelar si el correo está registrado por tema de privacidad de datos
+    async solicitarAccesoComoLanzador(correo: string, origen?: string) {
+        const correoNormalizado = correo.trim().toLowerCase();
+        if (!/^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/.test(correoNormalizado)) {
+            throw new BadRequestException('Introduce un correo electrónico válido.');
+        }
+
+        // Si hay identidades duplicadas con el mismo correo, no elegir una arbitrariamente
+        const candidatos = await this.prisma.lanzadores.findMany({
+            where: { correo: correoNormalizado },
+            select: { id: true, correo: true, nombre: true },
+            take: 2
+        });
+        if (candidatos.length !== 1) return this.respuestaAccesoGenerica;
+        const lanzador = candidatos[0];
+
+        const autorizaciones = await this.obtenerAutorizacionesHabilitadas(lanzador.id);
+        if (autorizaciones.length === 0) return this.respuestaAccesoGenerica;
+
+        const ahora = new Date();
+        const esUnaAutorizacion = autorizaciones.length === 1;
+        const codigo = esUnaAutorizacion
+            ? null
+            : randomInt(0, 100_000_000).toString().padStart(8, '0');
+        const token = esUnaAutorizacion ? randomBytes(32).toString('hex') : null;
+        const credencialId = randomUUID();
+        const finalidad = esUnaAutorizacion ? 'acceso_titular' : 'verificacion_correo';
+        const caducaEn = new Date(ahora.getTime() + (
+            esUnaAutorizacion ? this.duracionEnlaceAccesoMs : this.duracionCodigoAccesoMs
+        ));
+
+        // Bloquear el registro del lanzador para serializar solicitudes concurrentes e impedir crear credenciales duplicadas
+        const emitida = await this.prisma.$transaction(async tx => {
+            await tx.$queryRaw`SELECT id FROM public.lanzadores WHERE id = ${lanzador.id}::uuid FOR UPDATE`;
+
+            // Contabilizar solo las credenciales que generan un envío de correo
+            const ultimaSolicitud = await tx.credenciales_acceso_lanzadores.findFirst({
+                where: {
+                    lanzador_id: lanzador.id,
+                    finalidad: {
+                        in: ['verificacion_correo', 'acceso_titular']
+                    }
+                },
+                orderBy: { creado_en: 'desc' },
+                select: { creado_en: true }
+            });
+
+            // Limitar los envíos solicitados durante la última hora
+            const solicitudesHora = await tx.credenciales_acceso_lanzadores.count({
+                where: {
+                    lanzador_id: lanzador.id,
+                    finalidad: {
+                        in: ['verificacion_correo', 'acceso_titular']
+                    },
+                    creado_en: {
+                        gte: new Date(ahora.getTime() - 60 * 60 * 1000)
+                    }
+                }
+            });
+
+
+            // Contar los intentos fallidos acumulados entre los códigos emitidos durante la última hora, aunque ya estén invalidados
+            const intentosUltimaHora =
+                await tx.credenciales_acceso_lanzadores.aggregate({
+                    where: {
+                        lanzador_id: lanzador.id,
+                        finalidad: 'verificacion_correo',
+                        creado_en: {
+                            gte: new Date(ahora.getTime() - 60 * 60 * 1000)
+                        }
+                    },
+                    _sum: {
+                        intentos_fallidos: true
+                    }
+                });
+
+            if (
+                solicitudesHora >= 3 ||
+                (intentosUltimaHora._sum.intentos_fallidos ?? 0) >= 7 ||
+                (
+                    ultimaSolicitud &&
+                    ultimaSolicitud.creado_en.getTime() >
+                    ahora.getTime() - 60_000
+                )
+            ) {
+                return false;
+            }
+
+
+            await tx.credenciales_acceso_lanzadores.updateMany({
+                where: {
+                    lanzador_id: lanzador.id,
+                    finalidad,
+                    utilizado_en: null,
+                    invalidado_en: null
+                },
+                data: { invalidado_en: ahora }
+            });
+
+            await tx.credenciales_acceso_lanzadores.create({
+                data: {
+                    id: credencialId,
+                    lanzador_id: lanzador.id,
+                    asignacion_id: esUnaAutorizacion
+                        ? autorizaciones[0].asignacionId : null,
+                    finalidad,
+                    codigo_hash: codigo ? this.hashCodigoAcceso(credencialId, codigo) : null,
+                    token_hash: token ? this.hashTokenAcceso(token) : null,
+                    creado_en: ahora,
+                    caduca_en: caducaEn
+                }
+            });
+            return true;
+        });
+        if (!emitida) return this.respuestaAccesoGenerica;
+
+        try {
+            if (esUnaAutorizacion && token) {
+                const enlace = new URL('/acceso-lanzador', obtenerUrlBackoffice(this.config, origen));
+                enlace.searchParams.set('token', token);
+                await this.correoService.enviarEnlaceAccesoLanzador(
+                    lanzador.correo, lanzador.nombre,
+                    autorizaciones[0].administradorNombre, enlace.toString()
+                );
+            } else if (codigo) {
+                await this.correoService.enviarCodigoAccesoLanzador(
+                    lanzador.correo, lanzador.nombre, codigo
+                );
+            }
+        } catch (error) {
+            // Brevo podría haber recibido la solicitud.
+            // Invalidar el secreto para impedir accesos con un envío incierto.
+            await this.prisma.credenciales_acceso_lanzadores.updateMany({
+                where: { id: credencialId, utilizado_en: null, invalidado_en: null },
+                data: { invalidado_en: new Date() }
+            });
+            this.logger.error('Error al enviar acceso de lanzador por Brevo',
+                error instanceof Error ? error.message : String(error));
+        }
+        return this.respuestaAccesoGenerica;
+    }
+
+    // Código de ocho dígitos que comprueba identidad para poder seleccionar un titular. 
+    // No crea todavía una sesión de actuación.
+    async verificarCodigoAccesoComoLanzador(correo: string, codigo: string) {
+        if (!/^\d{8}$/.test(codigo)) {
+            throw new BadRequestException('El código debe contener ocho dígitos.');
+        }
+        const candidatos = await this.prisma.lanzadores.findMany({
+            where: { correo: correo.trim().toLowerCase() },
+            select: { id: true },
+            take: 2
+        });
+        if (candidatos.length !== 1) {
+            throw new UnauthorizedException('Código incorrecto o caducado.');
+        }
+        const lanzador = candidatos[0];
+        const ahora = new Date();
+        let tokenSeleccion: string | null = null;
+
+        await this.prisma.$transaction(async tx => {
+            await tx.$queryRaw`SELECT id FROM public.lanzadores WHERE id = ${lanzador.id}::uuid FOR UPDATE`;
+
+            // Bloquear la verificación si se han acumulado siete fallos entre los códigos emitidos durante la última hora
+            const intentosUltimaHora =
+                await tx.credenciales_acceso_lanzadores.aggregate({
+                    where: {
+                        lanzador_id: lanzador.id,
+                        finalidad: 'verificacion_correo',
+                        creado_en: {
+                            gte: new Date(ahora.getTime() - 60 * 60 * 1000)
+                        }
+                    },
+                    _sum: {
+                        intentos_fallidos: true
+                    }
+                });
+
+            if ((intentosUltimaHora._sum.intentos_fallidos ?? 0) >= 7) {
+                throw new UnauthorizedException(
+                    'Código incorrecto o caducado.'
+                );
+            }
+
+            const credencial = await tx.credenciales_acceso_lanzadores.findFirst({
+                where: {
+                    lanzador_id: lanzador.id,
+                    finalidad: 'verificacion_correo',
+                    utilizado_en: null,
+                    invalidado_en: null
+                },
+                orderBy: { creado_en: 'desc' }
+            });
+            if (
+                !credencial || credencial.caduca_en <= ahora ||
+                credencial.intentos_fallidos >= 7 || !credencial.codigo_hash
+            ) throw new UnauthorizedException('Código incorrecto o caducado.');
+
+            const esperado = Buffer.from(credencial.codigo_hash, 'hex');
+            const recibido = Buffer.from(this.hashCodigoAcceso(credencial.id, codigo), 'hex');
+            if (esperado.length !== recibido.length || !timingSafeEqual(esperado, recibido)) {
+                const intentos = credencial.intentos_fallidos + 1;
+                await tx.credenciales_acceso_lanzadores.update({
+                    where: { id: credencial.id },
+                    data: {
+                        intentos_fallidos: intentos,
+                        ...(intentos >= 7 ? { invalidado_en: ahora } : {})
+                    }
+                });
+
+                return;
+            }
+
+            const resultado = await tx.credenciales_acceso_lanzadores.updateMany({
+                where: { id: credencial.id, utilizado_en: null, invalidado_en: null },
+                data: { utilizado_en: ahora, verificado_en: ahora }
+            });
+            if (resultado.count !== 1) return;
+
+            await tx.credenciales_acceso_lanzadores.updateMany({
+                where: {
+                    lanzador_id: lanzador.id,
+                    finalidad: 'seleccion_titular',
+                    utilizado_en: null,
+                    invalidado_en: null
+                },
+                data: { invalidado_en: ahora }
+            });
+            const nuevoToken = randomBytes(32).toString('hex');
+            await tx.credenciales_acceso_lanzadores.create({
+                data: {
+                    lanzador_id: lanzador.id,
+                    finalidad: 'seleccion_titular',
+                    token_hash: this.hashTokenAcceso(nuevoToken),
+                    creado_en: ahora,
+                    caduca_en: new Date(ahora.getTime() + this.duracionSeleccionMs)
+                }
+            });
+            tokenSeleccion = nuevoToken;
+        });
+
+        if (!tokenSeleccion) throw new UnauthorizedException('Código incorrecto o caducado.');
+        const autorizaciones = await this.obtenerAutorizacionesHabilitadas(lanzador.id);
+        if (autorizaciones.length === 0) {
+            throw new ForbiddenException('No hay autorizaciones disponibles.');
+        }
+        return { tokenSeleccion, administradores: autorizaciones };
+    }
+
+    // La selección solo autoriza emitir un nuevo enlace de un solo uso
+    async seleccionarAdministradorAccesoLanzador(tokenSeleccion: string, asignacionId: string) {
+        if (!this.tokenValido(tokenSeleccion)) {
+            throw new UnauthorizedException('La verificación ha caducado o no es válida.');
+        }
+        const credencial = await this.prisma.credenciales_acceso_lanzadores.findFirst({
+            where: {
+                token_hash: this.hashTokenAcceso(tokenSeleccion),
+                finalidad: 'seleccion_titular',
+                utilizado_en: null,
+                invalidado_en: null,
+                caduca_en: { gt: new Date() }
+            }
+        });
+        if (!credencial) throw new UnauthorizedException('La verificación ha caducado o no es válida.');
+        const habilitadas = await this.obtenerAutorizacionesHabilitadas(credencial.lanzador_id);
+        const seleccionada = habilitadas.find(a => a.asignacionId === asignacionId);
+        if (!seleccionada) throw new ForbiddenException('La autorización no está disponible.');
+
+        const nuevoToken = randomBytes(32).toString('hex');
+        const ahora = new Date();
+        const creado = await this.prisma.$transaction(async tx => {
+            await tx.$queryRaw`SELECT id FROM public.lanzadores WHERE id = ${credencial.lanzador_id}::uuid FOR UPDATE`;
+            const consumo = await tx.credenciales_acceso_lanzadores.updateMany({
+                where: {
+                    id: credencial.id, utilizado_en: null,
+                    invalidado_en: null, caduca_en: { gt: ahora }
+                },
+                data: { utilizado_en: ahora }
+            });
+            if (consumo.count !== 1) return false;
+            await tx.credenciales_acceso_lanzadores.updateMany({
+                where: {
+                    lanzador_id: credencial.lanzador_id,
+                    asignacion_id: asignacionId,
+                    finalidad: 'acceso_titular',
+                    utilizado_en: null,
+                    invalidado_en: null
+                },
+                data: { invalidado_en: ahora }
+            });
+            await tx.credenciales_acceso_lanzadores.create({
+                data: {
+                    lanzador_id: credencial.lanzador_id,
+                    asignacion_id: asignacionId,
+                    finalidad: 'acceso_titular',
+                    token_hash: this.hashTokenAcceso(nuevoToken),
+                    creado_en: ahora,
+                    caduca_en: new Date(ahora.getTime() + this.duracionEnlaceAccesoMs)
+                }
+            });
+            return true;
+        });
+        if (!creado) throw new UnauthorizedException('La verificación ya se ha utilizado.');
+
+        const lanzador = await this.prisma.lanzadores.findUniqueOrThrow({
+            where: { id: credencial.lanzador_id },
+            select: { correo: true, nombre: true }
+        });
+        try {
+            const enlace = new URL('/acceso-lanzador', obtenerUrlBackoffice(this.config));
+            enlace.searchParams.set('token', nuevoToken);
+            await this.correoService.enviarEnlaceAccesoLanzador(
+                lanzador.correo, lanzador.nombre,
+                seleccionada.administradorNombre, enlace.toString()
+            );
+        } catch (error) {
+            await this.prisma.credenciales_acceso_lanzadores.updateMany({
+                where: { token_hash: this.hashTokenAcceso(nuevoToken), invalidado_en: null, utilizado_en: null },
+                data: { invalidado_en: new Date() }
+            });
+            this.logger.error('No se pudo solicitar correo de enlace lanzador',
+                error instanceof Error ? error.message : String(error));
+            // No revelar más datos al navegador que el resultado genérico
+        }
+        return { mensaje: 'Si la autorización continúa vigente, recibirás un enlace de acceso.' };
+    }
+
+    // Canje de un enlace de un solo uso por una sesión
+    async canjearEnlaceAccesoLanzador(token: string) {
+        if (!this.tokenValido(token)) {
+            throw new UnauthorizedException('El enlace no es válido o ha caducado.');
+        }
+        const credencial = await this.prisma.credenciales_acceso_lanzadores.findFirst({
+            where: {
+                token_hash: this.hashTokenAcceso(token),
+                finalidad: 'acceso_titular',
+                invalidado_en: null,
+                utilizado_en: null,
+                caduca_en: { gt: new Date() }
+            }
+        });
+        if (!credencial?.asignacion_id) {
+            throw new UnauthorizedException('El enlace no es válido o ha caducado.');
+        }
+        const autorizaciones = await this.obtenerAutorizacionesHabilitadas(credencial.lanzador_id);
+        const vigente = autorizaciones.find(a => a.asignacionId === credencial.asignacion_id);
+        if (!vigente) throw new ForbiddenException('La autorización ya no está habilitada.');
+
+        const ahora = new Date();
+        const tokenSesion = randomBytes(32).toString('hex');
+        const nuevaSesion = await this.prisma.$transaction(async tx => {
+            await tx.$queryRaw`SELECT id FROM public.lanzadores WHERE id = ${credencial.lanzador_id}::uuid FOR UPDATE`;
+            // Una revocación concurrente debe tener preferencia
+            await tx.$queryRaw`SELECT id FROM public.asignaciones_lanzadores WHERE id = ${credencial.asignacion_id}::uuid FOR UPDATE`;
+            const asignacion = await tx.asignaciones_lanzadores.findFirst({
+                where: {
+                    id: credencial.asignacion_id!,
+                    lanzador_id: credencial.lanzador_id,
+                    estado: 'aceptada'
+                },
+                select: { id: true }
+            });
+            if (!asignacion) return false;
+
+            const consumo = await tx.credenciales_acceso_lanzadores.updateMany({
+                where: { id: credencial.id, utilizado_en: null, invalidado_en: null, caduca_en: { gt: ahora } },
+                data: { utilizado_en: ahora }
+            });
+            if (consumo.count !== 1) return false;
+
+            await tx.sesiones_lanzadores.updateMany({
+                where: { lanzador_id: credencial.lanzador_id, revocado_en: null },
+                data: { revocado_en: ahora }
+            });
+            await tx.sesiones_lanzadores.create({
+                data: {
+                    lanzador_id: credencial.lanzador_id,
+                    asignacion_id: asignacion.id,
+                    token_hash: this.hashTokenAcceso(tokenSesion),
+                    creado_en: ahora,
+                    caduca_en: new Date(ahora.getTime() + this.duracionSesionMs)
+                }
+            });
+            return true;
+        });
+        if (!nuevaSesion) throw new UnauthorizedException('El enlace no está disponible.');
+        return {
+            tokenSesion,
+            caducaEn: new Date(ahora.getTime() + this.duracionSesionMs),
+            administradorId: vigente.administradorId,
+            administrador: vigente.administradorNombre
+        };
+    }
+
+    // Solo devuelve identidad y ámbito autorizados, pero ni contactos ni mensajes
+    async obtenerSesionLanzador(tokenSesion?: string) {
+        if (!this.tokenValido(tokenSesion)) throw new UnauthorizedException('Sesión de lanzador no válida.');
+        const sesion = await this.prisma.sesiones_lanzadores.findUnique({
+            where: { token_hash: this.hashTokenAcceso(tokenSesion) }
+        });
+        if (!sesion || sesion.revocado_en || sesion.caduca_en <= new Date()) {
+            throw new UnauthorizedException('La sesión ha caducado o no está disponible.');
+        }
+        const habilitadas = await this.obtenerAutorizacionesHabilitadas(sesion.lanzador_id);
+        const autorizacion = habilitadas.find(a => a.asignacionId === sesion.asignacion_id);
+        if (!autorizacion) {
+            await this.prisma.sesiones_lanzadores.updateMany({
+                where: { id: sesion.id, revocado_en: null },
+                data: { revocado_en: new Date() }
+            });
+            throw new UnauthorizedException('La autorización ya no está habilitada.');
+        }
+        const actualizacion = await this.prisma.sesiones_lanzadores.updateMany({
+            where: { id: sesion.id, revocado_en: null, caduca_en: { gt: new Date() } },
+            data: { ultimo_uso_en: new Date() }
+        });
+        if (actualizacion.count !== 1) throw new UnauthorizedException('Sesión no válida.');
+        return {
+            administradorId: autorizacion.administradorId,
+            administradorNombre: autorizacion.administradorNombre,
+            caducaEn: sesion.caduca_en
+        };
+    }
+
+    async cerrarSesionLanzador(tokenSesion?: string) {
+        if (!this.tokenValido(tokenSesion)) throw new UnauthorizedException('Sesión de lanzador no válida.');
+        await this.prisma.sesiones_lanzadores.updateMany({
+            where: { token_hash: this.hashTokenAcceso(tokenSesion), revocado_en: null },
+            data: { revocado_en: new Date() }
+        });
+        return { mensaje: 'Sesión cerrada.' };
+    }
+
+
 
 
 }

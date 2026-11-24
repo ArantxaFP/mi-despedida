@@ -1,0 +1,65 @@
+// Hay estilos compartidos para todos los formularios
+// Estilos específicos del Espacio de actuación del lanzador
+.espacio-lanzador {
+    margin: 1.5rem 0;
+}
+
+.espacio-lanzador h2 {
+    margin: 0 0 1rem;
+    color: #2f3747;
+    font-family: 'Montserrat Alternates', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 500;
+}
+
+.espacio-lanzador__descripcion,
+.espacio-lanzador__caducidad {
+    color: #3e4653;
+    line-height: 1.5;
+}
+
+.espacio-lanzador__acciones {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.espacio-lanzador__accion {
+    padding: 1.25rem;
+    border: 1px solid #c8dcd9;
+    border-radius: 1rem;
+    background: #fbfbfb;
+
+    h3 {
+        margin: 0 0 0.75rem;
+        color: #2f3747;
+        font-size: 1.05rem;
+        font-weight: 600;
+    }
+
+    p {
+        color: #3e4653;
+        font-size: 0.9rem;
+        line-height: 1.5;
+    }
+
+    button {
+        min-height: 2.75rem;
+        padding: 0.75rem 1rem;
+        border: 1px solid #59f0dd;
+        border-radius: 0.8rem;
+        background: #dff3f1;
+        color: #3e4653;
+        font: inherit;
+        opacity: 0.55;
+        cursor: not-allowed;
+    }
+}
+
+.espacio-lanzador__aviso {
+    margin: 1rem 0;
+    color: #476987;
+    font-size: 0.85rem;
+    line-height: 1.5;
+}

@@ -1,0 +1,62 @@
+<section class="espacio-lanzador" aria-labelledby="titulo-espacio-lanzador">
+
+    <h2 id="titulo-espacio-lanzador">
+        Espacio del contacto lanzador
+    </h2>
+
+    <p class="espacio-lanzador__descripcion">
+        Estás autorizado para actuar como contacto lanzador de
+        <strong>{{ sesion().administradorNombre }}</strong>.
+    </p>
+
+    <p class="espacio-lanzador__caducidad">
+        Tu sesión caduca el
+        {{ sesion().caducaEn | date:'dd/MM/yyyy HH:mm' }}.
+    </p>
+
+    <!-- OJO pendientes las acciones dependerán del estado real de activación que proporciona Nest -->
+
+    <div class="espacio-lanzador__acciones">
+
+        <article class="espacio-lanzador__accion">
+
+            <h3>Solicitar una activación</h3>
+
+            <p>
+                El primer lanzador podrá redactar una comunicación
+                general e introducir la información de la despedida.
+                La solicitud necesitará la confirmación expresa de otro lanzador autorizado por <strong>{{
+                    sesion().administradorNombre }}</strong>.
+            </p>
+
+            <!-- OJO Pendiente del servicio de activaciones -->
+            <button type="button" disabled>
+                Solicitar activación
+            </button>
+
+        </article>
+
+        <article class="espacio-lanzador__accion">
+
+            <h3>Confirmar una activación</h3>
+
+            <p>
+                El segundo contacto lanzador podrá revisar la comunicación general y
+                confirmarla si existe una solicitud pendiente presentada por otro lanzador autorizado distinto de él.
+            </p>
+
+            <!-- OJO Pendiente del servicio de activaciones -->
+            <button type="button" disabled>
+                Confirmar activación
+            </button>
+
+        </article>
+
+    </div>
+
+    <p class="espacio-lanzador__aviso" role="status">
+        Las operaciones de activación todavía no están habilitadas.
+        Se activarán cuando la aplicación pueda consultar y actualizar su estado de forma segura.
+    </p>
+
+</section>

@@ -1,8 +1,13 @@
-import { Body, Controller, Get, Headers, Post, UnauthorizedException, Param, Patch, } from '@nestjs/common';
+import { Body, Controller, Get, Headers, Post, UnauthorizedException, Param, Patch, ValidationPipe } from '@nestjs/common';
 import { ContactosLanzadoresService } from './contactos-lanzadores.service';
 import { SupabaseService } from '../supabase/supabase.service';
-import { CrearInvitacionDto } from './dto/crear-invitacion.dto';
 import { CuentasService } from '../cuentas/cuentas.service';
+
+import { CrearInvitacionDto } from './dto/crear-invitacion.dto';
+import { SolicitarAccesoLanzadorDto } from './dto/solicitar-acceso-lanzador.dto';
+import { VerificarCodigoAccesoLanzadorDto } from './dto/verificar-codigo-acceso-lanzador.dto';
+import { SeleccionarAdministradorLanzadorDto } from './dto/seleccionar-administrador-lanzador.dto';
+import { CanjearEnlaceAccesoLanzadorDto } from './dto/canjear-enlace-acceso-lanzador.dto';
 
 @Controller('contactos-lanzadores')
 export class ContactosLanzadoresController {
@@ -162,5 +167,98 @@ export class ContactosLanzadoresController {
         );
     }
 
+    // Solicitar acceso como lanzador mediante correo electrónico.
+    // La respuesta es genérica para no revelar si el correo existe o no en el sistema por privacidad de datos.
+    @Post('acceso/solicitar')
+    async solicitarAccesoComoLanzador(
+        @Body(new ValidationPipe({
+            whitelist: true,
+            forbidNonWhitelisted: true,
+            transform: true
+        }))
+        datos: SolicitarAccesoLanzadorDto,
+        @Headers('origin') origen?: string
+    ) {
+        return this.contactosLanzadoresService
+            .solicitarAccesoComoLanzador(
+                datos.correo,
+                origen
+            );
+    }
+
+    // Verificar el código de 8 dígitos enviado al correo del lanzador.
+    // Este procedimiento se utiliza cuando tiene varias autorizaciones.
+    // Tras verificar el correo podrá seleccionar un administrador.
+    // La verificación no crea una sesión ni autoriza activaciones.
+    @Post('acceso/verificar-codigo')
+    async verificarCodigoAccesoComoLanzador(
+        @Body(new ValidationPipe({
+            whitelist: true,
+            forbidNonWhitelisted: true,
+            transform: true
+        }))
+        datos: VerificarCodigoAccesoLanzadorDto
+    ) {
+        return this.contactosLanzadoresService
+            .verificarCodigoAccesoComoLanzador(
+                datos.correo,
+                datos.codigo
+            );
+    }
+
+    // Seleccionar el administrador con el que se quiere actuar cuando el lanzador dispone de varias autorizaciones vigentes
+    @Post('acceso/seleccionar-administrador')
+    async seleccionarAdministradorAccesoLanzador(
+        @Body(new ValidationPipe({
+            whitelist: true,
+            forbidNonWhitelisted: true,
+            transform: true
+        }))
+        datos: SeleccionarAdministradorLanzadorDto
+    ) {
+        return this.contactosLanzadoresService
+            .seleccionarAdministradorAccesoLanzador(
+                datos.tokenSeleccion,
+                datos.asignacionId
+            );
+    }
+
+    // Consultar la sesión temporal del lanzador
+    @Get('acceso/sesion')
+    async obtenerSesionLanzador(
+        @Headers('x-lanzador-session')
+        tokenSesion?: string
+    ) {
+        return this.contactosLanzadoresService.obtenerSesionLanzador(
+            tokenSesion
+        );
+    }
+
+    // Cerrar la sesión temporal del lanzador
+    @Post('acceso/cerrar-sesion')
+    async cerrarSesionLanzador(
+        @Headers('x-lanzador-session')
+        tokenSesion?: string
+    ) {
+        return this.contactosLanzadoresService.cerrarSesionLanzador(
+            tokenSesion
+        );
+    }
+
+    // Canjear un enlace temporal de un solo uso.
+    // Abrir el enlace no inicia ni confirma ningún envío.
+    // Validar el formato del token antes de enviarlo al servicio.
+    @Post('acceso/canjear-enlace')
+    async canjearEnlaceAccesoLanzador(
+        @Body(new ValidationPipe({
+            whitelist: true,
+            forbidNonWhitelisted: true,
+            transform: true
+        }))
+        datos: CanjearEnlaceAccesoLanzadorDto
+    ) {
+        return this.contactosLanzadoresService
+            .canjearEnlaceAccesoLanzador(datos.token);
+    }
 
 }

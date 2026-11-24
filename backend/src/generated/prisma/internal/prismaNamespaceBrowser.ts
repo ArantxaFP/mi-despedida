@@ -81,6 +81,8 @@ export const ModelName = {
   asignaciones_lanzadores: 'asignaciones_lanzadores',
   historial_asignaciones: 'historial_asignaciones',
   lanzadores: 'lanzadores',
+  credenciales_acceso_lanzadores: 'credenciales_acceso_lanzadores',
+  sesiones_lanzadores: 'sesiones_lanzadores',
   invitaciones_lanzadores: 'invitaciones_lanzadores',
   verificaciones_invitaciones_lanzadores: 'verificaciones_invitaciones_lanzadores',
   cuentas: 'cuentas',
@@ -580,6 +582,38 @@ export const LanzadoresScalarFieldEnum = {
 } as const
 
 export type LanzadoresScalarFieldEnum = (typeof LanzadoresScalarFieldEnum)[keyof typeof LanzadoresScalarFieldEnum]
+
+
+export const Credenciales_acceso_lanzadoresScalarFieldEnum = {
+  id: 'id',
+  lanzador_id: 'lanzador_id',
+  asignacion_id: 'asignacion_id',
+  finalidad: 'finalidad',
+  codigo_hash: 'codigo_hash',
+  token_hash: 'token_hash',
+  intentos_fallidos: 'intentos_fallidos',
+  creado_en: 'creado_en',
+  caduca_en: 'caduca_en',
+  verificado_en: 'verificado_en',
+  utilizado_en: 'utilizado_en',
+  invalidado_en: 'invalidado_en'
+} as const
+
+export type Credenciales_acceso_lanzadoresScalarFieldEnum = (typeof Credenciales_acceso_lanzadoresScalarFieldEnum)[keyof typeof Credenciales_acceso_lanzadoresScalarFieldEnum]
+
+
+export const Sesiones_lanzadoresScalarFieldEnum = {
+  id: 'id',
+  lanzador_id: 'lanzador_id',
+  asignacion_id: 'asignacion_id',
+  token_hash: 'token_hash',
+  creado_en: 'creado_en',
+  caduca_en: 'caduca_en',
+  revocado_en: 'revocado_en',
+  ultimo_uso_en: 'ultimo_uso_en'
+} as const
+
+export type Sesiones_lanzadoresScalarFieldEnum = (typeof Sesiones_lanzadoresScalarFieldEnum)[keyof typeof Sesiones_lanzadoresScalarFieldEnum]
 
 
 export const Invitaciones_lanzadoresScalarFieldEnum = {

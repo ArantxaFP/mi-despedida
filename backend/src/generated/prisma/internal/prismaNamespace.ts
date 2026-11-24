@@ -427,6 +427,8 @@ export const ModelName = {
   asignaciones_lanzadores: 'asignaciones_lanzadores',
   historial_asignaciones: 'historial_asignaciones',
   lanzadores: 'lanzadores',
+  credenciales_acceso_lanzadores: 'credenciales_acceso_lanzadores',
+  sesiones_lanzadores: 'sesiones_lanzadores',
   invitaciones_lanzadores: 'invitaciones_lanzadores',
   verificaciones_invitaciones_lanzadores: 'verificaciones_invitaciones_lanzadores',
   cuentas: 'cuentas',
@@ -450,7 +452,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "audit_log_entries" | "custom_oauth_providers" | "flow_state" | "identities" | "instances" | "mfa_amr_claims" | "mfa_challenges" | "mfa_factors" | "mfa_recovery_code_sets" | "mfa_recovery_codes" | "oauth_authorizations" | "oauth_client_states" | "oauth_clients" | "oauth_consents" | "one_time_tokens" | "refresh_tokens" | "saml_providers" | "saml_relay_states" | "schema_migrations" | "scim_tokens" | "scim_users" | "sessions" | "sso_domains" | "sso_providers" | "users" | "webauthn_challenges" | "webauthn_credentials" | "asignaciones_lanzadores" | "historial_asignaciones" | "lanzadores" | "invitaciones_lanzadores" | "verificaciones_invitaciones_lanzadores" | "cuentas" | "bloqueos_edicion_cuentas" | "auditoria_operaciones_cuentas" | "historico_cierre_cuentas" | "contactos_destinatarios" | "mensajes_destinatarios"
+    modelProps: "audit_log_entries" | "custom_oauth_providers" | "flow_state" | "identities" | "instances" | "mfa_amr_claims" | "mfa_challenges" | "mfa_factors" | "mfa_recovery_code_sets" | "mfa_recovery_codes" | "oauth_authorizations" | "oauth_client_states" | "oauth_clients" | "oauth_consents" | "one_time_tokens" | "refresh_tokens" | "saml_providers" | "saml_relay_states" | "schema_migrations" | "scim_tokens" | "scim_users" | "sessions" | "sso_domains" | "sso_providers" | "users" | "webauthn_challenges" | "webauthn_credentials" | "asignaciones_lanzadores" | "historial_asignaciones" | "lanzadores" | "credenciales_acceso_lanzadores" | "sesiones_lanzadores" | "invitaciones_lanzadores" | "verificaciones_invitaciones_lanzadores" | "cuentas" | "bloqueos_edicion_cuentas" | "auditoria_operaciones_cuentas" | "historico_cierre_cuentas" | "contactos_destinatarios" | "mensajes_destinatarios"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -2674,6 +2676,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    credenciales_acceso_lanzadores: {
+      payload: Prisma.$credenciales_acceso_lanzadoresPayload<ExtArgs>
+      fields: Prisma.credenciales_acceso_lanzadoresFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.credenciales_acceso_lanzadoresFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$credenciales_acceso_lanzadoresPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.credenciales_acceso_lanzadoresFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$credenciales_acceso_lanzadoresPayload>
+        }
+        findFirst: {
+          args: Prisma.credenciales_acceso_lanzadoresFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$credenciales_acceso_lanzadoresPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.credenciales_acceso_lanzadoresFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$credenciales_acceso_lanzadoresPayload>
+        }
+        findMany: {
+          args: Prisma.credenciales_acceso_lanzadoresFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$credenciales_acceso_lanzadoresPayload>[]
+        }
+        create: {
+          args: Prisma.credenciales_acceso_lanzadoresCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$credenciales_acceso_lanzadoresPayload>
+        }
+        createMany: {
+          args: Prisma.credenciales_acceso_lanzadoresCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.credenciales_acceso_lanzadoresCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$credenciales_acceso_lanzadoresPayload>[]
+        }
+        delete: {
+          args: Prisma.credenciales_acceso_lanzadoresDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$credenciales_acceso_lanzadoresPayload>
+        }
+        update: {
+          args: Prisma.credenciales_acceso_lanzadoresUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$credenciales_acceso_lanzadoresPayload>
+        }
+        deleteMany: {
+          args: Prisma.credenciales_acceso_lanzadoresDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.credenciales_acceso_lanzadoresUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.credenciales_acceso_lanzadoresUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$credenciales_acceso_lanzadoresPayload>[]
+        }
+        upsert: {
+          args: Prisma.credenciales_acceso_lanzadoresUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$credenciales_acceso_lanzadoresPayload>
+        }
+        aggregate: {
+          args: Prisma.Credenciales_acceso_lanzadoresAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateCredenciales_acceso_lanzadores>
+        }
+        groupBy: {
+          args: Prisma.credenciales_acceso_lanzadoresGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Credenciales_acceso_lanzadoresGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.credenciales_acceso_lanzadoresCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Credenciales_acceso_lanzadoresCountAggregateOutputType> | number
+        }
+      }
+    }
+    sesiones_lanzadores: {
+      payload: Prisma.$sesiones_lanzadoresPayload<ExtArgs>
+      fields: Prisma.sesiones_lanzadoresFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.sesiones_lanzadoresFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$sesiones_lanzadoresPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.sesiones_lanzadoresFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$sesiones_lanzadoresPayload>
+        }
+        findFirst: {
+          args: Prisma.sesiones_lanzadoresFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$sesiones_lanzadoresPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.sesiones_lanzadoresFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$sesiones_lanzadoresPayload>
+        }
+        findMany: {
+          args: Prisma.sesiones_lanzadoresFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$sesiones_lanzadoresPayload>[]
+        }
+        create: {
+          args: Prisma.sesiones_lanzadoresCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$sesiones_lanzadoresPayload>
+        }
+        createMany: {
+          args: Prisma.sesiones_lanzadoresCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.sesiones_lanzadoresCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$sesiones_lanzadoresPayload>[]
+        }
+        delete: {
+          args: Prisma.sesiones_lanzadoresDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$sesiones_lanzadoresPayload>
+        }
+        update: {
+          args: Prisma.sesiones_lanzadoresUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$sesiones_lanzadoresPayload>
+        }
+        deleteMany: {
+          args: Prisma.sesiones_lanzadoresDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.sesiones_lanzadoresUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.sesiones_lanzadoresUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$sesiones_lanzadoresPayload>[]
+        }
+        upsert: {
+          args: Prisma.sesiones_lanzadoresUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$sesiones_lanzadoresPayload>
+        }
+        aggregate: {
+          args: Prisma.Sesiones_lanzadoresAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateSesiones_lanzadores>
+        }
+        groupBy: {
+          args: Prisma.sesiones_lanzadoresGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Sesiones_lanzadoresGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.sesiones_lanzadoresCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Sesiones_lanzadoresCountAggregateOutputType> | number
+        }
+      }
+    }
     invitaciones_lanzadores: {
       payload: Prisma.$invitaciones_lanzadoresPayload<ExtArgs>
       fields: Prisma.invitaciones_lanzadoresFieldRefs
@@ -3780,6 +3930,38 @@ export const LanzadoresScalarFieldEnum = {
 export type LanzadoresScalarFieldEnum = (typeof LanzadoresScalarFieldEnum)[keyof typeof LanzadoresScalarFieldEnum]
 
 
+export const Credenciales_acceso_lanzadoresScalarFieldEnum = {
+  id: 'id',
+  lanzador_id: 'lanzador_id',
+  asignacion_id: 'asignacion_id',
+  finalidad: 'finalidad',
+  codigo_hash: 'codigo_hash',
+  token_hash: 'token_hash',
+  intentos_fallidos: 'intentos_fallidos',
+  creado_en: 'creado_en',
+  caduca_en: 'caduca_en',
+  verificado_en: 'verificado_en',
+  utilizado_en: 'utilizado_en',
+  invalidado_en: 'invalidado_en'
+} as const
+
+export type Credenciales_acceso_lanzadoresScalarFieldEnum = (typeof Credenciales_acceso_lanzadoresScalarFieldEnum)[keyof typeof Credenciales_acceso_lanzadoresScalarFieldEnum]
+
+
+export const Sesiones_lanzadoresScalarFieldEnum = {
+  id: 'id',
+  lanzador_id: 'lanzador_id',
+  asignacion_id: 'asignacion_id',
+  token_hash: 'token_hash',
+  creado_en: 'creado_en',
+  caduca_en: 'caduca_en',
+  revocado_en: 'revocado_en',
+  ultimo_uso_en: 'ultimo_uso_en'
+} as const
+
+export type Sesiones_lanzadoresScalarFieldEnum = (typeof Sesiones_lanzadoresScalarFieldEnum)[keyof typeof Sesiones_lanzadoresScalarFieldEnum]
+
+
 export const Invitaciones_lanzadoresScalarFieldEnum = {
   id: 'id',
   asignacion_id: 'asignacion_id',
@@ -4366,6 +4548,8 @@ export type GlobalOmitConfig = {
   asignaciones_lanzadores?: Prisma.asignaciones_lanzadoresOmit
   historial_asignaciones?: Prisma.historial_asignacionesOmit
   lanzadores?: Prisma.lanzadoresOmit
+  credenciales_acceso_lanzadores?: Prisma.credenciales_acceso_lanzadoresOmit
+  sesiones_lanzadores?: Prisma.sesiones_lanzadoresOmit
   invitaciones_lanzadores?: Prisma.invitaciones_lanzadoresOmit
   verificaciones_invitaciones_lanzadores?: Prisma.verificaciones_invitaciones_lanzadoresOmit
   cuentas?: Prisma.cuentasOmit

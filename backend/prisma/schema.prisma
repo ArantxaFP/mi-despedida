@@ -597,6 +597,9 @@ model asignaciones_lanzadores {
   lanzadores              lanzadores               @relation(fields: [lanzador_id], references: [id], onUpdate: NoAction)
   historial_asignaciones  historial_asignaciones[]
   invitaciones_lanzadores invitaciones_lanzadores?
+  // Credenciales y sesiones temporales vinculadas a esta asignación
+  credenciales_acceso_lanzadores credenciales_acceso_lanzadores[]
+  sesiones_lanzadores            sesiones_lanzadores[]
 
   @@unique([administrador_id, lanzador_id], map: "asignaciones_vigentes_unicas_idx", where: raw("((estado)::text = ANY ((ARRAY['pendiente'::character varying, 'aceptada'::character varying])::text[]))"))
   @@index([administrador_id, estado], map: "asignaciones_administrador_idx")
@@ -635,9 +638,96 @@ model lanzadores {
   updated_at              DateTime                  @default(now()) @db.Timestamptz(6)
   asignaciones_lanzadores asignaciones_lanzadores[]
   users                   users?                    @relation(fields: [usuario_id], references: [id], onUpdate: NoAction)
+  
+  // Credenciales y sesiones utilizadas para acceder como lanzador
+  credenciales_acceso_lanzadores credenciales_acceso_lanzadores[]
+  sesiones_lanzadores            sesiones_lanzadores[]
+  
+  @@schema("public")
+}
+
+
+/// Credenciales temporales para el acceso como lanzador.
+/// Independientes de los códigos utilizados para aceptar invitaciones.
+
+model credenciales_acceso_lanzadores {
+  id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+
+  // Identidad y asignación del lanzador
+  lanzador_id       String    @db.Uuid
+  asignacion_id     String?   @db.Uuid
+
+  // Finalidad: verificacion_correo, seleccion_titular o acceso_titular
+  finalidad         String    @db.VarChar(30)
+
+  // Solo se guardan hashes, nunca códigos ni tokens originales
+  codigo_hash       String?   @db.VarChar(64)
+  token_hash        String?   @db.VarChar(64)
+
+  // Control de intentos y fechas de validez
+  intentos_fallidos Int       @default(0)
+  creado_en         DateTime  @default(now()) @db.Timestamptz(6)
+  caduca_en         DateTime  @db.Timestamptz(6)
+  verificado_en     DateTime? @db.Timestamptz(6)
+  utilizado_en      DateTime? @db.Timestamptz(6)
+  invalidado_en     DateTime? @db.Timestamptz(6)
+
+  // Relaciones con las tablas existentes
+  lanzadores              lanzadores                @relation(fields: [lanzador_id], references: [id], onDelete: Restrict, onUpdate: NoAction)
+  asignaciones_lanzadores asignaciones_lanzadores?  @relation(fields: [asignacion_id], references: [id], onDelete: Restrict, onUpdate: NoAction)
+
+  // Índices únicos parciales definidos en PostgreSQL
+  @@unique([token_hash], map: "cal_token_hash_unico_idx", where: raw("(token_hash IS NOT NULL)"))
+  @@unique([lanzador_id], map: "cal_codigo_pendiente_idx", where: raw("(finalidad = 'verificacion_correo' AND utilizado_en IS NULL AND invalidado_en IS NULL)"))
+  @@unique([lanzador_id], map: "cal_seleccion_pendiente_idx", where: raw("(finalidad = 'seleccion_titular' AND utilizado_en IS NULL AND invalidado_en IS NULL)"))
+  @@unique([lanzador_id, asignacion_id], map: "cal_enlace_pendiente_idx", where: raw("(finalidad = 'acceso_titular' AND utilizado_en IS NULL AND invalidado_en IS NULL)"))
+
+  // Índices de consulta
+  @@index([lanzador_id, creado_en(sort: Desc)], map: "cal_lanzador_fecha_idx")
+  @@index([caduca_en], map: "cal_caducidad_idx")
+  @@index([asignacion_id], map: "cal_asignacion_idx")
 
   @@schema("public")
 }
+
+
+
+
+/// Sesiones temporales de actuación de lanzadores.
+/// Cada sesión está vinculada a un único administrador.
+/// Duración máxima: una hora.
+/// Una identidad de lanzador solo puede mantener una sesión sin revocar.
+model sesiones_lanzadores {
+  id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+
+  // Identidad y asignación autorizada
+  lanzador_id       String    @db.Uuid
+  asignacion_id     String    @db.Uuid
+
+  // Hash del token de sesión, nunca el token original
+  token_hash        String    @unique @db.VarChar(64)
+
+  // Control temporal de la sesión
+  creado_en         DateTime  @default(now()) @db.Timestamptz(6)
+  caduca_en         DateTime  @db.Timestamptz(6)
+  revocado_en       DateTime? @db.Timestamptz(6)
+  ultimo_uso_en     DateTime? @db.Timestamptz(6)
+
+  // Relaciones con las tablas existentes
+  lanzadores              lanzadores               @relation(fields: [lanzador_id], references: [id], onDelete: Restrict, onUpdate: NoAction)
+  asignaciones_lanzadores asignaciones_lanzadores  @relation(fields: [asignacion_id], references: [id], onDelete: Restrict, onUpdate: NoAction)
+
+  // Una sola sesión sin revocar por lanzador
+  @@unique([lanzador_id], map: "sl_una_sesion_no_revocada_idx", where: raw("(revocado_en IS NULL)"))
+
+  // Índices de consulta
+  @@index([asignacion_id], map: "sl_asignacion_idx")
+  @@index([caduca_en], map: "sl_caducidad_idx")
+
+  @@schema("public")
+}
+
+
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.

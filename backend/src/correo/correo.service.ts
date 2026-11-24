@@ -415,6 +415,89 @@ export class CorreoService {
             );
         }
     }
+
+
+    // Correos del acceso posterior como lanzador.
+    // No confundir con la verificación de una invitación.
+    async enviarCodigoAccesoLanzador(
+        correo: string,
+        nombre: string,
+        codigo: string
+    ): Promise<string> {
+        if (!/^\d{8}$/.test(codigo)) {
+            throw new InternalServerErrorException('Código de acceso no válido.');
+        }
+        try {
+            const resultado = await this.brevo.transactionalEmails.sendTransacEmail({
+                sender: { name: this.remitenteNombre, email: this.remitenteEmail },
+                to: [{ email: correo, name: nombre }],
+                subject: 'Mi despedida - Verificación para acceder como lanzador',
+                textContent:
+                    `Hola, ${nombre}.\n\n` +
+                    'Has solicitado acceder como lanzador a Mi despedida.\n' +
+                    `Código de verificación: ${codigo}\n\n` +
+                    'Caduca en 10 minutos. Introdúcelo en la pantalla de acceso.\n' +
+                    'Una vez verificado, podrás seleccionar el administrador.\n' +
+                    'El código no inicia ni confirma ninguna activación.\n\n' +
+                    'Si no lo has solicitado, ignora este mensaje.'
+            });
+            if (!resultado.messageId) throw new Error('Brevo no confirmó el envío.');
+            return resultado.messageId;
+        } catch (error) {
+            this.logger.error('Brevo no confirmó el envío del código de acceso',
+                error instanceof Error ? error.message : String(error));
+            throw new InternalServerErrorException('No se ha podido enviar el código de acceso.');
+        }
+    }
+
+    async enviarEnlaceAccesoLanzador(
+        correo: string,
+        nombre: string,
+        nombreAdministrador: string,
+        enlace: string
+    ): Promise<string> {
+        const nombreSeguro = this.escaparHtml(nombre);
+        const titularSeguro = this.escaparHtml(nombreAdministrador);
+        const enlaceSeguro = this.escaparHtml(enlace);
+        const htmlContent = `
+            <div style="max-width:600px;margin:auto;padding:28px;font-family:Arial,sans-serif;color:#273244;line-height:1.6">
+                <h1 style="color:#071d49">Mi despedida</h1>
+                <p>Hola, ${nombreSeguro}.</p>
+                <p>Has solicitado acceder como lanzador de <strong>${titularSeguro}</strong>.</p>
+                <p>Utiliza este enlace exclusivo y de un solo uso:</p>
+                <p style="margin:28px 0">
+                    <a href="${enlaceSeguro}" style="background:#071d49;color:white;padding:14px 22px;border-radius:6px;text-decoration:none">
+                        Acceder como lanzador
+                    </a>
+                </p>
+                <p>Este enlace caduca a los <strong>7 días</strong>. Al abrirlo podrás iniciar una sesión temporal de hasta una hora para actuar exclusivamente sobre esta cuenta.</p>
+                <p>Acceder no inicia ni confirma automáticamente ningún envío. Esas acciones requieren tu confirmación expresa.</p>
+                <p>No podrás consultar los contactos ni los mensajes privados de esta persona.</p>
+                <p style="color:#667085;font-size:13px">Si no has solicitado este acceso, puedes ignorar el correo.</p>
+            </div>`;
+        try {
+            const resultado = await this.brevo.transactionalEmails.sendTransacEmail({
+                sender: { name: this.remitenteNombre, email: this.remitenteEmail },
+                to: [{ email: correo, name: nombre }],
+                subject: 'Mi despedida - Tu acceso temporal como lanzador',
+                htmlContent,
+                textContent:
+                    `Hola, ${nombre}.\n\n` +
+                    `Puedes acceder como lanzador de ${nombreAdministrador}:\n${enlace}\n\n` +
+                    'El enlace es de un solo uso y caduca a los 7 días. ' +
+                    'La sesión durará como máximo una hora. ' +
+                    'Abrir el enlace no activa ningún envío.\n\n' +
+                    'Si no has solicitado el acceso, ignora el mensaje.'
+            });
+            if (!resultado.messageId) throw new Error('Brevo no confirmó el envío.');
+            return resultado.messageId;
+        } catch (error) {
+            this.logger.error('Brevo no confirmó el envío del enlace de acceso',
+                error instanceof Error ? error.message : String(error));
+            throw new InternalServerErrorException('No se ha podido enviar el enlace de acceso.');
+        }
+    }
+
 }
 
 

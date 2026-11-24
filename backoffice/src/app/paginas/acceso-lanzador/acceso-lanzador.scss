@@ -2,39 +2,116 @@
 // Aquí los estilos específicos de la pantalla de acceso de usuario lanzador no registrado
 
 :host {
-    display: block;
-    min-height: 100vh;
+  display: block;
+  min-height: 100vh;
+}
+
+.mensaje-error {
+  margin: 0;
+  color: #a43b48;
+  font-size: 0.8rem;
+  line-height: 1.4;
+}
+
+.respuesta-acceso {
+  margin-bottom: 1.5rem;
+  color: #3e4653;
+  font-size: 0.95rem;
+  line-height: 1.6;
+
+  p {
+    margin: 0 0 1rem;
   }
-  
-  .mensaje-error {
-    margin: 0;
-    color: #a43b48;
-    font-size: 0.8rem;
-    line-height: 1.4;
+}
+
+.aviso-desarrollo {
+  color: #476987;
+  font-size: 0.85rem;
+  font-style: italic;
+}
+
+#seccion-codigo-lanzador {
+  margin-top: 1.5rem;
+}
+
+.boton-principal:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+
+// Errores generales del proceso de acceso
+.acceso-lanzador__error {
+  margin: 0 0 1.25rem;
+}
+
+// Lista de administradores autorizados
+.acceso-lanzador__opciones {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+
+  margin-bottom: 1rem;
+}
+
+// Botón para seleccionar administrador
+.acceso-lanzador__opcion {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+
+  width: 100%;
+  overflow-wrap: anywhere;
+  text-align: left;
+}
+
+
+.acceso-lanzador__nota {
+  margin: 0 0 1.5rem;
+
+  color: #3e4653;
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+
+.acceso-lanzador__boton-secundario {
+  display: block;
+
+  margin-top: 1.25rem;
+  padding: 0;
+
+  border: 0;
+  background: transparent;
+
+  color: #476987;
+  font: inherit;
+  text-align: left;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: 2px solid #476987;
+    outline-offset: 4px;
   }
-  
-  .respuesta-acceso {
-    margin-bottom: 1.5rem;
-    color: #3e4653;
-    font-size: 0.95rem;
-    line-height: 1.6;
-  
-    p {
-      margin: 0 0 1rem;
-    }
-  }
-  
-  .aviso-desarrollo {
-    color: #476987;
-    font-size: 0.85rem;
-    font-style: italic;
-  }
-  
-  #seccion-codigo-lanzador {
-    margin-top: 1.5rem;
-  }
-  
-  .boton-principal:disabled {
+
+  &:disabled {
     opacity: 0.55;
     cursor: not-allowed;
   }
+}
+
+
+// ----------------------------
+// Accesibilidad
+// ----------------------------
+@media (prefers-reduced-motion: reduce) {
+
+  .acceso-lanzador__opcion,
+  .acceso-lanzador__boton-secundario {
+    transition: none;
+  }
+}

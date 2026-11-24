@@ -219,6 +219,19 @@ export type historial_asignaciones = Prisma.historial_asignacionesModel
  */
 export type lanzadores = Prisma.lanzadoresModel
 /**
+ * Model credenciales_acceso_lanzadores
+ * 
+ */
+export type credenciales_acceso_lanzadores = Prisma.credenciales_acceso_lanzadoresModel
+/**
+ * Model sesiones_lanzadores
+ * Sesiones temporales de actuación de lanzadores.
+ * Cada sesión está vinculada a un único administrador.
+ * Duración máxima: una hora.
+ * Una identidad de lanzador solo puede mantener una sesión sin revocar.
+ */
+export type sesiones_lanzadores = Prisma.sesiones_lanzadoresModel
+/**
  * Model invitaciones_lanzadores
  * This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
  * This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.

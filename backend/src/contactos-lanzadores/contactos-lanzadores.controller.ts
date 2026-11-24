@@ -1,7 +1,8 @@
-import { Body, Controller, Get, Headers, Post, UnauthorizedException, Param, Patch, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, Get, Headers, Post, UnauthorizedException, Param, Patch, ValidationPipe, UseGuards } from '@nestjs/common';
 import { ContactosLanzadoresService } from './contactos-lanzadores.service';
 import { SupabaseService } from '../supabase/supabase.service';
 import { CuentasService } from '../cuentas/cuentas.service';
+import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
 
 import { CrearInvitacionDto } from './dto/crear-invitacion.dto';
 import { SolicitarAccesoLanzadorDto } from './dto/solicitar-acceso-lanzador.dto';
@@ -169,6 +170,8 @@ export class ContactosLanzadoresController {
 
     // Solicitar acceso como lanzador mediante correo electrónico.
     // La respuesta es genérica para no revelar si el correo existe o no en el sistema por privacidad de datos.
+    @UseGuards(ThrottlerGuard)
+    @Throttle({ default: { limit: 5, ttl: 60_000 } })
     @Post('acceso/solicitar')
     async solicitarAccesoComoLanzador(
         @Body(new ValidationPipe({
@@ -190,6 +193,7 @@ export class ContactosLanzadoresController {
     // Este procedimiento se utiliza cuando tiene varias autorizaciones.
     // Tras verificar el correo podrá seleccionar un administrador.
     // La verificación no crea una sesión ni autoriza activaciones.
+    @UseGuards(ThrottlerGuard)
     @Post('acceso/verificar-codigo')
     async verificarCodigoAccesoComoLanzador(
         @Body(new ValidationPipe({
@@ -207,6 +211,7 @@ export class ContactosLanzadoresController {
     }
 
     // Seleccionar el administrador con el que se quiere actuar cuando el lanzador dispone de varias autorizaciones vigentes
+    @UseGuards(ThrottlerGuard)
     @Post('acceso/seleccionar-administrador')
     async seleccionarAdministradorAccesoLanzador(
         @Body(new ValidationPipe({
@@ -224,6 +229,7 @@ export class ContactosLanzadoresController {
     }
 
     // Consultar la sesión temporal del lanzador
+    @UseGuards(ThrottlerGuard)
     @Get('acceso/sesion')
     async obtenerSesionLanzador(
         @Headers('x-lanzador-session')
@@ -235,6 +241,7 @@ export class ContactosLanzadoresController {
     }
 
     // Cerrar la sesión temporal del lanzador
+    @UseGuards(ThrottlerGuard)
     @Post('acceso/cerrar-sesion')
     async cerrarSesionLanzador(
         @Headers('x-lanzador-session')
@@ -248,6 +255,7 @@ export class ContactosLanzadoresController {
     // Canjear un enlace temporal de un solo uso.
     // Abrir el enlace no inicia ni confirma ningún envío.
     // Validar el formato del token antes de enviarlo al servicio.
+    @UseGuards(ThrottlerGuard)
     @Post('acceso/canjear-enlace')
     async canjearEnlaceAccesoLanzador(
         @Body(new ValidationPipe({

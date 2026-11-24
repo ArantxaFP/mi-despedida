@@ -14,7 +14,7 @@ async function bootstrap() {
       'https://gestion-mi-despedida.netlify.app'
     ],
     methods: ['GET', 'POST', 'PATCH', 'DELETE', 'PUT', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization']
+    allowedHeaders: ['Content-Type', 'Authorization', 'x-lanzador-session']
   });
 
   app.useGlobalPipes(

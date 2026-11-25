@@ -1,11 +1,14 @@
 // Hay estilos compartidos para todos los formularios
 // Estilos específicos del Espacio de actuación del lanzador
+
 .espacio-lanzador {
-    margin: 1.5rem 0;
+    margin: 1rem 0;
+    width: 100%;
+    min-width: 0;
 }
 
 .espacio-lanzador h2 {
-    margin: 0 0 1rem;
+    margin: 0 0 0.75rem;
     color: #2f3747;
     font-family: 'Montserrat Alternates', sans-serif;
     font-size: 1.5rem;
@@ -16,16 +19,22 @@
 .espacio-lanzador__caducidad {
     color: #3e4653;
     line-height: 1.5;
+    margin: 0 0 0.75rem;
 }
 
+// Tarjetas una debajo de otra
 .espacio-lanzador__acciones {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
     gap: 1rem;
-    margin-top: 1.5rem;
+    margin-top: 1.25rem;
 }
 
 .espacio-lanzador__accion {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+
     padding: 1.25rem;
     border: 1px solid #c8dcd9;
     border-radius: 1rem;
@@ -39,12 +48,15 @@
     }
 
     p {
+        flex: 1;
+        margin: 0 0 1rem;
         color: #3e4653;
         font-size: 0.9rem;
         line-height: 1.5;
     }
 
     button {
+        align-self: flex-start;
         min-height: 2.75rem;
         padding: 0.75rem 1rem;
         border: 1px solid #59f0dd;
@@ -62,4 +74,48 @@
     color: #476987;
     font-size: 0.85rem;
     line-height: 1.5;
+}
+
+// ----------------------------------------
+// Tablet y desktop
+// ----------------------------------------
+@media (min-width: 768px) {
+
+    .espacio-lanzador {
+        margin: 0.75rem 0;
+    }
+
+    .espacio-lanzador__acciones {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1.25rem;
+        align-items: stretch;
+        margin-top: 1rem;
+    }
+
+    .espacio-lanzador__accion {
+        height: 100%;
+        box-sizing: border-box;
+    }
+
+    .espacio-lanzador__accion button {
+        margin-top: auto;
+    }
+
+    .espacio-lanzador__aviso {
+        margin: 0.75rem 0;
+    }
+}
+
+// ----------------------------------------
+// Desktop ancho
+// ----------------------------------------
+@media (min-width: 1200px) {
+
+    .espacio-lanzador__acciones {
+        gap: 1.5rem;
+    }
+
+    .espacio-lanzador__accion {
+        padding: 1.5rem;
+    }
 }

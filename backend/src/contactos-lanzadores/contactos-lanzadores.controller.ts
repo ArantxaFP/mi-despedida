@@ -240,6 +240,20 @@ export class ContactosLanzadoresController {
         );
     }
 
+    // Consultar el estado de activación del administrador.
+    // Requiere una sesión temporal válida de lanzador.
+    // No devuelve destinatarios ni mensajes privados por privacidad de datos.
+    @UseGuards(ThrottlerGuard)
+    @Get('acceso/estado-activacion')
+    async consultarEstadoActivacionLanzador(
+        @Headers('x-lanzador-session')
+        tokenSesion?: string
+    ) {
+        return this.contactosLanzadoresService
+            .consultarEstadoActivacionLanzador(tokenSesion);
+    }
+
+
     // Cerrar la sesión temporal del lanzador
     @UseGuards(ThrottlerGuard)
     @Post('acceso/cerrar-sesion')

@@ -279,3 +279,13 @@ export type contactos_destinatarios = Prisma.contactos_destinatariosModel
  * This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
  */
 export type mensajes_destinatarios = Prisma.mensajes_destinatariosModel
+/**
+ * Model solicitudes_activacion
+ * 
+ */
+export type solicitudes_activacion = Prisma.solicitudes_activacionModel
+/**
+ * Model comunicaciones_lote
+ * 
+ */
+export type comunicaciones_lote = Prisma.comunicaciones_loteModel

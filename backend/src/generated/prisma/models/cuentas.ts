@@ -269,6 +269,7 @@ export type cuentasWhereInput = {
   bloqueos_como_editor?: Prisma.Bloqueos_edicion_cuentasListRelationFilter
   contactos_destinatarios?: Prisma.Contactos_destinatariosListRelationFilter
   users?: Prisma.XOR<Prisma.UsersScalarRelationFilter, Prisma.usersWhereInput>
+  solicitudes_activacion?: Prisma.Solicitudes_activacionListRelationFilter
 }
 
 export type cuentasOrderByWithRelationInput = {
@@ -287,6 +288,7 @@ export type cuentasOrderByWithRelationInput = {
   bloqueos_como_editor?: Prisma.bloqueos_edicion_cuentasOrderByRelationAggregateInput
   contactos_destinatarios?: Prisma.contactos_destinatariosOrderByRelationAggregateInput
   users?: Prisma.usersOrderByWithRelationInput
+  solicitudes_activacion?: Prisma.solicitudes_activacionOrderByRelationAggregateInput
 }
 
 export type cuentasWhereUniqueInput = Prisma.AtLeast<{
@@ -308,6 +310,7 @@ export type cuentasWhereUniqueInput = Prisma.AtLeast<{
   bloqueos_como_editor?: Prisma.Bloqueos_edicion_cuentasListRelationFilter
   contactos_destinatarios?: Prisma.Contactos_destinatariosListRelationFilter
   users?: Prisma.XOR<Prisma.UsersScalarRelationFilter, Prisma.usersWhereInput>
+  solicitudes_activacion?: Prisma.Solicitudes_activacionListRelationFilter
 }, "id" | "correo">
 
 export type cuentasOrderByWithAggregationInput = {
@@ -361,6 +364,7 @@ export type cuentasCreateInput = {
   bloqueos_como_editor?: Prisma.bloqueos_edicion_cuentasCreateNestedManyWithoutEditorInput
   contactos_destinatarios?: Prisma.contactos_destinatariosCreateNestedManyWithoutCuentasInput
   users: Prisma.usersCreateNestedOneWithoutCuentasInput
+  solicitudes_activacion?: Prisma.solicitudes_activacionCreateNestedManyWithoutCuentasInput
 }
 
 export type cuentasUncheckedCreateInput = {
@@ -378,6 +382,7 @@ export type cuentasUncheckedCreateInput = {
   bloqueo_edicion?: Prisma.bloqueos_edicion_cuentasUncheckedCreateNestedOneWithoutCuentaInput
   bloqueos_como_editor?: Prisma.bloqueos_edicion_cuentasUncheckedCreateNestedManyWithoutEditorInput
   contactos_destinatarios?: Prisma.contactos_destinatariosUncheckedCreateNestedManyWithoutCuentasInput
+  solicitudes_activacion?: Prisma.solicitudes_activacionUncheckedCreateNestedManyWithoutCuentasInput
 }
 
 export type cuentasUpdateInput = {
@@ -395,6 +400,7 @@ export type cuentasUpdateInput = {
   bloqueos_como_editor?: Prisma.bloqueos_edicion_cuentasUpdateManyWithoutEditorNestedInput
   contactos_destinatarios?: Prisma.contactos_destinatariosUpdateManyWithoutCuentasNestedInput
   users?: Prisma.usersUpdateOneRequiredWithoutCuentasNestedInput
+  solicitudes_activacion?: Prisma.solicitudes_activacionUpdateManyWithoutCuentasNestedInput
 }
 
 export type cuentasUncheckedUpdateInput = {
@@ -412,6 +418,7 @@ export type cuentasUncheckedUpdateInput = {
   bloqueo_edicion?: Prisma.bloqueos_edicion_cuentasUncheckedUpdateOneWithoutCuentaNestedInput
   bloqueos_como_editor?: Prisma.bloqueos_edicion_cuentasUncheckedUpdateManyWithoutEditorNestedInput
   contactos_destinatarios?: Prisma.contactos_destinatariosUncheckedUpdateManyWithoutCuentasNestedInput
+  solicitudes_activacion?: Prisma.solicitudes_activacionUncheckedUpdateManyWithoutCuentasNestedInput
 }
 
 export type cuentasCreateManyInput = {
@@ -589,6 +596,20 @@ export type cuentasUpdateOneRequiredWithoutContactos_destinatariosNestedInput = 
   update?: Prisma.XOR<Prisma.XOR<Prisma.cuentasUpdateToOneWithWhereWithoutContactos_destinatariosInput, Prisma.cuentasUpdateWithoutContactos_destinatariosInput>, Prisma.cuentasUncheckedUpdateWithoutContactos_destinatariosInput>
 }
 
+export type cuentasCreateNestedOneWithoutSolicitudes_activacionInput = {
+  create?: Prisma.XOR<Prisma.cuentasCreateWithoutSolicitudes_activacionInput, Prisma.cuentasUncheckedCreateWithoutSolicitudes_activacionInput>
+  connectOrCreate?: Prisma.cuentasCreateOrConnectWithoutSolicitudes_activacionInput
+  connect?: Prisma.cuentasWhereUniqueInput
+}
+
+export type cuentasUpdateOneRequiredWithoutSolicitudes_activacionNestedInput = {
+  create?: Prisma.XOR<Prisma.cuentasCreateWithoutSolicitudes_activacionInput, Prisma.cuentasUncheckedCreateWithoutSolicitudes_activacionInput>
+  connectOrCreate?: Prisma.cuentasCreateOrConnectWithoutSolicitudes_activacionInput
+  upsert?: Prisma.cuentasUpsertWithoutSolicitudes_activacionInput
+  connect?: Prisma.cuentasWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.cuentasUpdateToOneWithWhereWithoutSolicitudes_activacionInput, Prisma.cuentasUpdateWithoutSolicitudes_activacionInput>, Prisma.cuentasUncheckedUpdateWithoutSolicitudes_activacionInput>
+}
+
 export type cuentasCreateWithoutUsersInput = {
   nombre: string
   apellidos?: string | null
@@ -603,6 +624,7 @@ export type cuentasCreateWithoutUsersInput = {
   bloqueo_edicion?: Prisma.bloqueos_edicion_cuentasCreateNestedOneWithoutCuentaInput
   bloqueos_como_editor?: Prisma.bloqueos_edicion_cuentasCreateNestedManyWithoutEditorInput
   contactos_destinatarios?: Prisma.contactos_destinatariosCreateNestedManyWithoutCuentasInput
+  solicitudes_activacion?: Prisma.solicitudes_activacionCreateNestedManyWithoutCuentasInput
 }
 
 export type cuentasUncheckedCreateWithoutUsersInput = {
@@ -619,6 +641,7 @@ export type cuentasUncheckedCreateWithoutUsersInput = {
   bloqueo_edicion?: Prisma.bloqueos_edicion_cuentasUncheckedCreateNestedOneWithoutCuentaInput
   bloqueos_como_editor?: Prisma.bloqueos_edicion_cuentasUncheckedCreateNestedManyWithoutEditorInput
   contactos_destinatarios?: Prisma.contactos_destinatariosUncheckedCreateNestedManyWithoutCuentasInput
+  solicitudes_activacion?: Prisma.solicitudes_activacionUncheckedCreateNestedManyWithoutCuentasInput
 }
 
 export type cuentasCreateOrConnectWithoutUsersInput = {
@@ -651,6 +674,7 @@ export type cuentasUpdateWithoutUsersInput = {
   bloqueo_edicion?: Prisma.bloqueos_edicion_cuentasUpdateOneWithoutCuentaNestedInput
   bloqueos_como_editor?: Prisma.bloqueos_edicion_cuentasUpdateManyWithoutEditorNestedInput
   contactos_destinatarios?: Prisma.contactos_destinatariosUpdateManyWithoutCuentasNestedInput
+  solicitudes_activacion?: Prisma.solicitudes_activacionUpdateManyWithoutCuentasNestedInput
 }
 
 export type cuentasUncheckedUpdateWithoutUsersInput = {
@@ -667,6 +691,7 @@ export type cuentasUncheckedUpdateWithoutUsersInput = {
   bloqueo_edicion?: Prisma.bloqueos_edicion_cuentasUncheckedUpdateOneWithoutCuentaNestedInput
   bloqueos_como_editor?: Prisma.bloqueos_edicion_cuentasUncheckedUpdateManyWithoutEditorNestedInput
   contactos_destinatarios?: Prisma.contactos_destinatariosUncheckedUpdateManyWithoutCuentasNestedInput
+  solicitudes_activacion?: Prisma.solicitudes_activacionUncheckedUpdateManyWithoutCuentasNestedInput
 }
 
 export type cuentasCreateWithoutBloqueo_edicionInput = {
@@ -683,6 +708,7 @@ export type cuentasCreateWithoutBloqueo_edicionInput = {
   bloqueos_como_editor?: Prisma.bloqueos_edicion_cuentasCreateNestedManyWithoutEditorInput
   contactos_destinatarios?: Prisma.contactos_destinatariosCreateNestedManyWithoutCuentasInput
   users: Prisma.usersCreateNestedOneWithoutCuentasInput
+  solicitudes_activacion?: Prisma.solicitudes_activacionCreateNestedManyWithoutCuentasInput
 }
 
 export type cuentasUncheckedCreateWithoutBloqueo_edicionInput = {
@@ -699,6 +725,7 @@ export type cuentasUncheckedCreateWithoutBloqueo_edicionInput = {
   fecha_cierre?: Date | string | null
   bloqueos_como_editor?: Prisma.bloqueos_edicion_cuentasUncheckedCreateNestedManyWithoutEditorInput
   contactos_destinatarios?: Prisma.contactos_destinatariosUncheckedCreateNestedManyWithoutCuentasInput
+  solicitudes_activacion?: Prisma.solicitudes_activacionUncheckedCreateNestedManyWithoutCuentasInput
 }
 
 export type cuentasCreateOrConnectWithoutBloqueo_edicionInput = {
@@ -720,6 +747,7 @@ export type cuentasCreateWithoutBloqueos_como_editorInput = {
   bloqueo_edicion?: Prisma.bloqueos_edicion_cuentasCreateNestedOneWithoutCuentaInput
   contactos_destinatarios?: Prisma.contactos_destinatariosCreateNestedManyWithoutCuentasInput
   users: Prisma.usersCreateNestedOneWithoutCuentasInput
+  solicitudes_activacion?: Prisma.solicitudes_activacionCreateNestedManyWithoutCuentasInput
 }
 
 export type cuentasUncheckedCreateWithoutBloqueos_como_editorInput = {
@@ -736,6 +764,7 @@ export type cuentasUncheckedCreateWithoutBloqueos_como_editorInput = {
   fecha_cierre?: Date | string | null
   bloqueo_edicion?: Prisma.bloqueos_edicion_cuentasUncheckedCreateNestedOneWithoutCuentaInput
   contactos_destinatarios?: Prisma.contactos_destinatariosUncheckedCreateNestedManyWithoutCuentasInput
+  solicitudes_activacion?: Prisma.solicitudes_activacionUncheckedCreateNestedManyWithoutCuentasInput
 }
 
 export type cuentasCreateOrConnectWithoutBloqueos_como_editorInput = {
@@ -768,6 +797,7 @@ export type cuentasUpdateWithoutBloqueo_edicionInput = {
   bloqueos_como_editor?: Prisma.bloqueos_edicion_cuentasUpdateManyWithoutEditorNestedInput
   contactos_destinatarios?: Prisma.contactos_destinatariosUpdateManyWithoutCuentasNestedInput
   users?: Prisma.usersUpdateOneRequiredWithoutCuentasNestedInput
+  solicitudes_activacion?: Prisma.solicitudes_activacionUpdateManyWithoutCuentasNestedInput
 }
 
 export type cuentasUncheckedUpdateWithoutBloqueo_edicionInput = {
@@ -784,6 +814,7 @@ export type cuentasUncheckedUpdateWithoutBloqueo_edicionInput = {
   fecha_cierre?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   bloqueos_como_editor?: Prisma.bloqueos_edicion_cuentasUncheckedUpdateManyWithoutEditorNestedInput
   contactos_destinatarios?: Prisma.contactos_destinatariosUncheckedUpdateManyWithoutCuentasNestedInput
+  solicitudes_activacion?: Prisma.solicitudes_activacionUncheckedUpdateManyWithoutCuentasNestedInput
 }
 
 export type cuentasUpsertWithoutBloqueos_como_editorInput = {
@@ -811,6 +842,7 @@ export type cuentasUpdateWithoutBloqueos_como_editorInput = {
   bloqueo_edicion?: Prisma.bloqueos_edicion_cuentasUpdateOneWithoutCuentaNestedInput
   contactos_destinatarios?: Prisma.contactos_destinatariosUpdateManyWithoutCuentasNestedInput
   users?: Prisma.usersUpdateOneRequiredWithoutCuentasNestedInput
+  solicitudes_activacion?: Prisma.solicitudes_activacionUpdateManyWithoutCuentasNestedInput
 }
 
 export type cuentasUncheckedUpdateWithoutBloqueos_como_editorInput = {
@@ -827,6 +859,7 @@ export type cuentasUncheckedUpdateWithoutBloqueos_como_editorInput = {
   fecha_cierre?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   bloqueo_edicion?: Prisma.bloqueos_edicion_cuentasUncheckedUpdateOneWithoutCuentaNestedInput
   contactos_destinatarios?: Prisma.contactos_destinatariosUncheckedUpdateManyWithoutCuentasNestedInput
+  solicitudes_activacion?: Prisma.solicitudes_activacionUncheckedUpdateManyWithoutCuentasNestedInput
 }
 
 export type cuentasCreateWithoutContactos_destinatariosInput = {
@@ -843,6 +876,7 @@ export type cuentasCreateWithoutContactos_destinatariosInput = {
   bloqueo_edicion?: Prisma.bloqueos_edicion_cuentasCreateNestedOneWithoutCuentaInput
   bloqueos_como_editor?: Prisma.bloqueos_edicion_cuentasCreateNestedManyWithoutEditorInput
   users: Prisma.usersCreateNestedOneWithoutCuentasInput
+  solicitudes_activacion?: Prisma.solicitudes_activacionCreateNestedManyWithoutCuentasInput
 }
 
 export type cuentasUncheckedCreateWithoutContactos_destinatariosInput = {
@@ -859,6 +893,7 @@ export type cuentasUncheckedCreateWithoutContactos_destinatariosInput = {
   fecha_cierre?: Date | string | null
   bloqueo_edicion?: Prisma.bloqueos_edicion_cuentasUncheckedCreateNestedOneWithoutCuentaInput
   bloqueos_como_editor?: Prisma.bloqueos_edicion_cuentasUncheckedCreateNestedManyWithoutEditorInput
+  solicitudes_activacion?: Prisma.solicitudes_activacionUncheckedCreateNestedManyWithoutCuentasInput
 }
 
 export type cuentasCreateOrConnectWithoutContactos_destinatariosInput = {
@@ -891,6 +926,7 @@ export type cuentasUpdateWithoutContactos_destinatariosInput = {
   bloqueo_edicion?: Prisma.bloqueos_edicion_cuentasUpdateOneWithoutCuentaNestedInput
   bloqueos_como_editor?: Prisma.bloqueos_edicion_cuentasUpdateManyWithoutEditorNestedInput
   users?: Prisma.usersUpdateOneRequiredWithoutCuentasNestedInput
+  solicitudes_activacion?: Prisma.solicitudes_activacionUpdateManyWithoutCuentasNestedInput
 }
 
 export type cuentasUncheckedUpdateWithoutContactos_destinatariosInput = {
@@ -907,6 +943,91 @@ export type cuentasUncheckedUpdateWithoutContactos_destinatariosInput = {
   fecha_cierre?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   bloqueo_edicion?: Prisma.bloqueos_edicion_cuentasUncheckedUpdateOneWithoutCuentaNestedInput
   bloqueos_como_editor?: Prisma.bloqueos_edicion_cuentasUncheckedUpdateManyWithoutEditorNestedInput
+  solicitudes_activacion?: Prisma.solicitudes_activacionUncheckedUpdateManyWithoutCuentasNestedInput
+}
+
+export type cuentasCreateWithoutSolicitudes_activacionInput = {
+  nombre: string
+  apellidos?: string | null
+  correo: string
+  rol?: string
+  estado?: string
+  version?: number
+  fecha_registro?: Date | string
+  fecha_suspension?: Date | string | null
+  motivo_suspension?: string | null
+  fecha_cierre?: Date | string | null
+  bloqueo_edicion?: Prisma.bloqueos_edicion_cuentasCreateNestedOneWithoutCuentaInput
+  bloqueos_como_editor?: Prisma.bloqueos_edicion_cuentasCreateNestedManyWithoutEditorInput
+  contactos_destinatarios?: Prisma.contactos_destinatariosCreateNestedManyWithoutCuentasInput
+  users: Prisma.usersCreateNestedOneWithoutCuentasInput
+}
+
+export type cuentasUncheckedCreateWithoutSolicitudes_activacionInput = {
+  id: string
+  nombre: string
+  apellidos?: string | null
+  correo: string
+  rol?: string
+  estado?: string
+  version?: number
+  fecha_registro?: Date | string
+  fecha_suspension?: Date | string | null
+  motivo_suspension?: string | null
+  fecha_cierre?: Date | string | null
+  bloqueo_edicion?: Prisma.bloqueos_edicion_cuentasUncheckedCreateNestedOneWithoutCuentaInput
+  bloqueos_como_editor?: Prisma.bloqueos_edicion_cuentasUncheckedCreateNestedManyWithoutEditorInput
+  contactos_destinatarios?: Prisma.contactos_destinatariosUncheckedCreateNestedManyWithoutCuentasInput
+}
+
+export type cuentasCreateOrConnectWithoutSolicitudes_activacionInput = {
+  where: Prisma.cuentasWhereUniqueInput
+  create: Prisma.XOR<Prisma.cuentasCreateWithoutSolicitudes_activacionInput, Prisma.cuentasUncheckedCreateWithoutSolicitudes_activacionInput>
+}
+
+export type cuentasUpsertWithoutSolicitudes_activacionInput = {
+  update: Prisma.XOR<Prisma.cuentasUpdateWithoutSolicitudes_activacionInput, Prisma.cuentasUncheckedUpdateWithoutSolicitudes_activacionInput>
+  create: Prisma.XOR<Prisma.cuentasCreateWithoutSolicitudes_activacionInput, Prisma.cuentasUncheckedCreateWithoutSolicitudes_activacionInput>
+  where?: Prisma.cuentasWhereInput
+}
+
+export type cuentasUpdateToOneWithWhereWithoutSolicitudes_activacionInput = {
+  where?: Prisma.cuentasWhereInput
+  data: Prisma.XOR<Prisma.cuentasUpdateWithoutSolicitudes_activacionInput, Prisma.cuentasUncheckedUpdateWithoutSolicitudes_activacionInput>
+}
+
+export type cuentasUpdateWithoutSolicitudes_activacionInput = {
+  nombre?: Prisma.StringFieldUpdateOperationsInput | string
+  apellidos?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  correo?: Prisma.StringFieldUpdateOperationsInput | string
+  rol?: Prisma.StringFieldUpdateOperationsInput | string
+  estado?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  fecha_registro?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  fecha_suspension?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  motivo_suspension?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fecha_cierre?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  bloqueo_edicion?: Prisma.bloqueos_edicion_cuentasUpdateOneWithoutCuentaNestedInput
+  bloqueos_como_editor?: Prisma.bloqueos_edicion_cuentasUpdateManyWithoutEditorNestedInput
+  contactos_destinatarios?: Prisma.contactos_destinatariosUpdateManyWithoutCuentasNestedInput
+  users?: Prisma.usersUpdateOneRequiredWithoutCuentasNestedInput
+}
+
+export type cuentasUncheckedUpdateWithoutSolicitudes_activacionInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  nombre?: Prisma.StringFieldUpdateOperationsInput | string
+  apellidos?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  correo?: Prisma.StringFieldUpdateOperationsInput | string
+  rol?: Prisma.StringFieldUpdateOperationsInput | string
+  estado?: Prisma.StringFieldUpdateOperationsInput | string
+  version?: Prisma.IntFieldUpdateOperationsInput | number
+  fecha_registro?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  fecha_suspension?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  motivo_suspension?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fecha_cierre?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  bloqueo_edicion?: Prisma.bloqueos_edicion_cuentasUncheckedUpdateOneWithoutCuentaNestedInput
+  bloqueos_como_editor?: Prisma.bloqueos_edicion_cuentasUncheckedUpdateManyWithoutEditorNestedInput
+  contactos_destinatarios?: Prisma.contactos_destinatariosUncheckedUpdateManyWithoutCuentasNestedInput
 }
 
 
@@ -917,11 +1038,13 @@ export type cuentasUncheckedUpdateWithoutContactos_destinatariosInput = {
 export type CuentasCountOutputType = {
   bloqueos_como_editor: number
   contactos_destinatarios: number
+  solicitudes_activacion: number
 }
 
 export type CuentasCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   bloqueos_como_editor?: boolean | CuentasCountOutputTypeCountBloqueos_como_editorArgs
   contactos_destinatarios?: boolean | CuentasCountOutputTypeCountContactos_destinatariosArgs
+  solicitudes_activacion?: boolean | CuentasCountOutputTypeCountSolicitudes_activacionArgs
 }
 
 /**
@@ -948,6 +1071,13 @@ export type CuentasCountOutputTypeCountContactos_destinatariosArgs<ExtArgs exten
   where?: Prisma.contactos_destinatariosWhereInput
 }
 
+/**
+ * CuentasCountOutputType without action
+ */
+export type CuentasCountOutputTypeCountSolicitudes_activacionArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.solicitudes_activacionWhereInput
+}
+
 
 export type cuentasSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -965,6 +1095,7 @@ export type cuentasSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   bloqueos_como_editor?: boolean | Prisma.cuentas$bloqueos_como_editorArgs<ExtArgs>
   contactos_destinatarios?: boolean | Prisma.cuentas$contactos_destinatariosArgs<ExtArgs>
   users?: boolean | Prisma.usersDefaultArgs<ExtArgs>
+  solicitudes_activacion?: boolean | Prisma.cuentas$solicitudes_activacionArgs<ExtArgs>
   _count?: boolean | Prisma.CuentasCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["cuentas"]>
 
@@ -1018,6 +1149,7 @@ export type cuentasInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs
   bloqueos_como_editor?: boolean | Prisma.cuentas$bloqueos_como_editorArgs<ExtArgs>
   contactos_destinatarios?: boolean | Prisma.cuentas$contactos_destinatariosArgs<ExtArgs>
   users?: boolean | Prisma.usersDefaultArgs<ExtArgs>
+  solicitudes_activacion?: boolean | Prisma.cuentas$solicitudes_activacionArgs<ExtArgs>
   _count?: boolean | Prisma.CuentasCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type cuentasIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1034,6 +1166,7 @@ export type $cuentasPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     bloqueos_como_editor: Prisma.$bloqueos_edicion_cuentasPayload<ExtArgs>[]
     contactos_destinatarios: Prisma.$contactos_destinatariosPayload<ExtArgs>[]
     users: Prisma.$usersPayload<ExtArgs>
+    solicitudes_activacion: Prisma.$solicitudes_activacionPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1445,6 +1578,7 @@ export interface Prisma__cuentasClient<T, Null = never, ExtArgs extends runtime.
   bloqueos_como_editor<T extends Prisma.cuentas$bloqueos_como_editorArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.cuentas$bloqueos_como_editorArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$bloqueos_edicion_cuentasPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   contactos_destinatarios<T extends Prisma.cuentas$contactos_destinatariosArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.cuentas$contactos_destinatariosArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$contactos_destinatariosPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   users<T extends Prisma.usersDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.usersDefaultArgs<ExtArgs>>): Prisma.Prisma__usersClient<runtime.Types.Result.GetResult<Prisma.$usersPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  solicitudes_activacion<T extends Prisma.cuentas$solicitudes_activacionArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.cuentas$solicitudes_activacionArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$solicitudes_activacionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1950,6 +2084,30 @@ export type cuentas$contactos_destinatariosArgs<ExtArgs extends runtime.Types.Ex
   take?: number
   skip?: number
   distinct?: Prisma.Contactos_destinatariosScalarFieldEnum | Prisma.Contactos_destinatariosScalarFieldEnum[]
+}
+
+/**
+ * cuentas.solicitudes_activacion
+ */
+export type cuentas$solicitudes_activacionArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the solicitudes_activacion
+   */
+  select?: Prisma.solicitudes_activacionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the solicitudes_activacion
+   */
+  omit?: Prisma.solicitudes_activacionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.solicitudes_activacionInclude<ExtArgs> | null
+  where?: Prisma.solicitudes_activacionWhereInput
+  orderBy?: Prisma.solicitudes_activacionOrderByWithRelationInput | Prisma.solicitudes_activacionOrderByWithRelationInput[]
+  cursor?: Prisma.solicitudes_activacionWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.Solicitudes_activacionScalarFieldEnum | Prisma.Solicitudes_activacionScalarFieldEnum[]
 }
 
 /**

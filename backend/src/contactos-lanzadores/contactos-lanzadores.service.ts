@@ -1333,6 +1333,138 @@ export class ContactosLanzadoresService {
         return { mensaje: 'Sesión cerrada.' };
     }
 
+    // --------------------------------------------------
+    // 9. Consultar el estado de activación del administrador desde una sesión temporal de lanzador.
+    // Solo devuelve información operativa autorizada.
+    // --------------------------------------------------
+
+    async consultarEstadoActivacionLanzador(tokenSesion?: string) {
+
+        // Comprobar el formato del token
+        if (!this.tokenValido(tokenSesion)) {
+            throw new UnauthorizedException(
+                'Sesión de lanzador no válida.'
+            );
+        }
+
+        // Reutilizar la comprobación de sesión y autorización existente
+        const contexto = await this.obtenerSesionLanzador(tokenSesion);
+
+        // Identificar al lanzador para distinguirlo del segundo lanzador que podría confirmar la solicitud
+        const sesion = await this.prisma.sesiones_lanzadores.findUnique({
+            where: {
+                token_hash: this.hashTokenAcceso(tokenSesion)
+            },
+            select: {
+                lanzador_id: true,
+                revocado_en: true,
+                caduca_en: true
+            }
+        });
+
+        if (
+            !sesion ||
+            sesion.revocado_en ||
+            sesion.caduca_en <= new Date()
+        ) {
+            throw new UnauthorizedException(
+                'La sesión ha caducado o no está disponible.'
+            );
+        }
+
+        // Estados que representan una activación en curso.
+        // Se corresponden con los estados contemplados por el índice de Postgre
+        const estadosEnCurso = [
+            'pendiente_validacion',
+            'periodo_seguridad',
+            'en_procesamiento',
+            'con_incidencias'
+        ];
+
+        // Consultar solo las solicitudes del administrador al que pertenece la sesión autorizada
+        const solicitud = await this.prisma.solicitudes_activacion.findFirst({
+            where: {
+                administrador_id: contexto.administradorId,
+                estado: {
+                    in: estadosEnCurso
+                }
+            },
+            select: {
+                id: true,
+                estado: true,
+                solicitada_en: true,
+                validada_en: true,
+                procesar_desde: true,
+                asignacion_solicitante: {
+                    select: {
+                        lanzador_id: true
+                    }
+                }
+            },
+            orderBy: {
+                solicitada_en: 'desc'
+            }
+        });
+
+        // Si no hay activación en curso, consultar solo el estado de la última solicitud histórica
+        const ultimaSolicitud = solicitud
+            ? null
+            : await this.prisma.solicitudes_activacion.findFirst({
+                where: {
+                    administrador_id: contexto.administradorId
+                },
+                select: {
+                    id: true,
+                    estado: true,
+                    solicitada_en: true,
+                    finalizada_en: true
+                },
+                orderBy: {
+                    solicitada_en: 'desc'
+                }
+            });
+
+        // Comprobar la identidad del solicitante, no solo el identificador de su asignación
+        const esSolicitante = solicitud
+            ? solicitud.asignacion_solicitante.lanzador_id === sesion.lanzador_id
+            : false;
+
+        // Información orientativa para el frontend
+        const accionOrientativa = !solicitud
+            ? 'solicitar'
+            : solicitud.estado === 'pendiente_validacion' && !esSolicitante
+                ? 'confirmar'
+                : 'ninguna';
+
+        return {
+            administradorId: contexto.administradorId,
+            administradorNombre: contexto.administradorNombre,
+
+            activacionEnCurso: solicitud !== null,
+            estado: solicitud?.estado ?? 'sin_activacion',
+
+            solicitud: solicitud
+                ? {
+                    id: solicitud.id,
+                    solicitadaEn: solicitud.solicitada_en,
+                    validadaEn: solicitud.validada_en,
+                    procesarDesde: solicitud.procesar_desde
+                }
+                : null,
+
+            ultimaSolicitud: ultimaSolicitud
+                ? {
+                    id: ultimaSolicitud.id,
+                    estado: ultimaSolicitud.estado,
+                    solicitadaEn: ultimaSolicitud.solicitada_en,
+                    finalizadaEn: ultimaSolicitud.finalizada_en
+                }
+                : null,
+
+            esSolicitante,
+            accionOrientativa
+        };
+    }
 
 
 

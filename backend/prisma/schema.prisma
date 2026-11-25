@@ -601,6 +601,10 @@ model asignaciones_lanzadores {
   credenciales_acceso_lanzadores credenciales_acceso_lanzadores[]
   sesiones_lanzadores            sesiones_lanzadores[]
 
+// Historial de activaciones solicitadas o validadas
+solicitudes_como_solicitante solicitudes_activacion[] @relation("SolicitudComoSolicitante")
+solicitudes_como_validador  solicitudes_activacion[] @relation("SolicitudComoValidador")
+
   @@unique([administrador_id, lanzador_id], map: "asignaciones_vigentes_unicas_idx", where: raw("((estado)::text = ANY ((ARRAY['pendiente'::character varying, 'aceptada'::character varying])::text[]))"))
   @@index([administrador_id, estado], map: "asignaciones_administrador_idx")
   @@index([fecha_caducidad], map: "asignaciones_caducidad_idx", where: raw("((estado)::text = 'pendiente'::text)"))
@@ -797,6 +801,9 @@ model cuentas {
   contactos_destinatarios contactos_destinatarios[]
   users                   users                     @relation(fields: [id], references: [id], onUpdate: NoAction, map: "cuentas_usuario_id_fkey")
 
+// Solicitudes de activación históricas de esta cuenta
+solicitudes_activacion solicitudes_activacion[]
+
   @@schema("public")
 }
 
@@ -911,6 +918,114 @@ model mensajes_destinatarios {
 
   @@schema("public")
 }
+
+/// Solicitudes de activación de una despedida.
+/// Un administrador puede conservar varias solicitudes históricas,
+/// pero PostgreSQL impide más de una solicitud en curso.
+
+model solicitudes_activacion {
+  id                        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  administrador_id          String    @db.Uuid
+  asignacion_solicitante_id String    @db.Uuid
+  asignacion_validador_id   String?   @db.Uuid
+
+  // Comunicación general y datos de la despedida
+  mensaje_general           String?
+  informacion_ceremonia     String?
+
+  // Estado de la solicitud
+  estado                    String    @default("pendiente_validacion") @db.VarChar(40)
+
+  // Fechas del proceso de activación
+  solicitada_en             DateTime  @default(now()) @db.Timestamptz(6)
+  validada_en               DateTime? @db.Timestamptz(6)
+  procesar_desde            DateTime? @db.Timestamptz(6)
+  procesamiento_iniciado_en DateTime? @db.Timestamptz(6)
+
+  // Cancelación
+  cancelada_en              DateTime? @db.Timestamptz(6)
+  cancelada_por_id          String?   @db.Uuid
+  cancelada_por_tipo        String?   @db.VarChar(25)
+  motivo_cancelacion       String?
+
+  // Finalización
+  finalizada_en             DateTime? @db.Timestamptz(6)
+
+  // Cuenta administradora
+  cuentas cuentas @relation(fields: [administrador_id], references: [id], onUpdate: NoAction)
+
+
+  // Primer contacto lanzador
+  asignacion_solicitante asignaciones_lanzadores @relation("SolicitudComoSolicitante", fields: [asignacion_solicitante_id], references: [id], onUpdate: NoAction)
+
+  // Segundo contacto lanzador, todavía opcional durante la solicitud
+  asignacion_validador asignaciones_lanzadores? @relation("SolicitudComoValidador", fields: [asignacion_validador_id], references: [id], onDelete: Restrict, onUpdate: NoAction)
+
+
+
+  // Comunicaciones vinculadas a la solicitud
+  comunicaciones_lote comunicaciones_lote[]
+
+
+// PostgreSQL ya tiene el índice único parcial
+// sa_una_activa_por_administrador_idx.
+// Impide más de una solicitud en curso por administrador,
+// pero permite conservar múltiples solicitudes históricas.
+// No se declara como @@unique en Prisma para mantener correctamente la relación uno a muchos.
+// OJO conservar este índice en PostgreSQL cuando se gestionen futuras migraciones de la base de datos.
+
+
+
+  @@index([administrador_id, solicitada_en(sort: Desc)], map: "sa_administrador_fecha_idx")
+  @@index([estado, procesar_desde], map: "sa_estado_procesar_idx")
+  @@index([asignacion_solicitante_id], map: "sa_solicitante_idx")
+  @@index([asignacion_validador_id], map: "sa_validador_idx")
+
+  @@schema("public")
+}
+
+
+
+/// Comunicaciones preparadas para una solicitud de activación.
+/// Contiene datos privados de destinatarios.
+/// Su contenido no debe exponerse a los contactos lanzadores.
+
+model comunicaciones_lote {
+  id                    String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  solicitud_id          String    @db.Uuid
+
+  // Datos congelados de la comunicación
+  destinatario_nombre   String    @db.VarChar(100)
+  destinatario_correo   String    @db.VarChar(254)
+  mensaje_privado       String?
+
+  // Estado del envío
+  estado_envio          String    @default("pendiente") @db.VarChar(40)
+  numero_intentos       Int       @default(0)
+  proximo_intento_en    DateTime? @db.Timestamptz(6)
+
+  // Confirmaciones del proveedor
+  aceptado_por_brevo_en DateTime? @db.Timestamptz(6)
+  entregado_en          DateTime? @db.Timestamptz(6)
+  referencia_proveedor  String?   @db.VarChar(255)
+
+  // Auditoría temporal
+  creado_en             DateTime  @default(now()) @db.Timestamptz(6)
+  actualizado_en        DateTime  @default(now()) @db.Timestamptz(6)
+
+  // Solicitud de activación relacionada
+  solicitudes_activacion solicitudes_activacion @relation(fields: [solicitud_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+
+  // Índices existentes en Postgre
+  @@index([referencia_proveedor], map: "cl_referencia_brevo_idx", where: raw("(referencia_proveedor IS NOT NULL)"))
+  @@index([proximo_intento_en], map: "cl_reintentos_idx", where: raw("((estado_envio)::text = 'reintento_programado'::text)"))
+  @@index([solicitud_id], map: "cl_solicitud_idx")
+
+  @@schema("public")
+}
+
+
 
 enum aal_level {
   aal1

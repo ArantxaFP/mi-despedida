@@ -90,7 +90,9 @@ export const ModelName = {
   auditoria_operaciones_cuentas: 'auditoria_operaciones_cuentas',
   historico_cierre_cuentas: 'historico_cierre_cuentas',
   contactos_destinatarios: 'contactos_destinatarios',
-  mensajes_destinatarios: 'mensajes_destinatarios'
+  mensajes_destinatarios: 'mensajes_destinatarios',
+  solicitudes_activacion: 'solicitudes_activacion',
+  comunicaciones_lote: 'comunicaciones_lote'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -735,6 +737,47 @@ export const Mensajes_destinatariosScalarFieldEnum = {
 } as const
 
 export type Mensajes_destinatariosScalarFieldEnum = (typeof Mensajes_destinatariosScalarFieldEnum)[keyof typeof Mensajes_destinatariosScalarFieldEnum]
+
+
+export const Solicitudes_activacionScalarFieldEnum = {
+  id: 'id',
+  administrador_id: 'administrador_id',
+  asignacion_solicitante_id: 'asignacion_solicitante_id',
+  asignacion_validador_id: 'asignacion_validador_id',
+  mensaje_general: 'mensaje_general',
+  informacion_ceremonia: 'informacion_ceremonia',
+  estado: 'estado',
+  solicitada_en: 'solicitada_en',
+  validada_en: 'validada_en',
+  procesar_desde: 'procesar_desde',
+  procesamiento_iniciado_en: 'procesamiento_iniciado_en',
+  cancelada_en: 'cancelada_en',
+  cancelada_por_id: 'cancelada_por_id',
+  cancelada_por_tipo: 'cancelada_por_tipo',
+  motivo_cancelacion: 'motivo_cancelacion',
+  finalizada_en: 'finalizada_en'
+} as const
+
+export type Solicitudes_activacionScalarFieldEnum = (typeof Solicitudes_activacionScalarFieldEnum)[keyof typeof Solicitudes_activacionScalarFieldEnum]
+
+
+export const Comunicaciones_loteScalarFieldEnum = {
+  id: 'id',
+  solicitud_id: 'solicitud_id',
+  destinatario_nombre: 'destinatario_nombre',
+  destinatario_correo: 'destinatario_correo',
+  mensaje_privado: 'mensaje_privado',
+  estado_envio: 'estado_envio',
+  numero_intentos: 'numero_intentos',
+  proximo_intento_en: 'proximo_intento_en',
+  aceptado_por_brevo_en: 'aceptado_por_brevo_en',
+  entregado_en: 'entregado_en',
+  referencia_proveedor: 'referencia_proveedor',
+  creado_en: 'creado_en',
+  actualizado_en: 'actualizado_en'
+} as const
+
+export type Comunicaciones_loteScalarFieldEnum = (typeof Comunicaciones_loteScalarFieldEnum)[keyof typeof Comunicaciones_loteScalarFieldEnum]
 
 
 export const SortOrder = {

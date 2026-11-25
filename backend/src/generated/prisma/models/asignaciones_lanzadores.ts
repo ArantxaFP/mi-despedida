@@ -229,6 +229,8 @@ export type asignaciones_lanzadoresWhereInput = {
   invitaciones_lanzadores?: Prisma.XOR<Prisma.Invitaciones_lanzadoresNullableScalarRelationFilter, Prisma.invitaciones_lanzadoresWhereInput> | null
   credenciales_acceso_lanzadores?: Prisma.Credenciales_acceso_lanzadoresListRelationFilter
   sesiones_lanzadores?: Prisma.Sesiones_lanzadoresListRelationFilter
+  solicitudes_como_solicitante?: Prisma.Solicitudes_activacionListRelationFilter
+  solicitudes_como_validador?: Prisma.Solicitudes_activacionListRelationFilter
 }
 
 export type asignaciones_lanzadoresOrderByWithRelationInput = {
@@ -248,6 +250,8 @@ export type asignaciones_lanzadoresOrderByWithRelationInput = {
   invitaciones_lanzadores?: Prisma.invitaciones_lanzadoresOrderByWithRelationInput
   credenciales_acceso_lanzadores?: Prisma.credenciales_acceso_lanzadoresOrderByRelationAggregateInput
   sesiones_lanzadores?: Prisma.sesiones_lanzadoresOrderByRelationAggregateInput
+  solicitudes_como_solicitante?: Prisma.solicitudes_activacionOrderByRelationAggregateInput
+  solicitudes_como_validador?: Prisma.solicitudes_activacionOrderByRelationAggregateInput
 }
 
 export type asignaciones_lanzadoresWhereUniqueInput = Prisma.AtLeast<{
@@ -271,6 +275,8 @@ export type asignaciones_lanzadoresWhereUniqueInput = Prisma.AtLeast<{
   invitaciones_lanzadores?: Prisma.XOR<Prisma.Invitaciones_lanzadoresNullableScalarRelationFilter, Prisma.invitaciones_lanzadoresWhereInput> | null
   credenciales_acceso_lanzadores?: Prisma.Credenciales_acceso_lanzadoresListRelationFilter
   sesiones_lanzadores?: Prisma.Sesiones_lanzadoresListRelationFilter
+  solicitudes_como_solicitante?: Prisma.Solicitudes_activacionListRelationFilter
+  solicitudes_como_validador?: Prisma.Solicitudes_activacionListRelationFilter
 }, "id" | "administrador_id_lanzador_id">
 
 export type asignaciones_lanzadoresOrderByWithAggregationInput = {
@@ -320,6 +326,8 @@ export type asignaciones_lanzadoresCreateInput = {
   invitaciones_lanzadores?: Prisma.invitaciones_lanzadoresCreateNestedOneWithoutAsignaciones_lanzadoresInput
   credenciales_acceso_lanzadores?: Prisma.credenciales_acceso_lanzadoresCreateNestedManyWithoutAsignaciones_lanzadoresInput
   sesiones_lanzadores?: Prisma.sesiones_lanzadoresCreateNestedManyWithoutAsignaciones_lanzadoresInput
+  solicitudes_como_solicitante?: Prisma.solicitudes_activacionCreateNestedManyWithoutAsignacion_solicitanteInput
+  solicitudes_como_validador?: Prisma.solicitudes_activacionCreateNestedManyWithoutAsignacion_validadorInput
 }
 
 export type asignaciones_lanzadoresUncheckedCreateInput = {
@@ -337,6 +345,8 @@ export type asignaciones_lanzadoresUncheckedCreateInput = {
   invitaciones_lanzadores?: Prisma.invitaciones_lanzadoresUncheckedCreateNestedOneWithoutAsignaciones_lanzadoresInput
   credenciales_acceso_lanzadores?: Prisma.credenciales_acceso_lanzadoresUncheckedCreateNestedManyWithoutAsignaciones_lanzadoresInput
   sesiones_lanzadores?: Prisma.sesiones_lanzadoresUncheckedCreateNestedManyWithoutAsignaciones_lanzadoresInput
+  solicitudes_como_solicitante?: Prisma.solicitudes_activacionUncheckedCreateNestedManyWithoutAsignacion_solicitanteInput
+  solicitudes_como_validador?: Prisma.solicitudes_activacionUncheckedCreateNestedManyWithoutAsignacion_validadorInput
 }
 
 export type asignaciones_lanzadoresUpdateInput = {
@@ -354,6 +364,8 @@ export type asignaciones_lanzadoresUpdateInput = {
   invitaciones_lanzadores?: Prisma.invitaciones_lanzadoresUpdateOneWithoutAsignaciones_lanzadoresNestedInput
   credenciales_acceso_lanzadores?: Prisma.credenciales_acceso_lanzadoresUpdateManyWithoutAsignaciones_lanzadoresNestedInput
   sesiones_lanzadores?: Prisma.sesiones_lanzadoresUpdateManyWithoutAsignaciones_lanzadoresNestedInput
+  solicitudes_como_solicitante?: Prisma.solicitudes_activacionUpdateManyWithoutAsignacion_solicitanteNestedInput
+  solicitudes_como_validador?: Prisma.solicitudes_activacionUpdateManyWithoutAsignacion_validadorNestedInput
 }
 
 export type asignaciones_lanzadoresUncheckedUpdateInput = {
@@ -371,6 +383,8 @@ export type asignaciones_lanzadoresUncheckedUpdateInput = {
   invitaciones_lanzadores?: Prisma.invitaciones_lanzadoresUncheckedUpdateOneWithoutAsignaciones_lanzadoresNestedInput
   credenciales_acceso_lanzadores?: Prisma.credenciales_acceso_lanzadoresUncheckedUpdateManyWithoutAsignaciones_lanzadoresNestedInput
   sesiones_lanzadores?: Prisma.sesiones_lanzadoresUncheckedUpdateManyWithoutAsignaciones_lanzadoresNestedInput
+  solicitudes_como_solicitante?: Prisma.solicitudes_activacionUncheckedUpdateManyWithoutAsignacion_solicitanteNestedInput
+  solicitudes_como_validador?: Prisma.solicitudes_activacionUncheckedUpdateManyWithoutAsignacion_validadorNestedInput
 }
 
 export type asignaciones_lanzadoresCreateManyInput = {
@@ -616,6 +630,36 @@ export type asignaciones_lanzadoresUpdateOneRequiredWithoutInvitaciones_lanzador
   update?: Prisma.XOR<Prisma.XOR<Prisma.asignaciones_lanzadoresUpdateToOneWithWhereWithoutInvitaciones_lanzadoresInput, Prisma.asignaciones_lanzadoresUpdateWithoutInvitaciones_lanzadoresInput>, Prisma.asignaciones_lanzadoresUncheckedUpdateWithoutInvitaciones_lanzadoresInput>
 }
 
+export type asignaciones_lanzadoresCreateNestedOneWithoutSolicitudes_como_solicitanteInput = {
+  create?: Prisma.XOR<Prisma.asignaciones_lanzadoresCreateWithoutSolicitudes_como_solicitanteInput, Prisma.asignaciones_lanzadoresUncheckedCreateWithoutSolicitudes_como_solicitanteInput>
+  connectOrCreate?: Prisma.asignaciones_lanzadoresCreateOrConnectWithoutSolicitudes_como_solicitanteInput
+  connect?: Prisma.asignaciones_lanzadoresWhereUniqueInput
+}
+
+export type asignaciones_lanzadoresCreateNestedOneWithoutSolicitudes_como_validadorInput = {
+  create?: Prisma.XOR<Prisma.asignaciones_lanzadoresCreateWithoutSolicitudes_como_validadorInput, Prisma.asignaciones_lanzadoresUncheckedCreateWithoutSolicitudes_como_validadorInput>
+  connectOrCreate?: Prisma.asignaciones_lanzadoresCreateOrConnectWithoutSolicitudes_como_validadorInput
+  connect?: Prisma.asignaciones_lanzadoresWhereUniqueInput
+}
+
+export type asignaciones_lanzadoresUpdateOneRequiredWithoutSolicitudes_como_solicitanteNestedInput = {
+  create?: Prisma.XOR<Prisma.asignaciones_lanzadoresCreateWithoutSolicitudes_como_solicitanteInput, Prisma.asignaciones_lanzadoresUncheckedCreateWithoutSolicitudes_como_solicitanteInput>
+  connectOrCreate?: Prisma.asignaciones_lanzadoresCreateOrConnectWithoutSolicitudes_como_solicitanteInput
+  upsert?: Prisma.asignaciones_lanzadoresUpsertWithoutSolicitudes_como_solicitanteInput
+  connect?: Prisma.asignaciones_lanzadoresWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.asignaciones_lanzadoresUpdateToOneWithWhereWithoutSolicitudes_como_solicitanteInput, Prisma.asignaciones_lanzadoresUpdateWithoutSolicitudes_como_solicitanteInput>, Prisma.asignaciones_lanzadoresUncheckedUpdateWithoutSolicitudes_como_solicitanteInput>
+}
+
+export type asignaciones_lanzadoresUpdateOneWithoutSolicitudes_como_validadorNestedInput = {
+  create?: Prisma.XOR<Prisma.asignaciones_lanzadoresCreateWithoutSolicitudes_como_validadorInput, Prisma.asignaciones_lanzadoresUncheckedCreateWithoutSolicitudes_como_validadorInput>
+  connectOrCreate?: Prisma.asignaciones_lanzadoresCreateOrConnectWithoutSolicitudes_como_validadorInput
+  upsert?: Prisma.asignaciones_lanzadoresUpsertWithoutSolicitudes_como_validadorInput
+  disconnect?: Prisma.asignaciones_lanzadoresWhereInput | boolean
+  delete?: Prisma.asignaciones_lanzadoresWhereInput | boolean
+  connect?: Prisma.asignaciones_lanzadoresWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.asignaciones_lanzadoresUpdateToOneWithWhereWithoutSolicitudes_como_validadorInput, Prisma.asignaciones_lanzadoresUpdateWithoutSolicitudes_como_validadorInput>, Prisma.asignaciones_lanzadoresUncheckedUpdateWithoutSolicitudes_como_validadorInput>
+}
+
 export type asignaciones_lanzadoresCreateWithoutUsersInput = {
   id?: string
   estado?: string
@@ -630,6 +674,8 @@ export type asignaciones_lanzadoresCreateWithoutUsersInput = {
   invitaciones_lanzadores?: Prisma.invitaciones_lanzadoresCreateNestedOneWithoutAsignaciones_lanzadoresInput
   credenciales_acceso_lanzadores?: Prisma.credenciales_acceso_lanzadoresCreateNestedManyWithoutAsignaciones_lanzadoresInput
   sesiones_lanzadores?: Prisma.sesiones_lanzadoresCreateNestedManyWithoutAsignaciones_lanzadoresInput
+  solicitudes_como_solicitante?: Prisma.solicitudes_activacionCreateNestedManyWithoutAsignacion_solicitanteInput
+  solicitudes_como_validador?: Prisma.solicitudes_activacionCreateNestedManyWithoutAsignacion_validadorInput
 }
 
 export type asignaciones_lanzadoresUncheckedCreateWithoutUsersInput = {
@@ -646,6 +692,8 @@ export type asignaciones_lanzadoresUncheckedCreateWithoutUsersInput = {
   invitaciones_lanzadores?: Prisma.invitaciones_lanzadoresUncheckedCreateNestedOneWithoutAsignaciones_lanzadoresInput
   credenciales_acceso_lanzadores?: Prisma.credenciales_acceso_lanzadoresUncheckedCreateNestedManyWithoutAsignaciones_lanzadoresInput
   sesiones_lanzadores?: Prisma.sesiones_lanzadoresUncheckedCreateNestedManyWithoutAsignaciones_lanzadoresInput
+  solicitudes_como_solicitante?: Prisma.solicitudes_activacionUncheckedCreateNestedManyWithoutAsignacion_solicitanteInput
+  solicitudes_como_validador?: Prisma.solicitudes_activacionUncheckedCreateNestedManyWithoutAsignacion_validadorInput
 }
 
 export type asignaciones_lanzadoresCreateOrConnectWithoutUsersInput = {
@@ -704,6 +752,8 @@ export type asignaciones_lanzadoresCreateWithoutHistorial_asignacionesInput = {
   invitaciones_lanzadores?: Prisma.invitaciones_lanzadoresCreateNestedOneWithoutAsignaciones_lanzadoresInput
   credenciales_acceso_lanzadores?: Prisma.credenciales_acceso_lanzadoresCreateNestedManyWithoutAsignaciones_lanzadoresInput
   sesiones_lanzadores?: Prisma.sesiones_lanzadoresCreateNestedManyWithoutAsignaciones_lanzadoresInput
+  solicitudes_como_solicitante?: Prisma.solicitudes_activacionCreateNestedManyWithoutAsignacion_solicitanteInput
+  solicitudes_como_validador?: Prisma.solicitudes_activacionCreateNestedManyWithoutAsignacion_validadorInput
 }
 
 export type asignaciones_lanzadoresUncheckedCreateWithoutHistorial_asignacionesInput = {
@@ -720,6 +770,8 @@ export type asignaciones_lanzadoresUncheckedCreateWithoutHistorial_asignacionesI
   invitaciones_lanzadores?: Prisma.invitaciones_lanzadoresUncheckedCreateNestedOneWithoutAsignaciones_lanzadoresInput
   credenciales_acceso_lanzadores?: Prisma.credenciales_acceso_lanzadoresUncheckedCreateNestedManyWithoutAsignaciones_lanzadoresInput
   sesiones_lanzadores?: Prisma.sesiones_lanzadoresUncheckedCreateNestedManyWithoutAsignaciones_lanzadoresInput
+  solicitudes_como_solicitante?: Prisma.solicitudes_activacionUncheckedCreateNestedManyWithoutAsignacion_solicitanteInput
+  solicitudes_como_validador?: Prisma.solicitudes_activacionUncheckedCreateNestedManyWithoutAsignacion_validadorInput
 }
 
 export type asignaciones_lanzadoresCreateOrConnectWithoutHistorial_asignacionesInput = {
@@ -752,6 +804,8 @@ export type asignaciones_lanzadoresUpdateWithoutHistorial_asignacionesInput = {
   invitaciones_lanzadores?: Prisma.invitaciones_lanzadoresUpdateOneWithoutAsignaciones_lanzadoresNestedInput
   credenciales_acceso_lanzadores?: Prisma.credenciales_acceso_lanzadoresUpdateManyWithoutAsignaciones_lanzadoresNestedInput
   sesiones_lanzadores?: Prisma.sesiones_lanzadoresUpdateManyWithoutAsignaciones_lanzadoresNestedInput
+  solicitudes_como_solicitante?: Prisma.solicitudes_activacionUpdateManyWithoutAsignacion_solicitanteNestedInput
+  solicitudes_como_validador?: Prisma.solicitudes_activacionUpdateManyWithoutAsignacion_validadorNestedInput
 }
 
 export type asignaciones_lanzadoresUncheckedUpdateWithoutHistorial_asignacionesInput = {
@@ -768,6 +822,8 @@ export type asignaciones_lanzadoresUncheckedUpdateWithoutHistorial_asignacionesI
   invitaciones_lanzadores?: Prisma.invitaciones_lanzadoresUncheckedUpdateOneWithoutAsignaciones_lanzadoresNestedInput
   credenciales_acceso_lanzadores?: Prisma.credenciales_acceso_lanzadoresUncheckedUpdateManyWithoutAsignaciones_lanzadoresNestedInput
   sesiones_lanzadores?: Prisma.sesiones_lanzadoresUncheckedUpdateManyWithoutAsignaciones_lanzadoresNestedInput
+  solicitudes_como_solicitante?: Prisma.solicitudes_activacionUncheckedUpdateManyWithoutAsignacion_solicitanteNestedInput
+  solicitudes_como_validador?: Prisma.solicitudes_activacionUncheckedUpdateManyWithoutAsignacion_validadorNestedInput
 }
 
 export type asignaciones_lanzadoresCreateWithoutLanzadoresInput = {
@@ -784,6 +840,8 @@ export type asignaciones_lanzadoresCreateWithoutLanzadoresInput = {
   invitaciones_lanzadores?: Prisma.invitaciones_lanzadoresCreateNestedOneWithoutAsignaciones_lanzadoresInput
   credenciales_acceso_lanzadores?: Prisma.credenciales_acceso_lanzadoresCreateNestedManyWithoutAsignaciones_lanzadoresInput
   sesiones_lanzadores?: Prisma.sesiones_lanzadoresCreateNestedManyWithoutAsignaciones_lanzadoresInput
+  solicitudes_como_solicitante?: Prisma.solicitudes_activacionCreateNestedManyWithoutAsignacion_solicitanteInput
+  solicitudes_como_validador?: Prisma.solicitudes_activacionCreateNestedManyWithoutAsignacion_validadorInput
 }
 
 export type asignaciones_lanzadoresUncheckedCreateWithoutLanzadoresInput = {
@@ -800,6 +858,8 @@ export type asignaciones_lanzadoresUncheckedCreateWithoutLanzadoresInput = {
   invitaciones_lanzadores?: Prisma.invitaciones_lanzadoresUncheckedCreateNestedOneWithoutAsignaciones_lanzadoresInput
   credenciales_acceso_lanzadores?: Prisma.credenciales_acceso_lanzadoresUncheckedCreateNestedManyWithoutAsignaciones_lanzadoresInput
   sesiones_lanzadores?: Prisma.sesiones_lanzadoresUncheckedCreateNestedManyWithoutAsignaciones_lanzadoresInput
+  solicitudes_como_solicitante?: Prisma.solicitudes_activacionUncheckedCreateNestedManyWithoutAsignacion_solicitanteInput
+  solicitudes_como_validador?: Prisma.solicitudes_activacionUncheckedCreateNestedManyWithoutAsignacion_validadorInput
 }
 
 export type asignaciones_lanzadoresCreateOrConnectWithoutLanzadoresInput = {
@@ -842,6 +902,8 @@ export type asignaciones_lanzadoresCreateWithoutCredenciales_acceso_lanzadoresIn
   historial_asignaciones?: Prisma.historial_asignacionesCreateNestedManyWithoutAsignaciones_lanzadoresInput
   invitaciones_lanzadores?: Prisma.invitaciones_lanzadoresCreateNestedOneWithoutAsignaciones_lanzadoresInput
   sesiones_lanzadores?: Prisma.sesiones_lanzadoresCreateNestedManyWithoutAsignaciones_lanzadoresInput
+  solicitudes_como_solicitante?: Prisma.solicitudes_activacionCreateNestedManyWithoutAsignacion_solicitanteInput
+  solicitudes_como_validador?: Prisma.solicitudes_activacionCreateNestedManyWithoutAsignacion_validadorInput
 }
 
 export type asignaciones_lanzadoresUncheckedCreateWithoutCredenciales_acceso_lanzadoresInput = {
@@ -858,6 +920,8 @@ export type asignaciones_lanzadoresUncheckedCreateWithoutCredenciales_acceso_lan
   historial_asignaciones?: Prisma.historial_asignacionesUncheckedCreateNestedManyWithoutAsignaciones_lanzadoresInput
   invitaciones_lanzadores?: Prisma.invitaciones_lanzadoresUncheckedCreateNestedOneWithoutAsignaciones_lanzadoresInput
   sesiones_lanzadores?: Prisma.sesiones_lanzadoresUncheckedCreateNestedManyWithoutAsignaciones_lanzadoresInput
+  solicitudes_como_solicitante?: Prisma.solicitudes_activacionUncheckedCreateNestedManyWithoutAsignacion_solicitanteInput
+  solicitudes_como_validador?: Prisma.solicitudes_activacionUncheckedCreateNestedManyWithoutAsignacion_validadorInput
 }
 
 export type asignaciones_lanzadoresCreateOrConnectWithoutCredenciales_acceso_lanzadoresInput = {
@@ -890,6 +954,8 @@ export type asignaciones_lanzadoresUpdateWithoutCredenciales_acceso_lanzadoresIn
   historial_asignaciones?: Prisma.historial_asignacionesUpdateManyWithoutAsignaciones_lanzadoresNestedInput
   invitaciones_lanzadores?: Prisma.invitaciones_lanzadoresUpdateOneWithoutAsignaciones_lanzadoresNestedInput
   sesiones_lanzadores?: Prisma.sesiones_lanzadoresUpdateManyWithoutAsignaciones_lanzadoresNestedInput
+  solicitudes_como_solicitante?: Prisma.solicitudes_activacionUpdateManyWithoutAsignacion_solicitanteNestedInput
+  solicitudes_como_validador?: Prisma.solicitudes_activacionUpdateManyWithoutAsignacion_validadorNestedInput
 }
 
 export type asignaciones_lanzadoresUncheckedUpdateWithoutCredenciales_acceso_lanzadoresInput = {
@@ -906,6 +972,8 @@ export type asignaciones_lanzadoresUncheckedUpdateWithoutCredenciales_acceso_lan
   historial_asignaciones?: Prisma.historial_asignacionesUncheckedUpdateManyWithoutAsignaciones_lanzadoresNestedInput
   invitaciones_lanzadores?: Prisma.invitaciones_lanzadoresUncheckedUpdateOneWithoutAsignaciones_lanzadoresNestedInput
   sesiones_lanzadores?: Prisma.sesiones_lanzadoresUncheckedUpdateManyWithoutAsignaciones_lanzadoresNestedInput
+  solicitudes_como_solicitante?: Prisma.solicitudes_activacionUncheckedUpdateManyWithoutAsignacion_solicitanteNestedInput
+  solicitudes_como_validador?: Prisma.solicitudes_activacionUncheckedUpdateManyWithoutAsignacion_validadorNestedInput
 }
 
 export type asignaciones_lanzadoresCreateWithoutSesiones_lanzadoresInput = {
@@ -922,6 +990,8 @@ export type asignaciones_lanzadoresCreateWithoutSesiones_lanzadoresInput = {
   historial_asignaciones?: Prisma.historial_asignacionesCreateNestedManyWithoutAsignaciones_lanzadoresInput
   invitaciones_lanzadores?: Prisma.invitaciones_lanzadoresCreateNestedOneWithoutAsignaciones_lanzadoresInput
   credenciales_acceso_lanzadores?: Prisma.credenciales_acceso_lanzadoresCreateNestedManyWithoutAsignaciones_lanzadoresInput
+  solicitudes_como_solicitante?: Prisma.solicitudes_activacionCreateNestedManyWithoutAsignacion_solicitanteInput
+  solicitudes_como_validador?: Prisma.solicitudes_activacionCreateNestedManyWithoutAsignacion_validadorInput
 }
 
 export type asignaciones_lanzadoresUncheckedCreateWithoutSesiones_lanzadoresInput = {
@@ -938,6 +1008,8 @@ export type asignaciones_lanzadoresUncheckedCreateWithoutSesiones_lanzadoresInpu
   historial_asignaciones?: Prisma.historial_asignacionesUncheckedCreateNestedManyWithoutAsignaciones_lanzadoresInput
   invitaciones_lanzadores?: Prisma.invitaciones_lanzadoresUncheckedCreateNestedOneWithoutAsignaciones_lanzadoresInput
   credenciales_acceso_lanzadores?: Prisma.credenciales_acceso_lanzadoresUncheckedCreateNestedManyWithoutAsignaciones_lanzadoresInput
+  solicitudes_como_solicitante?: Prisma.solicitudes_activacionUncheckedCreateNestedManyWithoutAsignacion_solicitanteInput
+  solicitudes_como_validador?: Prisma.solicitudes_activacionUncheckedCreateNestedManyWithoutAsignacion_validadorInput
 }
 
 export type asignaciones_lanzadoresCreateOrConnectWithoutSesiones_lanzadoresInput = {
@@ -970,6 +1042,8 @@ export type asignaciones_lanzadoresUpdateWithoutSesiones_lanzadoresInput = {
   historial_asignaciones?: Prisma.historial_asignacionesUpdateManyWithoutAsignaciones_lanzadoresNestedInput
   invitaciones_lanzadores?: Prisma.invitaciones_lanzadoresUpdateOneWithoutAsignaciones_lanzadoresNestedInput
   credenciales_acceso_lanzadores?: Prisma.credenciales_acceso_lanzadoresUpdateManyWithoutAsignaciones_lanzadoresNestedInput
+  solicitudes_como_solicitante?: Prisma.solicitudes_activacionUpdateManyWithoutAsignacion_solicitanteNestedInput
+  solicitudes_como_validador?: Prisma.solicitudes_activacionUpdateManyWithoutAsignacion_validadorNestedInput
 }
 
 export type asignaciones_lanzadoresUncheckedUpdateWithoutSesiones_lanzadoresInput = {
@@ -986,6 +1060,8 @@ export type asignaciones_lanzadoresUncheckedUpdateWithoutSesiones_lanzadoresInpu
   historial_asignaciones?: Prisma.historial_asignacionesUncheckedUpdateManyWithoutAsignaciones_lanzadoresNestedInput
   invitaciones_lanzadores?: Prisma.invitaciones_lanzadoresUncheckedUpdateOneWithoutAsignaciones_lanzadoresNestedInput
   credenciales_acceso_lanzadores?: Prisma.credenciales_acceso_lanzadoresUncheckedUpdateManyWithoutAsignaciones_lanzadoresNestedInput
+  solicitudes_como_solicitante?: Prisma.solicitudes_activacionUncheckedUpdateManyWithoutAsignacion_solicitanteNestedInput
+  solicitudes_como_validador?: Prisma.solicitudes_activacionUncheckedUpdateManyWithoutAsignacion_validadorNestedInput
 }
 
 export type asignaciones_lanzadoresCreateWithoutInvitaciones_lanzadoresInput = {
@@ -1002,6 +1078,8 @@ export type asignaciones_lanzadoresCreateWithoutInvitaciones_lanzadoresInput = {
   historial_asignaciones?: Prisma.historial_asignacionesCreateNestedManyWithoutAsignaciones_lanzadoresInput
   credenciales_acceso_lanzadores?: Prisma.credenciales_acceso_lanzadoresCreateNestedManyWithoutAsignaciones_lanzadoresInput
   sesiones_lanzadores?: Prisma.sesiones_lanzadoresCreateNestedManyWithoutAsignaciones_lanzadoresInput
+  solicitudes_como_solicitante?: Prisma.solicitudes_activacionCreateNestedManyWithoutAsignacion_solicitanteInput
+  solicitudes_como_validador?: Prisma.solicitudes_activacionCreateNestedManyWithoutAsignacion_validadorInput
 }
 
 export type asignaciones_lanzadoresUncheckedCreateWithoutInvitaciones_lanzadoresInput = {
@@ -1018,6 +1096,8 @@ export type asignaciones_lanzadoresUncheckedCreateWithoutInvitaciones_lanzadores
   historial_asignaciones?: Prisma.historial_asignacionesUncheckedCreateNestedManyWithoutAsignaciones_lanzadoresInput
   credenciales_acceso_lanzadores?: Prisma.credenciales_acceso_lanzadoresUncheckedCreateNestedManyWithoutAsignaciones_lanzadoresInput
   sesiones_lanzadores?: Prisma.sesiones_lanzadoresUncheckedCreateNestedManyWithoutAsignaciones_lanzadoresInput
+  solicitudes_como_solicitante?: Prisma.solicitudes_activacionUncheckedCreateNestedManyWithoutAsignacion_solicitanteInput
+  solicitudes_como_validador?: Prisma.solicitudes_activacionUncheckedCreateNestedManyWithoutAsignacion_validadorInput
 }
 
 export type asignaciones_lanzadoresCreateOrConnectWithoutInvitaciones_lanzadoresInput = {
@@ -1050,6 +1130,8 @@ export type asignaciones_lanzadoresUpdateWithoutInvitaciones_lanzadoresInput = {
   historial_asignaciones?: Prisma.historial_asignacionesUpdateManyWithoutAsignaciones_lanzadoresNestedInput
   credenciales_acceso_lanzadores?: Prisma.credenciales_acceso_lanzadoresUpdateManyWithoutAsignaciones_lanzadoresNestedInput
   sesiones_lanzadores?: Prisma.sesiones_lanzadoresUpdateManyWithoutAsignaciones_lanzadoresNestedInput
+  solicitudes_como_solicitante?: Prisma.solicitudes_activacionUpdateManyWithoutAsignacion_solicitanteNestedInput
+  solicitudes_como_validador?: Prisma.solicitudes_activacionUpdateManyWithoutAsignacion_validadorNestedInput
 }
 
 export type asignaciones_lanzadoresUncheckedUpdateWithoutInvitaciones_lanzadoresInput = {
@@ -1066,6 +1148,184 @@ export type asignaciones_lanzadoresUncheckedUpdateWithoutInvitaciones_lanzadores
   historial_asignaciones?: Prisma.historial_asignacionesUncheckedUpdateManyWithoutAsignaciones_lanzadoresNestedInput
   credenciales_acceso_lanzadores?: Prisma.credenciales_acceso_lanzadoresUncheckedUpdateManyWithoutAsignaciones_lanzadoresNestedInput
   sesiones_lanzadores?: Prisma.sesiones_lanzadoresUncheckedUpdateManyWithoutAsignaciones_lanzadoresNestedInput
+  solicitudes_como_solicitante?: Prisma.solicitudes_activacionUncheckedUpdateManyWithoutAsignacion_solicitanteNestedInput
+  solicitudes_como_validador?: Prisma.solicitudes_activacionUncheckedUpdateManyWithoutAsignacion_validadorNestedInput
+}
+
+export type asignaciones_lanzadoresCreateWithoutSolicitudes_como_solicitanteInput = {
+  id?: string
+  estado?: string
+  fecha_invitacion?: Date | string
+  fecha_caducidad?: Date | string
+  fecha_aceptacion?: Date | string | null
+  fecha_revocacion?: Date | string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  users: Prisma.usersCreateNestedOneWithoutAsignaciones_lanzadoresInput
+  lanzadores: Prisma.lanzadoresCreateNestedOneWithoutAsignaciones_lanzadoresInput
+  historial_asignaciones?: Prisma.historial_asignacionesCreateNestedManyWithoutAsignaciones_lanzadoresInput
+  invitaciones_lanzadores?: Prisma.invitaciones_lanzadoresCreateNestedOneWithoutAsignaciones_lanzadoresInput
+  credenciales_acceso_lanzadores?: Prisma.credenciales_acceso_lanzadoresCreateNestedManyWithoutAsignaciones_lanzadoresInput
+  sesiones_lanzadores?: Prisma.sesiones_lanzadoresCreateNestedManyWithoutAsignaciones_lanzadoresInput
+  solicitudes_como_validador?: Prisma.solicitudes_activacionCreateNestedManyWithoutAsignacion_validadorInput
+}
+
+export type asignaciones_lanzadoresUncheckedCreateWithoutSolicitudes_como_solicitanteInput = {
+  id?: string
+  administrador_id: string
+  lanzador_id: string
+  estado?: string
+  fecha_invitacion?: Date | string
+  fecha_caducidad?: Date | string
+  fecha_aceptacion?: Date | string | null
+  fecha_revocacion?: Date | string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  historial_asignaciones?: Prisma.historial_asignacionesUncheckedCreateNestedManyWithoutAsignaciones_lanzadoresInput
+  invitaciones_lanzadores?: Prisma.invitaciones_lanzadoresUncheckedCreateNestedOneWithoutAsignaciones_lanzadoresInput
+  credenciales_acceso_lanzadores?: Prisma.credenciales_acceso_lanzadoresUncheckedCreateNestedManyWithoutAsignaciones_lanzadoresInput
+  sesiones_lanzadores?: Prisma.sesiones_lanzadoresUncheckedCreateNestedManyWithoutAsignaciones_lanzadoresInput
+  solicitudes_como_validador?: Prisma.solicitudes_activacionUncheckedCreateNestedManyWithoutAsignacion_validadorInput
+}
+
+export type asignaciones_lanzadoresCreateOrConnectWithoutSolicitudes_como_solicitanteInput = {
+  where: Prisma.asignaciones_lanzadoresWhereUniqueInput
+  create: Prisma.XOR<Prisma.asignaciones_lanzadoresCreateWithoutSolicitudes_como_solicitanteInput, Prisma.asignaciones_lanzadoresUncheckedCreateWithoutSolicitudes_como_solicitanteInput>
+}
+
+export type asignaciones_lanzadoresCreateWithoutSolicitudes_como_validadorInput = {
+  id?: string
+  estado?: string
+  fecha_invitacion?: Date | string
+  fecha_caducidad?: Date | string
+  fecha_aceptacion?: Date | string | null
+  fecha_revocacion?: Date | string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  users: Prisma.usersCreateNestedOneWithoutAsignaciones_lanzadoresInput
+  lanzadores: Prisma.lanzadoresCreateNestedOneWithoutAsignaciones_lanzadoresInput
+  historial_asignaciones?: Prisma.historial_asignacionesCreateNestedManyWithoutAsignaciones_lanzadoresInput
+  invitaciones_lanzadores?: Prisma.invitaciones_lanzadoresCreateNestedOneWithoutAsignaciones_lanzadoresInput
+  credenciales_acceso_lanzadores?: Prisma.credenciales_acceso_lanzadoresCreateNestedManyWithoutAsignaciones_lanzadoresInput
+  sesiones_lanzadores?: Prisma.sesiones_lanzadoresCreateNestedManyWithoutAsignaciones_lanzadoresInput
+  solicitudes_como_solicitante?: Prisma.solicitudes_activacionCreateNestedManyWithoutAsignacion_solicitanteInput
+}
+
+export type asignaciones_lanzadoresUncheckedCreateWithoutSolicitudes_como_validadorInput = {
+  id?: string
+  administrador_id: string
+  lanzador_id: string
+  estado?: string
+  fecha_invitacion?: Date | string
+  fecha_caducidad?: Date | string
+  fecha_aceptacion?: Date | string | null
+  fecha_revocacion?: Date | string | null
+  created_at?: Date | string
+  updated_at?: Date | string
+  historial_asignaciones?: Prisma.historial_asignacionesUncheckedCreateNestedManyWithoutAsignaciones_lanzadoresInput
+  invitaciones_lanzadores?: Prisma.invitaciones_lanzadoresUncheckedCreateNestedOneWithoutAsignaciones_lanzadoresInput
+  credenciales_acceso_lanzadores?: Prisma.credenciales_acceso_lanzadoresUncheckedCreateNestedManyWithoutAsignaciones_lanzadoresInput
+  sesiones_lanzadores?: Prisma.sesiones_lanzadoresUncheckedCreateNestedManyWithoutAsignaciones_lanzadoresInput
+  solicitudes_como_solicitante?: Prisma.solicitudes_activacionUncheckedCreateNestedManyWithoutAsignacion_solicitanteInput
+}
+
+export type asignaciones_lanzadoresCreateOrConnectWithoutSolicitudes_como_validadorInput = {
+  where: Prisma.asignaciones_lanzadoresWhereUniqueInput
+  create: Prisma.XOR<Prisma.asignaciones_lanzadoresCreateWithoutSolicitudes_como_validadorInput, Prisma.asignaciones_lanzadoresUncheckedCreateWithoutSolicitudes_como_validadorInput>
+}
+
+export type asignaciones_lanzadoresUpsertWithoutSolicitudes_como_solicitanteInput = {
+  update: Prisma.XOR<Prisma.asignaciones_lanzadoresUpdateWithoutSolicitudes_como_solicitanteInput, Prisma.asignaciones_lanzadoresUncheckedUpdateWithoutSolicitudes_como_solicitanteInput>
+  create: Prisma.XOR<Prisma.asignaciones_lanzadoresCreateWithoutSolicitudes_como_solicitanteInput, Prisma.asignaciones_lanzadoresUncheckedCreateWithoutSolicitudes_como_solicitanteInput>
+  where?: Prisma.asignaciones_lanzadoresWhereInput
+}
+
+export type asignaciones_lanzadoresUpdateToOneWithWhereWithoutSolicitudes_como_solicitanteInput = {
+  where?: Prisma.asignaciones_lanzadoresWhereInput
+  data: Prisma.XOR<Prisma.asignaciones_lanzadoresUpdateWithoutSolicitudes_como_solicitanteInput, Prisma.asignaciones_lanzadoresUncheckedUpdateWithoutSolicitudes_como_solicitanteInput>
+}
+
+export type asignaciones_lanzadoresUpdateWithoutSolicitudes_como_solicitanteInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  estado?: Prisma.StringFieldUpdateOperationsInput | string
+  fecha_invitacion?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  fecha_caducidad?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  fecha_aceptacion?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  fecha_revocacion?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  users?: Prisma.usersUpdateOneRequiredWithoutAsignaciones_lanzadoresNestedInput
+  lanzadores?: Prisma.lanzadoresUpdateOneRequiredWithoutAsignaciones_lanzadoresNestedInput
+  historial_asignaciones?: Prisma.historial_asignacionesUpdateManyWithoutAsignaciones_lanzadoresNestedInput
+  invitaciones_lanzadores?: Prisma.invitaciones_lanzadoresUpdateOneWithoutAsignaciones_lanzadoresNestedInput
+  credenciales_acceso_lanzadores?: Prisma.credenciales_acceso_lanzadoresUpdateManyWithoutAsignaciones_lanzadoresNestedInput
+  sesiones_lanzadores?: Prisma.sesiones_lanzadoresUpdateManyWithoutAsignaciones_lanzadoresNestedInput
+  solicitudes_como_validador?: Prisma.solicitudes_activacionUpdateManyWithoutAsignacion_validadorNestedInput
+}
+
+export type asignaciones_lanzadoresUncheckedUpdateWithoutSolicitudes_como_solicitanteInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  administrador_id?: Prisma.StringFieldUpdateOperationsInput | string
+  lanzador_id?: Prisma.StringFieldUpdateOperationsInput | string
+  estado?: Prisma.StringFieldUpdateOperationsInput | string
+  fecha_invitacion?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  fecha_caducidad?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  fecha_aceptacion?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  fecha_revocacion?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  historial_asignaciones?: Prisma.historial_asignacionesUncheckedUpdateManyWithoutAsignaciones_lanzadoresNestedInput
+  invitaciones_lanzadores?: Prisma.invitaciones_lanzadoresUncheckedUpdateOneWithoutAsignaciones_lanzadoresNestedInput
+  credenciales_acceso_lanzadores?: Prisma.credenciales_acceso_lanzadoresUncheckedUpdateManyWithoutAsignaciones_lanzadoresNestedInput
+  sesiones_lanzadores?: Prisma.sesiones_lanzadoresUncheckedUpdateManyWithoutAsignaciones_lanzadoresNestedInput
+  solicitudes_como_validador?: Prisma.solicitudes_activacionUncheckedUpdateManyWithoutAsignacion_validadorNestedInput
+}
+
+export type asignaciones_lanzadoresUpsertWithoutSolicitudes_como_validadorInput = {
+  update: Prisma.XOR<Prisma.asignaciones_lanzadoresUpdateWithoutSolicitudes_como_validadorInput, Prisma.asignaciones_lanzadoresUncheckedUpdateWithoutSolicitudes_como_validadorInput>
+  create: Prisma.XOR<Prisma.asignaciones_lanzadoresCreateWithoutSolicitudes_como_validadorInput, Prisma.asignaciones_lanzadoresUncheckedCreateWithoutSolicitudes_como_validadorInput>
+  where?: Prisma.asignaciones_lanzadoresWhereInput
+}
+
+export type asignaciones_lanzadoresUpdateToOneWithWhereWithoutSolicitudes_como_validadorInput = {
+  where?: Prisma.asignaciones_lanzadoresWhereInput
+  data: Prisma.XOR<Prisma.asignaciones_lanzadoresUpdateWithoutSolicitudes_como_validadorInput, Prisma.asignaciones_lanzadoresUncheckedUpdateWithoutSolicitudes_como_validadorInput>
+}
+
+export type asignaciones_lanzadoresUpdateWithoutSolicitudes_como_validadorInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  estado?: Prisma.StringFieldUpdateOperationsInput | string
+  fecha_invitacion?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  fecha_caducidad?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  fecha_aceptacion?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  fecha_revocacion?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  users?: Prisma.usersUpdateOneRequiredWithoutAsignaciones_lanzadoresNestedInput
+  lanzadores?: Prisma.lanzadoresUpdateOneRequiredWithoutAsignaciones_lanzadoresNestedInput
+  historial_asignaciones?: Prisma.historial_asignacionesUpdateManyWithoutAsignaciones_lanzadoresNestedInput
+  invitaciones_lanzadores?: Prisma.invitaciones_lanzadoresUpdateOneWithoutAsignaciones_lanzadoresNestedInput
+  credenciales_acceso_lanzadores?: Prisma.credenciales_acceso_lanzadoresUpdateManyWithoutAsignaciones_lanzadoresNestedInput
+  sesiones_lanzadores?: Prisma.sesiones_lanzadoresUpdateManyWithoutAsignaciones_lanzadoresNestedInput
+  solicitudes_como_solicitante?: Prisma.solicitudes_activacionUpdateManyWithoutAsignacion_solicitanteNestedInput
+}
+
+export type asignaciones_lanzadoresUncheckedUpdateWithoutSolicitudes_como_validadorInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  administrador_id?: Prisma.StringFieldUpdateOperationsInput | string
+  lanzador_id?: Prisma.StringFieldUpdateOperationsInput | string
+  estado?: Prisma.StringFieldUpdateOperationsInput | string
+  fecha_invitacion?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  fecha_caducidad?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  fecha_aceptacion?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  fecha_revocacion?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  historial_asignaciones?: Prisma.historial_asignacionesUncheckedUpdateManyWithoutAsignaciones_lanzadoresNestedInput
+  invitaciones_lanzadores?: Prisma.invitaciones_lanzadoresUncheckedUpdateOneWithoutAsignaciones_lanzadoresNestedInput
+  credenciales_acceso_lanzadores?: Prisma.credenciales_acceso_lanzadoresUncheckedUpdateManyWithoutAsignaciones_lanzadoresNestedInput
+  sesiones_lanzadores?: Prisma.sesiones_lanzadoresUncheckedUpdateManyWithoutAsignaciones_lanzadoresNestedInput
+  solicitudes_como_solicitante?: Prisma.solicitudes_activacionUncheckedUpdateManyWithoutAsignacion_solicitanteNestedInput
 }
 
 export type asignaciones_lanzadoresCreateManyUsersInput = {
@@ -1094,6 +1354,8 @@ export type asignaciones_lanzadoresUpdateWithoutUsersInput = {
   invitaciones_lanzadores?: Prisma.invitaciones_lanzadoresUpdateOneWithoutAsignaciones_lanzadoresNestedInput
   credenciales_acceso_lanzadores?: Prisma.credenciales_acceso_lanzadoresUpdateManyWithoutAsignaciones_lanzadoresNestedInput
   sesiones_lanzadores?: Prisma.sesiones_lanzadoresUpdateManyWithoutAsignaciones_lanzadoresNestedInput
+  solicitudes_como_solicitante?: Prisma.solicitudes_activacionUpdateManyWithoutAsignacion_solicitanteNestedInput
+  solicitudes_como_validador?: Prisma.solicitudes_activacionUpdateManyWithoutAsignacion_validadorNestedInput
 }
 
 export type asignaciones_lanzadoresUncheckedUpdateWithoutUsersInput = {
@@ -1110,6 +1372,8 @@ export type asignaciones_lanzadoresUncheckedUpdateWithoutUsersInput = {
   invitaciones_lanzadores?: Prisma.invitaciones_lanzadoresUncheckedUpdateOneWithoutAsignaciones_lanzadoresNestedInput
   credenciales_acceso_lanzadores?: Prisma.credenciales_acceso_lanzadoresUncheckedUpdateManyWithoutAsignaciones_lanzadoresNestedInput
   sesiones_lanzadores?: Prisma.sesiones_lanzadoresUncheckedUpdateManyWithoutAsignaciones_lanzadoresNestedInput
+  solicitudes_como_solicitante?: Prisma.solicitudes_activacionUncheckedUpdateManyWithoutAsignacion_solicitanteNestedInput
+  solicitudes_como_validador?: Prisma.solicitudes_activacionUncheckedUpdateManyWithoutAsignacion_validadorNestedInput
 }
 
 export type asignaciones_lanzadoresUncheckedUpdateManyWithoutUsersInput = {
@@ -1150,6 +1414,8 @@ export type asignaciones_lanzadoresUpdateWithoutLanzadoresInput = {
   invitaciones_lanzadores?: Prisma.invitaciones_lanzadoresUpdateOneWithoutAsignaciones_lanzadoresNestedInput
   credenciales_acceso_lanzadores?: Prisma.credenciales_acceso_lanzadoresUpdateManyWithoutAsignaciones_lanzadoresNestedInput
   sesiones_lanzadores?: Prisma.sesiones_lanzadoresUpdateManyWithoutAsignaciones_lanzadoresNestedInput
+  solicitudes_como_solicitante?: Prisma.solicitudes_activacionUpdateManyWithoutAsignacion_solicitanteNestedInput
+  solicitudes_como_validador?: Prisma.solicitudes_activacionUpdateManyWithoutAsignacion_validadorNestedInput
 }
 
 export type asignaciones_lanzadoresUncheckedUpdateWithoutLanzadoresInput = {
@@ -1166,6 +1432,8 @@ export type asignaciones_lanzadoresUncheckedUpdateWithoutLanzadoresInput = {
   invitaciones_lanzadores?: Prisma.invitaciones_lanzadoresUncheckedUpdateOneWithoutAsignaciones_lanzadoresNestedInput
   credenciales_acceso_lanzadores?: Prisma.credenciales_acceso_lanzadoresUncheckedUpdateManyWithoutAsignaciones_lanzadoresNestedInput
   sesiones_lanzadores?: Prisma.sesiones_lanzadoresUncheckedUpdateManyWithoutAsignaciones_lanzadoresNestedInput
+  solicitudes_como_solicitante?: Prisma.solicitudes_activacionUncheckedUpdateManyWithoutAsignacion_solicitanteNestedInput
+  solicitudes_como_validador?: Prisma.solicitudes_activacionUncheckedUpdateManyWithoutAsignacion_validadorNestedInput
 }
 
 export type asignaciones_lanzadoresUncheckedUpdateManyWithoutLanzadoresInput = {
@@ -1189,12 +1457,16 @@ export type Asignaciones_lanzadoresCountOutputType = {
   historial_asignaciones: number
   credenciales_acceso_lanzadores: number
   sesiones_lanzadores: number
+  solicitudes_como_solicitante: number
+  solicitudes_como_validador: number
 }
 
 export type Asignaciones_lanzadoresCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   historial_asignaciones?: boolean | Asignaciones_lanzadoresCountOutputTypeCountHistorial_asignacionesArgs
   credenciales_acceso_lanzadores?: boolean | Asignaciones_lanzadoresCountOutputTypeCountCredenciales_acceso_lanzadoresArgs
   sesiones_lanzadores?: boolean | Asignaciones_lanzadoresCountOutputTypeCountSesiones_lanzadoresArgs
+  solicitudes_como_solicitante?: boolean | Asignaciones_lanzadoresCountOutputTypeCountSolicitudes_como_solicitanteArgs
+  solicitudes_como_validador?: boolean | Asignaciones_lanzadoresCountOutputTypeCountSolicitudes_como_validadorArgs
 }
 
 /**
@@ -1228,6 +1500,20 @@ export type Asignaciones_lanzadoresCountOutputTypeCountSesiones_lanzadoresArgs<E
   where?: Prisma.sesiones_lanzadoresWhereInput
 }
 
+/**
+ * Asignaciones_lanzadoresCountOutputType without action
+ */
+export type Asignaciones_lanzadoresCountOutputTypeCountSolicitudes_como_solicitanteArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.solicitudes_activacionWhereInput
+}
+
+/**
+ * Asignaciones_lanzadoresCountOutputType without action
+ */
+export type Asignaciones_lanzadoresCountOutputTypeCountSolicitudes_como_validadorArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.solicitudes_activacionWhereInput
+}
+
 
 export type asignaciones_lanzadoresSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1246,6 +1532,8 @@ export type asignaciones_lanzadoresSelect<ExtArgs extends runtime.Types.Extensio
   invitaciones_lanzadores?: boolean | Prisma.asignaciones_lanzadores$invitaciones_lanzadoresArgs<ExtArgs>
   credenciales_acceso_lanzadores?: boolean | Prisma.asignaciones_lanzadores$credenciales_acceso_lanzadoresArgs<ExtArgs>
   sesiones_lanzadores?: boolean | Prisma.asignaciones_lanzadores$sesiones_lanzadoresArgs<ExtArgs>
+  solicitudes_como_solicitante?: boolean | Prisma.asignaciones_lanzadores$solicitudes_como_solicitanteArgs<ExtArgs>
+  solicitudes_como_validador?: boolean | Prisma.asignaciones_lanzadores$solicitudes_como_validadorArgs<ExtArgs>
   _count?: boolean | Prisma.Asignaciones_lanzadoresCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["asignaciones_lanzadores"]>
 
@@ -1300,6 +1588,8 @@ export type asignaciones_lanzadoresInclude<ExtArgs extends runtime.Types.Extensi
   invitaciones_lanzadores?: boolean | Prisma.asignaciones_lanzadores$invitaciones_lanzadoresArgs<ExtArgs>
   credenciales_acceso_lanzadores?: boolean | Prisma.asignaciones_lanzadores$credenciales_acceso_lanzadoresArgs<ExtArgs>
   sesiones_lanzadores?: boolean | Prisma.asignaciones_lanzadores$sesiones_lanzadoresArgs<ExtArgs>
+  solicitudes_como_solicitante?: boolean | Prisma.asignaciones_lanzadores$solicitudes_como_solicitanteArgs<ExtArgs>
+  solicitudes_como_validador?: boolean | Prisma.asignaciones_lanzadores$solicitudes_como_validadorArgs<ExtArgs>
   _count?: boolean | Prisma.Asignaciones_lanzadoresCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type asignaciones_lanzadoresIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1320,6 +1610,8 @@ export type $asignaciones_lanzadoresPayload<ExtArgs extends runtime.Types.Extens
     invitaciones_lanzadores: Prisma.$invitaciones_lanzadoresPayload<ExtArgs> | null
     credenciales_acceso_lanzadores: Prisma.$credenciales_acceso_lanzadoresPayload<ExtArgs>[]
     sesiones_lanzadores: Prisma.$sesiones_lanzadoresPayload<ExtArgs>[]
+    solicitudes_como_solicitante: Prisma.$solicitudes_activacionPayload<ExtArgs>[]
+    solicitudes_como_validador: Prisma.$solicitudes_activacionPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1732,6 +2024,8 @@ export interface Prisma__asignaciones_lanzadoresClient<T, Null = never, ExtArgs 
   invitaciones_lanzadores<T extends Prisma.asignaciones_lanzadores$invitaciones_lanzadoresArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.asignaciones_lanzadores$invitaciones_lanzadoresArgs<ExtArgs>>): Prisma.Prisma__invitaciones_lanzadoresClient<runtime.Types.Result.GetResult<Prisma.$invitaciones_lanzadoresPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   credenciales_acceso_lanzadores<T extends Prisma.asignaciones_lanzadores$credenciales_acceso_lanzadoresArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.asignaciones_lanzadores$credenciales_acceso_lanzadoresArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$credenciales_acceso_lanzadoresPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   sesiones_lanzadores<T extends Prisma.asignaciones_lanzadores$sesiones_lanzadoresArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.asignaciones_lanzadores$sesiones_lanzadoresArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$sesiones_lanzadoresPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  solicitudes_como_solicitante<T extends Prisma.asignaciones_lanzadores$solicitudes_como_solicitanteArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.asignaciones_lanzadores$solicitudes_como_solicitanteArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$solicitudes_activacionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  solicitudes_como_validador<T extends Prisma.asignaciones_lanzadores$solicitudes_como_validadorArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.asignaciones_lanzadores$solicitudes_como_validadorArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$solicitudes_activacionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2260,6 +2554,54 @@ export type asignaciones_lanzadores$sesiones_lanzadoresArgs<ExtArgs extends runt
   take?: number
   skip?: number
   distinct?: Prisma.Sesiones_lanzadoresScalarFieldEnum | Prisma.Sesiones_lanzadoresScalarFieldEnum[]
+}
+
+/**
+ * asignaciones_lanzadores.solicitudes_como_solicitante
+ */
+export type asignaciones_lanzadores$solicitudes_como_solicitanteArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the solicitudes_activacion
+   */
+  select?: Prisma.solicitudes_activacionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the solicitudes_activacion
+   */
+  omit?: Prisma.solicitudes_activacionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.solicitudes_activacionInclude<ExtArgs> | null
+  where?: Prisma.solicitudes_activacionWhereInput
+  orderBy?: Prisma.solicitudes_activacionOrderByWithRelationInput | Prisma.solicitudes_activacionOrderByWithRelationInput[]
+  cursor?: Prisma.solicitudes_activacionWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.Solicitudes_activacionScalarFieldEnum | Prisma.Solicitudes_activacionScalarFieldEnum[]
+}
+
+/**
+ * asignaciones_lanzadores.solicitudes_como_validador
+ */
+export type asignaciones_lanzadores$solicitudes_como_validadorArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the solicitudes_activacion
+   */
+  select?: Prisma.solicitudes_activacionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the solicitudes_activacion
+   */
+  omit?: Prisma.solicitudes_activacionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.solicitudes_activacionInclude<ExtArgs> | null
+  where?: Prisma.solicitudes_activacionWhereInput
+  orderBy?: Prisma.solicitudes_activacionOrderByWithRelationInput | Prisma.solicitudes_activacionOrderByWithRelationInput[]
+  cursor?: Prisma.solicitudes_activacionWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.Solicitudes_activacionScalarFieldEnum | Prisma.Solicitudes_activacionScalarFieldEnum[]
 }
 
 /**

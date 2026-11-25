@@ -13,7 +13,9 @@
   </header>
 
   <main class="contenido-acceso">
-    <section class="tarjeta-acceso" aria-labelledby="titulo-acceso-lanzador">
+
+    <section class="tarjeta-acceso" [class.tarjeta-acceso--sesion]="pantalla() === 'sesion'"
+      aria-labelledby="titulo-acceso-lanzador">
 
       <h1 id="titulo-acceso-lanzador" class="tarjeta-acceso__titulo" data-i18n="titulo_acceso_lanzador">
         ¿Quieres notificar una despedida? Accede como contacto lanzador

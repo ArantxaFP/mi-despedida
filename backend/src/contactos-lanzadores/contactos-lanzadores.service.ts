@@ -828,13 +828,14 @@ export class ContactosLanzadoresService {
     // --------------------------------------------------
 
     private readonly respuestaAccesoGenerica = {
-        mensaje: 'Si el correo tiene autorizaciones vigentes, recibirás un correo con las instrucciones.'
+        mensaje: 'Si el correo tiene autorizaciones vigentes, recibirás un código de verificación de 8 dígitos.'
     };
+
 
     private readonly duracionCodigoAccesoMs = 10 * 60 * 1000;
     private readonly duracionSeleccionMs = 10 * 60 * 1000;
-    private readonly duracionEnlaceAccesoMs = 7 * 24 * 60 * 60 * 1000;
     private readonly duracionSesionMs = 60 * 60 * 1000;
+
 
     private hashTokenAcceso(token: string): string {
         return createHash('sha256').update(token).digest('hex');
@@ -901,7 +902,7 @@ export class ContactosLanzadoresService {
     }
 
     // Petición pública: nunca revelar si el correo está registrado por tema de privacidad de datos
-    async solicitarAccesoComoLanzador(correo: string, origen?: string) {
+    async solicitarAccesoComoLanzador(correo: string) {
         const correoNormalizado = correo.trim().toLowerCase();
         if (!/^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/.test(correoNormalizado)) {
             throw new BadRequestException('Introduce un correo electrónico válido.');
@@ -920,16 +921,21 @@ export class ContactosLanzadoresService {
         if (autorizaciones.length === 0) return this.respuestaAccesoGenerica;
 
         const ahora = new Date();
-        const esUnaAutorizacion = autorizaciones.length === 1;
-        const codigo = esUnaAutorizacion
-            ? null
-            : randomInt(0, 100_000_000).toString().padStart(8, '0');
-        const token = esUnaAutorizacion ? randomBytes(32).toString('hex') : null;
+
+        // Acceso mediante código de ocho dígitos, independientemente del número de administradores autorizados
+        const codigo = randomInt(0, 100_000_000)
+            .toString()
+            .padStart(8, '0');
+
         const credencialId = randomUUID();
-        const finalidad = esUnaAutorizacion ? 'acceso_titular' : 'verificacion_correo';
-        const caducaEn = new Date(ahora.getTime() + (
-            esUnaAutorizacion ? this.duracionEnlaceAccesoMs : this.duracionCodigoAccesoMs
-        ));
+        const finalidad = 'verificacion_correo';
+
+        // El código de acceso caduca a los diez minutos
+        const caducaEn = new Date(
+            ahora.getTime() + this.duracionCodigoAccesoMs
+        );
+
+
 
         // Bloquear el registro del lanzador para serializar solicitudes concurrentes e impedir crear credenciales duplicadas
         const emitida = await this.prisma.$transaction(async tx => {
@@ -988,26 +994,34 @@ export class ContactosLanzadoresService {
                 return false;
             }
 
-
+            // Invalidar los códigos anteriores, las credenciales de selección pendientes y los antiguos enlaces de acceso del lanzador.
+            // No se modifican las invitaciones iniciales ni las sesiones activas.
             await tx.credenciales_acceso_lanzadores.updateMany({
                 where: {
                     lanzador_id: lanzador.id,
-                    finalidad,
+                    finalidad: {
+                        in: [
+                            'verificacion_correo',
+                            'seleccion_titular',
+                            'acceso_titular'
+                        ]
+                    },
                     utilizado_en: null,
                     invalidado_en: null
                 },
                 data: { invalidado_en: ahora }
             });
 
+
+            // La asignación se determinará después de verificar el correo.
             await tx.credenciales_acceso_lanzadores.create({
                 data: {
                     id: credencialId,
                     lanzador_id: lanzador.id,
-                    asignacion_id: esUnaAutorizacion
-                        ? autorizaciones[0].asignacionId : null,
+                    asignacion_id: null,
                     finalidad,
-                    codigo_hash: codigo ? this.hashCodigoAcceso(credencialId, codigo) : null,
-                    token_hash: token ? this.hashTokenAcceso(token) : null,
+                    codigo_hash: this.hashCodigoAcceso(credencialId, codigo),
+                    token_hash: null,
                     creado_en: ahora,
                     caduca_en: caducaEn
                 }
@@ -1016,22 +1030,19 @@ export class ContactosLanzadoresService {
         });
         if (!emitida) return this.respuestaAccesoGenerica;
 
+
         try {
-            if (esUnaAutorizacion && token) {
-                const enlace = new URL('/acceso-lanzador', obtenerUrlBackoffice(this.config, origen));
-                enlace.searchParams.set('token', token);
-                await this.correoService.enviarEnlaceAccesoLanzador(
-                    lanzador.correo, lanzador.nombre,
-                    autorizaciones[0].administradorNombre, enlace.toString()
-                );
-            } else if (codigo) {
-                await this.correoService.enviarCodigoAccesoLanzador(
-                    lanzador.correo, lanzador.nombre, codigo
-                );
-            }
+            // Enviar siempre un código de acceso mediante Brevo.
+            // No se envían enlaces para acceder como lanzador.
+            await this.correoService.enviarCodigoAccesoLanzador(
+                lanzador.correo,
+                lanzador.nombre,
+                codigo
+            );
+
         } catch (error) {
-            // Brevo podría haber recibido la solicitud.
-            // Invalidar el secreto para impedir accesos con un envío incierto.
+
+            // Brevo podría haber recibido la solicitud
             await this.prisma.credenciales_acceso_lanzadores.updateMany({
                 where: { id: credencialId, utilizado_en: null, invalidado_en: null },
                 data: { invalidado_en: new Date() }
@@ -1042,7 +1053,9 @@ export class ContactosLanzadoresService {
         return this.respuestaAccesoGenerica;
     }
 
-    // Código de ocho dígitos que comprueba identidad para poder seleccionar un titular. 
+
+    // Código de ocho dígitos que comprueba la identidad del lanzador.
+    // Se utiliza independientemente del número de administradores autorizados.
     // No crea todavía una sesión de actuación.
     async verificarCodigoAccesoComoLanzador(correo: string, codigo: string) {
         if (!/^\d{8}$/.test(codigo)) {
@@ -1149,11 +1162,25 @@ export class ContactosLanzadoresService {
         return { tokenSeleccion, administradores: autorizaciones };
     }
 
-    // La selección solo autoriza emitir un nuevo enlace de un solo uso
-    async seleccionarAdministradorAccesoLanzador(tokenSeleccion: string, asignacionId: string) {
+
+    // Seleccionar el administrador con el que actuará el lanzador.
+    // La selección será automática si solo tiene una autorización vigente.
+    // Si tiene varias autorizaciones, deberá elegir un administrador.
+    // No se envían enlaces adicionales por correo.
+    // La selección crea una sesión, pero no inicia ni confirma activaciones.
+
+    async seleccionarAdministradorAccesoLanzador(
+        tokenSeleccion: string,
+        asignacionId: string
+    ) {
+
         if (!this.tokenValido(tokenSeleccion)) {
-            throw new UnauthorizedException('La verificación ha caducado o no es válida.');
+            throw new UnauthorizedException(
+                'La verificación ha caducado o no es válida.'
+            );
         }
+
+        // Localizar la credencial temporal obtenida al verificar el código
         const credencial = await this.prisma.credenciales_acceso_lanzadores.findFirst({
             where: {
                 token_hash: this.hashTokenAcceso(tokenSeleccion),
@@ -1163,135 +1190,215 @@ export class ContactosLanzadoresService {
                 caduca_en: { gt: new Date() }
             }
         });
-        if (!credencial) throw new UnauthorizedException('La verificación ha caducado o no es válida.');
-        const habilitadas = await this.obtenerAutorizacionesHabilitadas(credencial.lanzador_id);
-        const seleccionada = habilitadas.find(a => a.asignacionId === asignacionId);
-        if (!seleccionada) throw new ForbiddenException('La autorización no está disponible.');
 
-        const nuevoToken = randomBytes(32).toString('hex');
-        const ahora = new Date();
-        const creado = await this.prisma.$transaction(async tx => {
-            await tx.$queryRaw`SELECT id FROM public.lanzadores WHERE id = ${credencial.lanzador_id}::uuid FOR UPDATE`;
+        if (!credencial) {
+            throw new UnauthorizedException(
+                'La verificación ha caducado o no es válida.'
+            );
+        }
+
+        // Comprobar que el administrador seleccionado pertenece a las autorizaciones habilitadas del lanzador
+        const habilitadas = await this.obtenerAutorizacionesHabilitadas(
+            credencial.lanzador_id
+        );
+
+        const seleccionada = habilitadas.find(
+            a => a.asignacionId === asignacionId
+        );
+
+        if (!seleccionada) {
+            throw new ForbiddenException(
+                'La autorización no está disponible.'
+            );
+        }
+
+        // Generar el token original de la nueva sesión.
+        // Postgre almacenará únicamente su hash.
+        const tokenSesion = randomBytes(32).toString('hex');
+
+        return this.prisma.$transaction(async tx => {
+
+            // Bloquear el registro del lanzador para impedir la creación concurrente de varias sesiones
+            await tx.$queryRaw`
+            SELECT id
+            FROM public.lanzadores
+            WHERE id = ${credencial.lanzador_id}::uuid
+            FOR UPDATE
+        `;
+
+            const lanzador = await tx.lanzadores.findUnique({
+                where: {
+                    id: credencial.lanzador_id
+                },
+                select: {
+                    id: true,
+                    usuario_id: true
+                }
+            });
+
+            if (!lanzador) {
+                throw new UnauthorizedException(
+                    'El acceso ya no está disponible.'
+                );
+            }
+
+            // Coordinar el inicio de sesión con los cambios de estado de la cuenta del titular y del lanzador
+            const { titularActiva, estadoLanzador } = await bloquearCuentas(
+                tx,
+                seleccionada.administradorId,
+                lanzador.usuario_id
+            );
+
+            if (
+                !titularActiva ||
+                (
+                    lanzador.usuario_id !== null &&
+                    estadoLanzador !== 'activa'
+                ) ||
+                lanzador.usuario_id === seleccionada.administradorId
+            ) {
+                throw new ForbiddenException(
+                    'La autorización ya no está habilitada.'
+                );
+            }
+
+            // Una revocación concurrente debe tener preferencia
+            await tx.$queryRaw`
+            SELECT id
+            FROM public.asignaciones_lanzadores
+            WHERE id = ${asignacionId}::uuid
+            FOR UPDATE
+        `;
+
+            // Volver a comprobar la asignación dentro de la transacción
+            const asignacion = await tx.asignaciones_lanzadores.findFirst({
+                where: {
+                    id: asignacionId,
+                    lanzador_id: lanzador.id,
+                    administrador_id: seleccionada.administradorId,
+                    estado: 'aceptada'
+                },
+                select: {
+                    id: true
+                }
+            });
+
+            if (!asignacion) {
+                throw new ForbiddenException(
+                    'La autorización ya no está habilitada.'
+                );
+            }
+
+            // Comprobar el estado y el rol actual del administrador
+            const administrador = await tx.cuentas.findFirst({
+                where: {
+                    id: seleccionada.administradorId,
+                    rol: 'administrador',
+                    estado: 'activa'
+                },
+                select: {
+                    id: true,
+                    nombre: true,
+                    apellidos: true
+                }
+            });
+
+            if (!administrador) {
+                throw new ForbiddenException(
+                    'La cuenta ya no está habilitada.'
+                );
+            }
+
+            // Calcular las fechas después de obtener los bloqueos
+            const ahora = new Date();
+
+            const caducaEn = new Date(
+                ahora.getTime() + this.duracionSesionMs
+            );
+
+            // Consumir la credencial temporal de selección.
+            // Solo puede utilizarse una vez y antes de su caducidad.
             const consumo = await tx.credenciales_acceso_lanzadores.updateMany({
                 where: {
-                    id: credencial.id, utilizado_en: null,
-                    invalidado_en: null, caduca_en: { gt: ahora }
+                    id: credencial.id,
+                    lanzador_id: lanzador.id,
+                    finalidad: 'seleccion_titular',
+                    utilizado_en: null,
+                    invalidado_en: null,
+                    caduca_en: { gt: ahora }
                 },
-                data: { utilizado_en: ahora }
+                data: {
+                    utilizado_en: ahora
+                }
             });
-            if (consumo.count !== 1) return false;
+
+            if (consumo.count !== 1) {
+                throw new UnauthorizedException(
+                    'La verificación ha caducado o ya se ha utilizado.'
+                );
+            }
+
+            // Invalidar los antiguos enlaces de acceso pendientes.
+            // No afecta a los enlaces de aceptación de invitaciones.
             await tx.credenciales_acceso_lanzadores.updateMany({
                 where: {
-                    lanzador_id: credencial.lanzador_id,
-                    asignacion_id: asignacionId,
+                    lanzador_id: lanzador.id,
                     finalidad: 'acceso_titular',
                     utilizado_en: null,
                     invalidado_en: null
                 },
-                data: { invalidado_en: ahora }
-            });
-            await tx.credenciales_acceso_lanzadores.create({
                 data: {
-                    lanzador_id: credencial.lanzador_id,
-                    asignacion_id: asignacionId,
-                    finalidad: 'acceso_titular',
-                    token_hash: this.hashTokenAcceso(nuevoToken),
-                    creado_en: ahora,
-                    caduca_en: new Date(ahora.getTime() + this.duracionEnlaceAccesoMs)
+                    invalidado_en: ahora
                 }
             });
-            return true;
-        });
-        if (!creado) throw new UnauthorizedException('La verificación ya se ha utilizado.');
 
-        const lanzador = await this.prisma.lanzadores.findUniqueOrThrow({
-            where: { id: credencial.lanzador_id },
-            select: { correo: true, nombre: true }
-        });
-        try {
-            const enlace = new URL('/acceso-lanzador', obtenerUrlBackoffice(this.config));
-            enlace.searchParams.set('token', nuevoToken);
-            await this.correoService.enviarEnlaceAccesoLanzador(
-                lanzador.correo, lanzador.nombre,
-                seleccionada.administradorNombre, enlace.toString()
-            );
-        } catch (error) {
-            await this.prisma.credenciales_acceso_lanzadores.updateMany({
-                where: { token_hash: this.hashTokenAcceso(nuevoToken), invalidado_en: null, utilizado_en: null },
-                data: { invalidado_en: new Date() }
-            });
-            this.logger.error('No se pudo solicitar correo de enlace lanzador',
-                error instanceof Error ? error.message : String(error));
-            // No revelar más datos al navegador que el resultado genérico
-        }
-        return { mensaje: 'Si la autorización continúa vigente, recibirás un enlace de acceso.' };
-    }
-
-    // Canje de un enlace de un solo uso por una sesión
-    async canjearEnlaceAccesoLanzador(token: string) {
-        if (!this.tokenValido(token)) {
-            throw new UnauthorizedException('El enlace no es válido o ha caducado.');
-        }
-        const credencial = await this.prisma.credenciales_acceso_lanzadores.findFirst({
-            where: {
-                token_hash: this.hashTokenAcceso(token),
-                finalidad: 'acceso_titular',
-                invalidado_en: null,
-                utilizado_en: null,
-                caduca_en: { gt: new Date() }
-            }
-        });
-        if (!credencial?.asignacion_id) {
-            throw new UnauthorizedException('El enlace no es válido o ha caducado.');
-        }
-        const autorizaciones = await this.obtenerAutorizacionesHabilitadas(credencial.lanzador_id);
-        const vigente = autorizaciones.find(a => a.asignacionId === credencial.asignacion_id);
-        if (!vigente) throw new ForbiddenException('La autorización ya no está habilitada.');
-
-        const ahora = new Date();
-        const tokenSesion = randomBytes(32).toString('hex');
-        const nuevaSesion = await this.prisma.$transaction(async tx => {
-            await tx.$queryRaw`SELECT id FROM public.lanzadores WHERE id = ${credencial.lanzador_id}::uuid FOR UPDATE`;
-            // Una revocación concurrente debe tener preferencia
-            await tx.$queryRaw`SELECT id FROM public.asignaciones_lanzadores WHERE id = ${credencial.asignacion_id}::uuid FOR UPDATE`;
-            const asignacion = await tx.asignaciones_lanzadores.findFirst({
-                where: {
-                    id: credencial.asignacion_id!,
-                    lanzador_id: credencial.lanzador_id,
-                    estado: 'aceptada'
-                },
-                select: { id: true }
-            });
-            if (!asignacion) return false;
-
-            const consumo = await tx.credenciales_acceso_lanzadores.updateMany({
-                where: { id: credencial.id, utilizado_en: null, invalidado_en: null, caduca_en: { gt: ahora } },
-                data: { utilizado_en: ahora }
-            });
-            if (consumo.count !== 1) return false;
-
+            // Revocar las sesiones anteriores de este lanzador.
+            // Solo puede mantener una sesión activa.
             await tx.sesiones_lanzadores.updateMany({
-                where: { lanzador_id: credencial.lanzador_id, revocado_en: null },
-                data: { revocado_en: ahora }
+                where: {
+                    lanzador_id: lanzador.id,
+                    revocado_en: null
+                },
+                data: {
+                    revocado_en: ahora
+                }
             });
+
+            // Crear la nueva sesión vinculada al administrador seleccionado
             await tx.sesiones_lanzadores.create({
                 data: {
-                    lanzador_id: credencial.lanzador_id,
+                    lanzador_id: lanzador.id,
                     asignacion_id: asignacion.id,
                     token_hash: this.hashTokenAcceso(tokenSesion),
                     creado_en: ahora,
-                    caduca_en: new Date(ahora.getTime() + this.duracionSesionMs)
+                    caduca_en: caducaEn
                 }
             });
-            return true;
+
+            // Devolver únicamente la sesión y el administrador autorizado.
+            // No se devuelven destinatarios ni mensajes privados por privacidad de datos.
+            return {
+                tokenSesion,
+                caducaEn,
+                administradorId: administrador.id,
+                administradorNombre:
+                    `${administrador.nombre} ${administrador.apellidos ?? ''}`.trim()
+            };
         });
-        if (!nuevaSesion) throw new UnauthorizedException('El enlace no está disponible.');
-        return {
-            tokenSesion,
-            caducaEn: new Date(ahora.getTime() + this.duracionSesionMs),
-            administradorId: vigente.administradorId,
-            administrador: vigente.administradorNombre
-        };
+    }
+
+    // OJO: antiguo acceso mediante enlace de un solo uso.
+    // Se conserva temporalmente para rechazar enlaces de acceso anteriores por tema de seguridad.
+    // El acceso del lanzador ahora se realiza mediante código de ocho dígitos.
+    // No confundir con los enlaces de aceptación de invitaciones iniciales.
+    // Quitarlo dentro de unos días que los enlaces ya no servirán
+
+    async canjearEnlaceAccesoLanzador(_token: string) {
+
+        throw new UnauthorizedException(
+            'El acceso mediante enlace ya no está disponible. ' +
+            'Solicita un código de verificación.'
+        );
     }
 
     // Solo devuelve identidad y ámbito autorizados, pero ni contactos ni mensajes

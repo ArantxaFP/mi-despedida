@@ -431,15 +431,21 @@ export class CorreoService {
             const resultado = await this.brevo.transactionalEmails.sendTransacEmail({
                 sender: { name: this.remitenteNombre, email: this.remitenteEmail },
                 to: [{ email: correo, name: nombre }],
-                subject: 'Mi despedida - Verificación para acceder como lanzador',
+                subject: 'Mi despedida - Código de acceso como contacto lanzador',
                 textContent:
                     `Hola, ${nombre}.\n\n` +
-                    'Has solicitado acceder como lanzador a Mi despedida.\n' +
-                    `Código de verificación: ${codigo}\n\n` +
-                    'Caduca en 10 minutos. Introdúcelo en la pantalla de acceso.\n' +
-                    'Una vez verificado, podrás seleccionar el administrador.\n' +
-                    'El código no inicia ni confirma ninguna activación.\n\n' +
-                    'Si no lo has solicitado, ignora este mensaje.'
+                    'Has solicitado acceder como contacto lanzador a Mi despedida.\n\n' +
+                    `Tu código de acceso es: ${codigo}\n\n` +
+                    'Este código es de un solo uso y caduca a los 10 minutos.\n' +
+                    'Introdúcelo en la pantalla desde la que has solicitado el acceso.\n\n' +
+                    'Si tienes autorización para actuar como lanzador de varias personas, ' +
+                    'en el siguiente paso podrás seleccionar para quién quieres actuar.\n\n' +
+                    'Tu sesión tendrá una duración máxima de una hora.\n\n' +
+                    'Acceder como contacto lanzador no inicia ni confirma ninguna activación.\n\n' +
+                    'No compartas este código con nadie.\n\n' +
+                    'Si no has solicitado este acceso, puedes ignorar este mail.'
+
+
             });
             if (!resultado.messageId) throw new Error('Brevo no confirmó el envío.');
             return resultado.messageId;
@@ -450,6 +456,11 @@ export class CorreoService {
         }
     }
 
+
+    // OJO: método del anterior sistema de acceso mediante enlace.
+    // El nuevo acceso unificado utiliza exclusivamente códigos de ocho dígitos.
+    // Pendiente de eliminar cuando se comprueben las referencias del proyecto.
+    // Recordar quitarlo dentro de unos días
     async enviarEnlaceAccesoLanzador(
         correo: string,
         nombre: string,

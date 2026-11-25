@@ -21,11 +21,13 @@
         ¿Quieres notificar una despedida? Accede como contacto lanzador
       </h1>
 
-      @if (pantalla() === 'correo' || pantalla() === 'respuesta') {
+      @if (pantalla() === 'correo') {
       <p class="tarjeta-acceso__descripcion" data-i18n="descripcion_acceso_lanzador">
         Introduce el correo electrónico con el que aceptaste la invitación para actuar como contacto lanzador.
       </p>
       }
+
+
       <!-- ERRORES DEL ACCESO -->
       @if (errorAcceso()) {
 
@@ -75,28 +77,30 @@
 
       } @else if (pantalla() === 'respuesta') {
 
+      <!-- RESPUESTA GENÉRICA DE LA SOLICITUD DE ACCESO -->
+      <!-- No revelar si el correo tiene autorizaciones vigentes -->
+
       <div class="respuesta-acceso" role="status">
 
         <p data-i18n="respuesta_acceso_lanzador">
-          Si este correo tiene autorizaciones vigentes como contacto lanzador, recibirás un email con las instrucciones.
-          <br>Si recibes un código de verificación, introdúcelo en esta pantalla.
+          Si tu correo electrónico tiene autorizaciones vigentes como contacto lanzador,
+          recibirás un código de verificación de 8 dígitos.
+        </p>
+
+        <p>
+          Introdúcelo a continuación.
+          El código caduca a los <strong>10 minutos</strong>.
+        </p>
+
+        <p>
+          Si no recibes el correo, revisa también la carpeta de correo no deseado.
         </p>
 
       </div>
 
-      <button id="boton-introducir-codigo" class="boton-principal" type="button" (click)="cambiarFormularioCodigo()"
-        [disabled]="cargando()" [attr.aria-expanded]="mostrarCodigo()" aria-controls="seccion-codigo-lanzador"
-        data-i18n="introducir_codigo_verificacion">
-
-        {{ mostrarCodigo()
-        ? 'Ocultar código'
-        : 'Introducir código de verificación' }}
-
-      </button>
 
 
-      @if (mostrarCodigo()) {
-
+      <!-- Formulario de verificación del código de acceso -->
       <div id="seccion-codigo-lanzador">
         <form id="formulario-codigo-lanzador" class="formulario-acceso" [formGroup]="formularioCodigo"
           (ngSubmit)="verificarCodigo()" novalidate>
@@ -133,9 +137,23 @@
 
           </button>
 
+
+
         </form>
       </div>
-      }
+
+      <!-- Solicitar un nuevo código sin volver a introducir el correo -->
+      <button id="boton-solicitar-otro-codigo" class="acceso-lanzador__boton-secundario" type="button"
+        (click)="solicitarAcceso()" [disabled]="cargando()">
+
+        Solicitar otro código
+
+      </button>
+
+      <p class="acceso-lanzador__nota">
+        Debes esperar al menos un minuto entre solicitudes.
+      </p>
+
 
       <button class="acceso-lanzador__boton-secundario" type="button" (click)="volverAlCorreo()"
         [disabled]="cargando()">
@@ -148,9 +166,10 @@
 
       <!-- SELECCIÓN DE ADMINISTRADOR -->
       <p class="tarjeta-acceso__descripcion">
-        Has verificado tu correo.
-        Selecciona para qué contacto quieres actuar.
+        Has verificado tu correo electrónico.
+        Selecciona la persona para la que quieres actuar como contacto lanzador.
       </p>
+
 
       <div class="acceso-lanzador__opciones">
 
@@ -173,52 +192,17 @@
       </div>
 
       <p class="acceso-lanzador__nota">
-        La selección solo solicitará un enlace de acceso.
-        No iniciará ni confirmará un envío.
+        Al seleccionar a una persona, iniciarás una sesión temporal como su contacto lanzador.
+        No se iniciará ni se confirmará automáticamente ningún envío.
       </p>
 
-      } @else if (pantalla() === 'enlace-enviado') {
+      <button class="acceso-lanzador__boton-secundario" type="button" (click)="volverAlCorreo()"
+        [disabled]="cargando()">
 
-      <!-- CONFIRMACIÓN GENÉRICA DEL ENVÍO DEL ENLACE -->
-      <div class="respuesta-acceso" role="status">
-
-        <p>
-          Si la autorización continúa vigente, recibirás un correo con un enlace exclusivo de acceso al contacto
-          seleccionado.
-        </p>
-
-        <p>
-          Abrir el enlace no activa ninguna despedida automáticamente.
-        </p>
-
-      </div>
-
-      <button class="acceso-lanzador__boton-secundario" type="button" (click)="volverAlCorreo()">
-
-        Solicitar otro acceso
+        Volver al acceso
 
       </button>
 
-      } @else if (pantalla() === 'canjear') {
-
-      <!-- CONFIRMACIÓN DEL CANJE DEL ENLACE -->
-      <p class="tarjeta-acceso__descripcion">
-        Has abierto un enlace de acceso temporal como contacto lanzador.
-        Para iniciar tu sesión, confirma que deseas utilizarlo.
-      </p>
-
-      <p class="acceso-lanzador__nota">
-        Iniciar sesión no solicita ni confirma un envío.
-        El acceso estará limitado al contacto que te ha autorizado.
-      </p>
-
-      <button class="boton-principal" type="button" (click)="canjearEnlace()" [disabled]="cargando()">
-
-        {{ cargando()
-        ? 'Iniciando sesión...'
-        : 'Iniciar sesión como lanzador' }}
-
-      </button>
 
       } @else if (pantalla() === 'sesion') {
 

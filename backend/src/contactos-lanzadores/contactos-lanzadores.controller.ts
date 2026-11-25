@@ -179,19 +179,18 @@ export class ContactosLanzadoresController {
             forbidNonWhitelisted: true,
             transform: true
         }))
-        datos: SolicitarAccesoLanzadorDto,
-        @Headers('origin') origen?: string
+        datos: SolicitarAccesoLanzadorDto
     ) {
         return this.contactosLanzadoresService
             .solicitarAccesoComoLanzador(
-                datos.correo,
-                origen
+                datos.correo
             );
     }
 
+
     // Verificar el código de 8 dígitos enviado al correo del lanzador.
-    // Este procedimiento se utiliza cuando tiene varias autorizaciones.
-    // Tras verificar el correo podrá seleccionar un administrador.
+    // Este procedimiento se utiliza tanto si tiene una autorización como si tiene varias.
+    // Tras verificar el correo se obtiene una credencial temporal de selección.
     // La verificación no crea una sesión ni autoriza activaciones.
     @UseGuards(ThrottlerGuard)
     @Post('acceso/verificar-codigo')
@@ -210,7 +209,12 @@ export class ContactosLanzadoresController {
             );
     }
 
-    // Seleccionar el administrador con el que se quiere actuar cuando el lanzador dispone de varias autorizaciones vigentes
+
+    // Seleccionar el administrador para el que se quiere actuar como contacto lanzador.
+    // Iniciar esta sesión no implica solicitar ni confirmar una despedida.
+    // La selección será automática si solo dispone de una autorización vigente.
+    // Si dispone de varias autorizaciones, deberá elegir un administrador.
+    // La selección crea una sesión temporal sin enviar nuevos correos.    
     @UseGuards(ThrottlerGuard)
     @Post('acceso/seleccionar-administrador')
     async seleccionarAdministradorAccesoLanzador(
@@ -266,9 +270,15 @@ export class ContactosLanzadoresController {
         );
     }
 
-    // Canjear un enlace temporal de un solo uso.
-    // Abrir el enlace no inicia ni confirma ningún envío.
-    // Validar el formato del token antes de enviarlo al servicio.
+
+
+
+
+    // OJO: antiguo endpoint de acceso mediante enlace temporal de un solo uso.
+    // Se conserva temporalmente para rechazar enlaces anteriores.
+    // El acceso como lanzador ahora se realiza mediante código de ocho dígitos.
+    // No afecta a los enlaces de aceptación de invitaciones iniciales.
+    // Recordar quitarlo dentro de unos días.
     @UseGuards(ThrottlerGuard)
     @Post('acceso/canjear-enlace')
     async canjearEnlaceAccesoLanzador(

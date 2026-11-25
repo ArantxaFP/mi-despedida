@@ -11,8 +11,6 @@ type PantallaAcceso =
   | 'correo'
   | 'respuesta'
   | 'seleccion'
-  | 'enlace-enviado'
-  | 'canjear'
   | 'sesion';
 
 // Administradores para los que el lanzador está autorizado
@@ -28,12 +26,12 @@ interface RespuestaVerificacion {
   administradores: AdministradorAutorizado[];
 }
 
-// Respuesta al canjear un enlace
-interface RespuestaCanje {
+// Respuesta al iniciar una sesión temporal de lanzador
+interface RespuestaInicioSesion {
   tokenSesion: string;
   caducaEn: string;
   administradorId: string;
-  administrador: string;
+  administradorNombre: string;
 }
 
 // Datos de una sesión temporal
@@ -62,9 +60,9 @@ export class AccesoLanzador implements OnInit {
 
   readonly urlWebComercial = enlaces.webComercial;
 
+
   // Estado actual de la pantalla
   readonly pantalla = signal<PantallaAcceso>('correo');
-  readonly mostrarCodigo = signal(false);
 
   // Estado de las peticiones
   readonly cargando = signal(false);
@@ -73,11 +71,12 @@ export class AccesoLanzador implements OnInit {
   // Autorizaciones disponibles tras verificar el correo
   readonly administradores = signal<AdministradorAutorizado[]>([]);
 
+
   // Credenciales y sesión temporal
   readonly tokenSeleccion = signal<string | null>(null);
-  readonly tokenEnlace = signal<string | null>(null);
   readonly tokenSesion = signal<string | null>(null);
   readonly sesion = signal<RespuestaSesion | null>(null);
+
 
   formularioCorreo;
   formularioCodigo;
@@ -129,9 +128,13 @@ export class AccesoLanzador implements OnInit {
         { correo }
       );
 
-      // La respuesta es idéntica para cualquier correo
+      // La respuesta es idéntica para cualquier correo.
+      // Mostrar directamente el formulario de verificación del código.
+      this.formularioCodigo.reset();
       this.pantalla.set('respuesta');
-      this.mostrarCodigo.set(false);
+
+
+
 
     } catch (error) {
       this.mostrarError(error);
@@ -141,14 +144,7 @@ export class AccesoLanzador implements OnInit {
     }
   }
 
-  // Mostrar o ocultar el formulario del código
-  cambiarFormularioCodigo(): void {
 
-    if (this.cargando()) return;
-
-    this.errorAcceso.set('');
-    this.mostrarCodigo.update(valor => !valor);
-  }
 
   // Realizar peticiones al backend Nest
   private async peticion<T = unknown>(
@@ -219,7 +215,9 @@ export class AccesoLanzador implements OnInit {
     );
   }
 
-  // Verificar el correo cuando el lanzador tiene varias autorizaciones
+
+  // Verificar el correo mediante el código de ocho dígitos.
+  // Se utiliza independientemente del número de autorizaciones vigentes.
   async verificarCodigo(): Promise<void> {
 
     if (this.cargando()) return;
@@ -256,11 +254,31 @@ export class AccesoLanzador implements OnInit {
         );
       }
 
+
       this.tokenSeleccion.set(datos.tokenSeleccion);
       this.administradores.set(datos.administradores);
 
       this.formularioCodigo.reset();
-      this.pantalla.set('seleccion');
+
+      // Si solo existe un administrador autorizado, iniciar la sesión directamente sin mostrar la selección
+      if (datos.administradores.length === 1) {
+
+        await this.iniciarSesionAdministrador(
+          datos.administradores[0]
+        );
+
+      } else {
+
+        // Si hay varios administradores autorizados, el lanzador deberá seleccionar para cuál quiere actuar
+        this.pantalla.set('seleccion');
+
+      }
+
+
+
+
+
+
 
     } catch (error) {
       this.mostrarError(error);
@@ -270,118 +288,118 @@ export class AccesoLanzador implements OnInit {
     }
   }
 
-  // Solicitar el enlace específico del administrador seleccionado
+
+  // Seleccionar el administrador para el que actuará el lanzador.
+  // Se utiliza cuando existen varias autorizaciones vigentes.
   async seleccionarAdministrador(
     administrador: AdministradorAutorizado
   ): Promise<void> {
 
     if (this.cargando()) return;
 
-    const token = this.tokenSeleccion();
-    if (!token) return;
-
     this.cargando.set(true);
     this.errorAcceso.set('');
 
     try {
-      await this.peticion(
-        'acceso/seleccionar-administrador',
-        'POST',
-        {
-          tokenSeleccion: token,
-          asignacionId: administrador.asignacionId
-        }
-      );
 
-      this.tokenSeleccion.set(null);
-      this.administradores.set([]);
-
-      this.pantalla.set('enlace-enviado');
+      await this.iniciarSesionAdministrador(administrador);
 
     } catch (error) {
+
       this.mostrarError(error);
 
     } finally {
+
       this.cargando.set(false);
+
     }
   }
 
 
-  // Detectar el enlace recibido sin consumirlo automáticamente
+  // Iniciar una sesión temporal con el administrador autorizado.
+  // Si solo existe una autorización, se ejecuta automáticamente.
+  // Si hay varias, se ejecuta después de la selección del lanzador.
+  // No se solicitan ni se envían enlaces adicionales por correo.
+  private async iniciarSesionAdministrador(
+    administrador: AdministradorAutorizado
+  ): Promise<void> {
+
+    const token = this.tokenSeleccion();
+
+    if (!token) {
+      throw new Error(
+        'La verificación ya no está disponible. Solicita un nuevo código.'
+      );
+    }
+
+    const datos = await this.peticion<RespuestaInicioSesion>(
+      'acceso/seleccionar-administrador',
+      'POST',
+      {
+        tokenSeleccion: token,
+        asignacionId: administrador.asignacionId
+      }
+    );
+
+    // Comprobar que el servidor ha devuelto una sesión válida y vinculada al administrador seleccionado
+    if (
+      !datos ||
+      typeof datos.tokenSesion !== 'string' ||
+      !/^[a-f0-9]{64}$/.test(datos.tokenSesion) ||
+      datos.administradorId !== administrador.administradorId ||
+      typeof datos.administradorNombre !== 'string' ||
+      typeof datos.caducaEn !== 'string' ||
+      !Number.isFinite(Date.parse(datos.caducaEn)) ||
+      Date.parse(datos.caducaEn) <= Date.now()
+    ) {
+      throw new Error(
+        'El servidor no ha devuelto una sesión válida.'
+      );
+    }
+
+    // La credencial temporal de selección ya se ha utilizado
+    this.tokenSeleccion.set(null);
+    this.administradores.set([]);
+
+    // Guardar el token de la nueva sesión
+    this.tokenSesion.set(datos.tokenSesion);
+
+    // Datos autorizados que se mostrarán en el espacio del lanzador
+    this.sesion.set({
+      administradorId: datos.administradorId,
+      administradorNombre: datos.administradorNombre,
+      caducaEn: datos.caducaEn
+    });
+
+    // Mantener la sesión en la pestaña actual
+    this.guardarTokenSesion(datos.tokenSesion);
+
+    // Acceder directamente al espacio del contacto lanzador
+    this.pantalla.set('sesion');
+  }
+
+
+
+  // Recuperar una sesión temporal al entrar en la pantalla.
+  // OJO: los antiguos enlaces de acceso ya no están habilitados.
   ngOnInit(): void {
 
     const token = this.ruta.snapshot.queryParamMap.get('token');
 
     if (token !== null) {
 
-      // Retirar el token de la barra de direcciones
+      // Retirar el token antiguo de la barra de direcciones.
       this.ubicacion.replaceState('/acceso-lanzador');
 
-      if (/^[a-f0-9]{64}$/.test(token)) {
-
-        this.tokenEnlace.set(token);
-        this.pantalla.set('canjear');
-
-      } else {
-
-        this.errorAcceso.set(
-          'El enlace recibido no tiene un formato válido.'
-        );
-      }
+      this.errorAcceso.set(
+        'El acceso mediante enlace ya no está disponible. ' +
+        'Solicita un código de verificación.'
+      );
 
       return;
     }
 
     void this.recuperarSesion();
-  }
-
-
-  // Canjear el enlace de un solo uso por una sesión temporal
-  async canjearEnlace(): Promise<void> {
-
-    if (this.cargando()) return;
-
-    const token = this.tokenEnlace();
-    if (!token) return;
-
-    this.cargando.set(true);
-    this.errorAcceso.set('');
-
-    try {
-      const datos = await this.peticion<RespuestaCanje>(
-        'acceso/canjear-enlace',
-        'POST',
-        { token }
-      );
-
-      if (
-        !datos ||
-        typeof datos.tokenSesion !== 'string' ||
-        !/^[a-f0-9]{64}$/.test(datos.tokenSesion)
-      ) {
-        throw new Error(
-          'El servidor no ha devuelto una sesión válida.'
-        );
-      }
-
-      this.tokenEnlace.set(null);
-      this.tokenSesion.set(datos.tokenSesion);
-
-      this.sesion.set({
-        administradorId: datos.administradorId,
-        administradorNombre: datos.administrador,
-        caducaEn: datos.caducaEn
-      });
-
-      this.guardarTokenSesion(datos.tokenSesion);
-      this.pantalla.set('sesion');
-
-    } catch (error) {
-      this.mostrarError(error);
-
-    } finally {
-      this.cargando.set(false);
-    }
   }
 
 
@@ -469,11 +487,14 @@ export class AccesoLanzador implements OnInit {
     this.administradores.set([]);
     this.tokenSeleccion.set(null);
 
+    this.formularioCorreo.reset();
     this.formularioCodigo.reset();
-    this.mostrarCodigo.set(false);
 
     this.pantalla.set('correo');
   }
+
+
+
 
   // Mantener la sesión en la pestaña actual.
   // Es provisional hasta completar la gestión de sesiones del frontend.

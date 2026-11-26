@@ -14,8 +14,117 @@
         {{ sesion().caducaEn | date:'dd/MM/yyyy HH:mm' }}.
     </p>
 
-    <!-- OJO pendientes las acciones dependerán del estado real de activación que proporciona Nest -->
+    <!-- ESTADO ACTUAL DE LA ACTIVACIÓN -->
+    <!-- La información procede de Nest y no incluye datos privados -->
 
+    <section class="espacio-lanzador__estado" aria-labelledby="titulo-estado-activacion">
+
+        <div class="espacio-lanzador__estado-cabecera">
+
+            <h3 id="titulo-estado-activacion">
+                Estado de activación
+            </h3>
+
+            <button id="boton-actualizar-estado-activacion" class="espacio-lanzador__actualizar" type="button"
+                (click)="actualizarEstado.emit()" [disabled]="cargandoEstado()">
+
+                {{ cargandoEstado()
+                ? 'Actualizando...'
+                : 'Actualizar estado' }}
+
+            </button>
+
+        </div>
+
+        @if (errorEstado()) {
+
+        <!-- No mostrar un error de conexión como ausencia de activación -->
+        <p class="espacio-lanzador__estado-error" role="alert">
+            {{ errorEstado() }}
+        </p>
+
+        @if (estadoActivacion()) {
+
+        <p class="espacio-lanzador__estado-detalle">
+            Se muestra la última información disponible.
+            Puede no corresponder al estado actual.
+        </p>
+
+        }
+
+        }
+
+        @if (estadoActivacion(); as datos) {
+
+        <p class="espacio-lanzador__estado-titulo">
+            {{ tituloEstado() }}
+        </p>
+
+        <p class="espacio-lanzador__estado-detalle">
+            {{ descripcionEstado() }}
+        </p>
+
+        @if (datos.solicitud; as solicitud) {
+
+        <div class="espacio-lanzador__estado-fechas">
+
+            <p>
+                <strong>Fecha de solicitud:</strong>
+                {{ solicitud.solicitadaEn | date:'dd/MM/yyyy HH:mm' }}
+            </p>
+
+            @if (solicitud.validadaEn) {
+
+            <p>
+                <strong>Fecha de confirmación:</strong>
+                {{ solicitud.validadaEn | date:'dd/MM/yyyy HH:mm' }}
+            </p>
+
+            }
+
+            @if (
+            datos.estado === 'periodo_seguridad' &&
+            solicitud.procesarDesde
+            ) {
+
+            <p>
+                <strong>Fin del periodo de seguridad:</strong>
+                {{ solicitud.procesarDesde | date:'dd/MM/yyyy HH:mm' }}
+            </p>
+
+            }
+
+        </div>
+
+        }
+
+        } @else if (cargandoEstado()) {
+
+        <p class="espacio-lanzador__estado-detalle" role="status">
+            Consultando el estado de activación...
+        </p>
+
+        } @else {
+
+        <p class="espacio-lanzador__estado-detalle">
+            No se dispone del estado de activación.
+        </p>
+
+        }
+
+        @if (ultimaActualizacion(); as fecha) {
+
+        <p class="espacio-lanzador__ultima-actualizacion">
+            Última actualización:
+            {{ fecha | date:'dd/MM/yyyy HH:mm:ss' }}
+        </p>
+
+        }
+
+    </section>
+
+    <!-- OJO las acciones dependerán del estado real de activación que proporciona Nest -->
+    <!-- Pendiente implementar las operaciones de solicitud y confirmación en el backend -->
     <div class="espacio-lanzador__acciones">
 
         <article class="espacio-lanzador__accion">
@@ -55,8 +164,7 @@
     </div>
 
     <p class="espacio-lanzador__aviso" role="status">
-        Las operaciones de activación todavía no están habilitadas.
-        Se activarán cuando la aplicación pueda consultar y actualizar su estado de forma segura.
+        Las operaciones de solicitud y confirmación de activación todavía no están habilitadas.
     </p>
 
 </section>

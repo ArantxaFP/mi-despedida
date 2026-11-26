@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal, OnDestroy } from '@angular/core';
 import { Location } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
@@ -41,13 +41,60 @@ interface RespuestaSesion {
   caducaEn: string;
 }
 
+// Estados de activación que devuelve Nest al contacto lanzador
+export type EstadoActivacionLanzador =
+  | 'sin_activacion'
+  | 'pendiente_validacion'
+  | 'periodo_seguridad'
+  | 'en_procesamiento'
+  | 'con_incidencias';
+
+// Información operativa autorizada de la activación en curso
+export interface SolicitudActivacionLanzador {
+  id: string;
+  solicitadaEn: string;
+  validadaEn: string | null;
+  procesarDesde: string | null;
+}
+
+// Información de la última solicitud histórica
+export interface UltimaSolicitudActivacionLanzador {
+  id: string;
+  estado: string;
+  solicitadaEn: string;
+  finalizadaEn: string | null;
+}
+
+// Respuesta de Nest al consultar el estado de activación.
+// No contiene destinatarios ni mensajes privados.
+export interface RespuestaEstadoActivacion {
+  administradorId: string;
+  administradorNombre: string;
+  activacionEnCurso: boolean;
+  estado: EstadoActivacionLanzador;
+  solicitud: SolicitudActivacionLanzador | null;
+  ultimaSolicitud: UltimaSolicitudActivacionLanzador | null;
+  esSolicitante: boolean;
+  accionOrientativa: 'solicitar' | 'confirmar' | 'ninguna';
+}
+
+// Error de una petición http al backend
+class ErrorPeticionLanzador extends Error {
+  constructor(
+    mensaje: string,
+    readonly estadoHttp: number
+  ) {
+    super(mensaje);
+  }
+}
+
 @Component({
   selector: 'app-acceso-lanzador',
   imports: [ReactiveFormsModule, RouterLink, EspacioLanzador],
   templateUrl: './acceso-lanzador.html',
   styleUrl: './acceso-lanzador.scss'
 })
-export class AccesoLanzador implements OnInit {
+export class AccesoLanzador implements OnInit, OnDestroy {
 
   private readonly ruta = inject(ActivatedRoute);
   private readonly ubicacion = inject(Location);
@@ -68,6 +115,9 @@ export class AccesoLanzador implements OnInit {
   readonly cargando = signal(false);
   readonly errorAcceso = signal('');
 
+  // Identificar si se está cerrando la sesión del lanzador
+  readonly cerrandoSesion = signal(false);
+
   // Autorizaciones disponibles tras verificar el correo
   readonly administradores = signal<AdministradorAutorizado[]>([]);
 
@@ -77,6 +127,26 @@ export class AccesoLanzador implements OnInit {
   readonly tokenSesion = signal<string | null>(null);
   readonly sesion = signal<RespuestaSesion | null>(null);
 
+
+  // Información del estado de activación del administrador
+  readonly estadoActivacion =
+    signal<RespuestaEstadoActivacion | null>(null);
+
+  readonly cargandoEstadoActivacion = signal(false);
+  readonly errorEstadoActivacion = signal('');
+  readonly ultimaActualizacionEstado = signal<Date | null>(null);
+
+  // Actualización automática del estado de activación cada 30 segundos
+  private readonly intervaloEstadoActivacionMs = 30_000;
+
+  private temporizadorEstadoActivacion:
+    ReturnType<typeof setInterval> | null = null;
+
+  // Evitar aplicar respuestas de consultas anteriores después de cerrar una sesión o abandonar 
+  private versionConsultaEstado = 0;
+
+  // Impedir iniciar nuevas consultas cuando el componente ya se ha eliminado
+  private componenteDestruido = false;
 
   formularioCorreo;
   formularioCodigo;
@@ -192,8 +262,9 @@ export class AccesoLanzador implements OnInit {
       }
 
       if (respuesta.status === 401 || respuesta.status === 403) {
-        throw new Error(
-          'El acceso no es válido, ha caducado o ya no está autorizado.'
+        throw new ErrorPeticionLanzador(
+          'El acceso no es válido, ha caducado o ya no estás autorizado.',
+          respuesta.status
         );
       }
 
@@ -376,6 +447,9 @@ export class AccesoLanzador implements OnInit {
 
     // Acceder directamente al espacio del contacto lanzador
     this.pantalla.set('sesion');
+
+    // Consultar el estado de activación y iniciar actualización automática
+    this.iniciarActualizacionEstadoActivacion();
   }
 
 
@@ -429,6 +503,9 @@ export class AccesoLanzador implements OnInit {
       this.sesion.set(datos);
       this.pantalla.set('sesion');
 
+      // Recuperar el estado de activación al recargar la página
+      this.iniciarActualizacionEstadoActivacion();
+
     } catch {
 
       this.tokenSesion.set(null);
@@ -444,6 +521,162 @@ export class AccesoLanzador implements OnInit {
     }
   }
 
+  // Iniciar la consulta del estado de activación.
+  // La primera consulta se realiza inmediatamente.
+  private iniciarActualizacionEstadoActivacion(): void {
+
+    if (this.componenteDestruido) return;
+
+    this.detenerActualizacionEstadoActivacion();
+
+    void this.consultarEstadoActivacion();
+
+    this.temporizadorEstadoActivacion = setInterval(
+      () => {
+        void this.consultarEstadoActivacion();
+      },
+      this.intervaloEstadoActivacionMs
+    );
+  }
+
+
+  // Consultar el estado real de activación del administrador.
+  // Nest identifica al administrador mediante la sesión del lanzador.
+  async consultarEstadoActivacion(): Promise<void> {
+
+    const token = this.tokenSesion();
+    const sesionActual = this.sesion();
+
+    if (
+      this.pantalla() !== 'sesion' ||
+      !token ||
+      !sesionActual ||
+      this.cargandoEstadoActivacion() ||
+      this.cerrandoSesion() ||
+      this.componenteDestruido 
+    ) {
+      return;
+    }
+
+    const version = this.versionConsultaEstado;
+
+    this.cargandoEstadoActivacion.set(true);
+    this.errorEstadoActivacion.set('');
+
+    try {
+
+      const datos = await this.peticion<RespuestaEstadoActivacion>(
+        'acceso/estado-activacion',
+        'GET',
+        undefined,
+        token
+      );
+
+      // Ignorar respuestas de una sesión anterior o cerrada
+      if (
+        version !== this.versionConsultaEstado ||
+        this.tokenSesion() !== token ||
+        this.pantalla() !== 'sesion'
+      ) {
+        return;
+      }
+
+      // Comprobar que la respuesta corresponde al administrador autorizado
+      if (
+        !datos ||
+        datos.administradorId !== sesionActual.administradorId ||
+        ![
+          'sin_activacion',
+          'pendiente_validacion',
+          'periodo_seguridad',
+          'en_procesamiento',
+          'con_incidencias'
+        ].includes(datos.estado)
+      ) {
+        throw new Error(
+          'El servidor no ha devuelto un estado de activación válido.'
+        );
+      }
+
+      this.estadoActivacion.set(datos);
+      this.ultimaActualizacionEstado.set(new Date());
+
+    } catch (error) {
+
+      // No aplicar errores procedentes de una consulta anterior
+      if (
+        version !== this.versionConsultaEstado ||
+        this.tokenSesion() !== token ||
+        this.pantalla() !== 'sesion'
+      ) {
+        return;
+      }
+
+      // Si la sesión ya no está autorizada, eliminar el acceso local
+      if (
+        error instanceof ErrorPeticionLanzador &&
+        (
+          error.estadoHttp === 401 ||
+          error.estadoHttp === 403
+        )
+      ) {
+
+        this.detenerActualizacionEstadoActivacion();
+
+        this.tokenSesion.set(null);
+        this.sesion.set(null);
+        this.eliminarTokenSesion();
+
+        this.formularioCorreo.reset();
+        this.formularioCodigo.reset();
+
+        this.pantalla.set('correo');
+
+        this.errorAcceso.set(
+          'Tu sesión ha caducado o ya no está autorizada. ' +
+          'Solicita un nuevo acceso.'
+        );
+
+        return;
+      }
+
+      // Si falla la conexión, no interpretar el error como ausencia de activación
+      this.errorEstadoActivacion.set(
+        error instanceof Error
+          ? error.message
+          : 'No se ha podido consultar el estado de activación.'
+      );
+
+    } finally {
+
+      if (version === this.versionConsultaEstado) {
+        this.cargandoEstadoActivacion.set(false);
+      }
+
+    }
+  }
+
+
+  // Detener las consultas automáticas y limpiar el estado local
+  private detenerActualizacionEstadoActivacion(): void {
+
+    // Invalidar las respuestas que todavía estén pendientes
+    this.versionConsultaEstado++;
+
+    if (this.temporizadorEstadoActivacion !== null) {
+
+      clearInterval(this.temporizadorEstadoActivacion);
+
+      this.temporizadorEstadoActivacion = null;
+    }
+
+    this.estadoActivacion.set(null);
+    this.cargandoEstadoActivacion.set(false);
+    this.errorEstadoActivacion.set('');
+    this.ultimaActualizacionEstado.set(null);
+  }
+
+
   // Cerrar la sesión de lanzador
   async cerrarSesion(): Promise<void> {
 
@@ -453,7 +686,10 @@ export class AccesoLanzador implements OnInit {
     if (!token) return;
 
     this.cargando.set(true);
+    this.cerrandoSesion.set(true);
     this.errorAcceso.set('');
+    // Detener las consultas mientras se cierra la sesión
+    this.detenerActualizacionEstadoActivacion();
 
     try {
       await this.peticion(
@@ -473,7 +709,15 @@ export class AccesoLanzador implements OnInit {
     } catch (error) {
       this.mostrarError(error);
 
+      this.cerrandoSesion.set(false);
+
+      // Si no se ha podido cerrar la sesión, recuperar la consulta del estado
+      if (this.tokenSesion() && this.pantalla() === 'sesion') {
+        this.iniciarActualizacionEstadoActivacion();
+      }
+
     } finally {
+      this.cerrandoSesion.set(false);
       this.cargando.set(false);
     }
   }
@@ -529,6 +773,15 @@ export class AccesoLanzador implements OnInit {
     } catch {
       // El cierre se ha solicitado al backend
     }
+  }
+
+  // Detener las consultas automáticas al abandonar la pantalla de acceso
+  ngOnDestroy(): void {
+
+    this.componenteDestruido = true;
+
+    this.detenerActualizacionEstadoActivacion();
+
   }
 
 }

@@ -5,6 +5,8 @@ import { PrismaService } from '../prisma/prisma.service';
 import { bloquearCuentaActiva, bloquearCuentas } from '../cuentas/bloqueo-cuentas';
 import { CorreoService } from '../correo/correo.service';
 import { CrearInvitacionDto } from './dto/crear-invitacion.dto';
+import { SolicitarActivacionDto } from './dto/solicitar-activacion.dto';
+import type { Prisma } from '../generated/prisma/client';
 import { obtenerUrlBackoffice } from '../configuracion/urls-backoffice';
 
 
@@ -614,6 +616,30 @@ export class ContactosLanzadoresService {
                 );
             }
 
+            // Si el lanzador cuya autorización se revoca ha solicitado una activación que todavía no ha sido confirmada,
+            // cancelar automáticamente dicha solicitud.
+
+
+            // Conservar la solicitud cancelada para mantener su historial.
+            const activacionesCanceladas =
+                await tx.solicitudes_activacion.updateMany({
+                    where: {
+                        administrador_id: administradorId,
+                        asignacion_solicitante_id: asignacionId,
+                        estado: 'pendiente_validacion',
+                        asignacion_validador_id: null,
+                        validada_en: null
+                    },
+                    data: {
+                        estado: 'cancelada',
+                        cancelada_en: ahora,
+                        cancelada_por_id: administradorId,
+                        cancelada_por_tipo: 'administrador',
+                        motivo_cancelacion:
+                            'Cancelación automática por revocación de la autorización del contacto lanzador solicitante.'
+                    }
+                });
+
             // Invalidar los enlaces de acceso pendientes de esta autorización.
             // Los enlaces de otras asignaciones del lanzador no se modifican.
             await tx.credenciales_acceso_lanzadores.updateMany({
@@ -654,7 +680,14 @@ export class ContactosLanzadoresService {
 
             return {
                 estado: 'revocada',
-                mensaje: 'La autorización se ha revocado correctamente.'
+
+                // Informar al administrador si la revocación ha provocado la cancelación de una solicitud de activación
+                activacionCancelada: activacionesCanceladas.count > 0,
+
+                mensaje: activacionesCanceladas.count > 0
+                    ? 'La autorización se ha revocado correctamente. ' +
+                    'También se ha cancelado la solicitud de activación pendiente de validación.'
+                    : 'La autorización se ha revocado correctamente.'
             };
         });
     }
@@ -835,6 +868,14 @@ export class ContactosLanzadoresService {
     private readonly duracionCodigoAccesoMs = 10 * 60 * 1000;
     private readonly duracionSeleccionMs = 10 * 60 * 1000;
     private readonly duracionSesionMs = 60 * 60 * 1000;
+
+    // Estados que impiden crear otra solicitud de activación
+    private readonly estadosActivacionEnCurso = [
+        'pendiente_validacion',
+        'periodo_seguridad',
+        'en_procesamiento',
+        'con_incidencias'
+    ];
 
 
     private hashTokenAcceso(token: string): string {
@@ -1440,6 +1481,80 @@ export class ContactosLanzadoresService {
         return { mensaje: 'Sesión cerrada.' };
     }
 
+    // Consultar los contactos lanzadores habilitados de un administrador.
+    // Solo se aceptan las asignaciones que ya estaban validadas.
+    // Si el lanzador tiene una cuenta propia, esta debe estar activa.
+    // El titular no puede actuar como lanzador de su propia cuenta.
+
+    private async obtenerLanzadoresHabilitadosAdministrador(
+        administradorId: string,
+        db: Pick<
+            Prisma.TransactionClient,
+            'asignaciones_lanzadores' | 'cuentas'
+        > = this.prisma
+    ) {
+
+        const asignaciones =
+            await db.asignaciones_lanzadores.findMany({
+                where: {
+                    administrador_id: administradorId,
+                    estado: 'aceptada'
+                },
+                select: {
+                    id: true,
+                    lanzador_id: true,
+                    lanzadores: {
+                        select: {
+                            usuario_id: true,
+                            correo: true
+                        }
+                    }
+                }
+            });
+
+        // Identificar los lanzadores que también tienen una cuenta propia
+        const usuariosIds = asignaciones
+            .map(asignacion => asignacion.lanzadores.usuario_id)
+            .filter((id): id is string => id !== null);
+
+        // Comprobar qué cuentas propias están activas
+        const cuentasActivas =
+            await db.cuentas.findMany({
+                where: {
+                    id: {
+                        in: usuariosIds
+                    },
+                    estado: 'activa'
+                },
+                select: {
+                    id: true
+                }
+            });
+
+        const cuentasActivasIds = new Set(
+            cuentasActivas.map(cuenta => cuenta.id)
+        );
+
+        // Excluir al titular y a los lanzadores cuya cuenta propia no esté habilitada para actuar
+        return asignaciones.filter(asignacion => {
+
+            const usuarioId = asignacion.lanzadores.usuario_id;
+
+            if (usuarioId === administradorId) {
+                return false;
+            }
+
+            if (
+                usuarioId !== null &&
+                !cuentasActivasIds.has(usuarioId)
+            ) {
+                return false;
+            }
+
+            return true;
+        });
+    }
+
     // --------------------------------------------------
     // 9. Consultar el estado de activación del administrador desde una sesión temporal de lanzador.
     // Solo devuelve información operativa autorizada.
@@ -1481,12 +1596,7 @@ export class ContactosLanzadoresService {
 
         // Estados que representan una activación en curso.
         // Se corresponden con los estados contemplados por el índice de Postgre
-        const estadosEnCurso = [
-            'pendiente_validacion',
-            'periodo_seguridad',
-            'en_procesamiento',
-            'con_incidencias'
-        ];
+        const estadosEnCurso = this.estadosActivacionEnCurso;
 
         // Consultar solo las solicitudes del administrador al que pertenece la sesión autorizada
         const solicitud = await this.prisma.solicitudes_activacion.findFirst({
@@ -1536,12 +1646,51 @@ export class ContactosLanzadoresService {
             ? solicitud.asignacion_solicitante.lanzador_id === sesion.lanzador_id
             : false;
 
-        // Información orientativa para el frontend
-        const accionOrientativa = !solicitud
-            ? 'solicitar'
-            : solicitud.estado === 'pendiente_validacion' && !esSolicitante
-                ? 'confirmar'
-                : 'ninguna';
+        // Comprobar los contactos lanzadores habilitados del administrador
+        const lanzadoresHabilitados =
+            await this.obtenerLanzadoresHabilitadosAdministrador(
+                contexto.administradorId
+            );
+
+        // Contabilizar personas distintas, no solo asignaciones
+        const lanzadoresDistintos = new Set(
+            lanzadoresHabilitados.map(
+                asignacion => asignacion.lanzadores.correo.trim().toLowerCase()
+            )
+        );
+
+        const numeroLanzadoresHabilitados = lanzadoresDistintos.size;
+
+        const disponeLanzadoresNecesarios =
+            numeroLanzadoresHabilitados >= 2;
+
+        // Comprobar que la autorización del lanzador actual sigue habilitada
+        const lanzadorActualHabilitado = lanzadoresHabilitados.some(
+            asignacion => asignacion.lanzador_id === sesion.lanzador_id
+        );
+
+        // Comprobar que el solicitante original sigue autorizado
+        const solicitanteHabilitado = solicitud
+            ? lanzadoresHabilitados.some(
+                asignacion =>
+                    asignacion.lanzador_id ===
+                    solicitud.asignacion_solicitante.lanzador_id
+            )
+            : false;
+
+        // Información orientativa para el frontend.
+        // Las comprobaciones deberán repetirse dentro de la transacción que solicite o confirme una activación.
+        const accionOrientativa =
+            !disponeLanzadoresNecesarios || !lanzadorActualHabilitado
+                ? 'ninguna'
+                : !solicitud
+                    ? 'solicitar'
+                    : solicitud.estado === 'pendiente_validacion' &&
+                        !esSolicitante &&
+                        solicitanteHabilitado
+                        ? 'confirmar'
+                        : 'ninguna';
+
 
         return {
             administradorId: contexto.administradorId,
@@ -1569,11 +1718,474 @@ export class ContactosLanzadoresService {
                 : null,
 
             esSolicitante,
+
+            // Información sobre los requisitos de activación
+            numeroLanzadoresHabilitados,
+            disponeLanzadoresNecesarios,
+
             accionOrientativa
         };
     }
 
 
+
+    // --------------------------------------------------
+    // 10. Comprobar la sesión del lanzador dentro de una transacción.
+    // Se utilizará en las operaciones que modifican una activación.
+    // --------------------------------------------------
+
+    private async comprobarSesionParaActivacion(
+        tx: Prisma.TransactionClient,
+        tokenSesion: string
+    ) {
+
+        const tokenHash = this.hashTokenAcceso(tokenSesion);
+
+        // Localizar la sesión para identificar su ámbito autorizado
+        const sesionInicial = await tx.sesiones_lanzadores.findUnique({
+            where: {
+                token_hash: tokenHash
+            },
+            select: {
+                id: true,
+                lanzador_id: true,
+                asignacion_id: true,
+                revocado_en: true,
+                caduca_en: true
+            }
+        });
+
+        if (
+            !sesionInicial ||
+            sesionInicial.revocado_en ||
+            sesionInicial.caduca_en <= new Date()
+        ) {
+            throw new UnauthorizedException(
+                'La sesión ha caducado o no está disponible.'
+            );
+        }
+
+        // Bloquear la identidad del lanzador siguiendo el orden utilizado en la creación de sesiones
+        await tx.$queryRaw`
+        SELECT id
+        FROM public.lanzadores
+        WHERE id = ${sesionInicial.lanzador_id}::uuid
+        FOR UPDATE
+    `;
+
+        const lanzador = await tx.lanzadores.findUnique({
+            where: {
+                id: sesionInicial.lanzador_id
+            },
+            select: {
+                id: true,
+                usuario_id: true,
+                correo: true
+            }
+        });
+
+        const asignacionInicial =
+            await tx.asignaciones_lanzadores.findUnique({
+                where: {
+                    id: sesionInicial.asignacion_id
+                },
+                select: {
+                    id: true,
+                    administrador_id: true,
+                    lanzador_id: true
+                }
+            });
+
+        if (
+            !lanzador ||
+            !asignacionInicial ||
+            asignacionInicial.lanzador_id !== lanzador.id
+        ) {
+            throw new UnauthorizedException(
+                'La autorización no está disponible.'
+            );
+        }
+
+        // Coordinar la operación con las suspensiones y bajas del administrador y de la cuenta propia del lanzador
+        const { titularActiva, estadoLanzador } =
+            await bloquearCuentas(
+                tx,
+                asignacionInicial.administrador_id,
+                lanzador.usuario_id
+            );
+
+        if (
+            !titularActiva ||
+            lanzador.usuario_id === asignacionInicial.administrador_id ||
+            (
+                lanzador.usuario_id !== null &&
+                estadoLanzador !== 'activa'
+            )
+        ) {
+            throw new ForbiddenException(
+                'La autorización ya no está habilitada.'
+            );
+        }
+
+        // Bloquear y comprobar otra vez la asignación
+        await tx.$queryRaw`
+        SELECT id
+        FROM public.asignaciones_lanzadores
+        WHERE id = ${asignacionInicial.id}::uuid
+        FOR UPDATE
+    `;
+
+        const asignacion =
+            await tx.asignaciones_lanzadores.findFirst({
+                where: {
+                    id: asignacionInicial.id,
+                    lanzador_id: lanzador.id,
+                    administrador_id: asignacionInicial.administrador_id,
+                    estado: 'aceptada'
+                },
+                select: {
+                    id: true,
+                    administrador_id: true
+                }
+            });
+
+        if (!asignacion) {
+            throw new ForbiddenException(
+                'La autorización ya no está habilitada.'
+            );
+        }
+
+        // Bloquear la sesión para impedir utilizarla después de su revocación
+        await tx.$queryRaw`
+        SELECT id
+        FROM public.sesiones_lanzadores
+        WHERE id = ${sesionInicial.id}::uuid
+        FOR UPDATE
+    `;
+
+        const ahora = new Date();
+
+        const sesion = await tx.sesiones_lanzadores.findFirst({
+            where: {
+                id: sesionInicial.id,
+                token_hash: tokenHash,
+                lanzador_id: lanzador.id,
+                asignacion_id: asignacion.id,
+                revocado_en: null,
+                caduca_en: {
+                    gt: ahora
+                }
+            },
+            select: {
+                id: true
+            }
+        });
+
+        if (!sesion) {
+            throw new UnauthorizedException(
+                'La sesión ha caducado o no está disponible.'
+            );
+        }
+
+        // Registrar el uso de la sesión dentro de la misma transacción
+        await tx.sesiones_lanzadores.update({
+            where: {
+                id: sesion.id
+            },
+            data: {
+                ultimo_uso_en: ahora
+            }
+        });
+
+        return {
+            administradorId: asignacion.administrador_id,
+            asignacionId: asignacion.id,
+            lanzadorId: lanzador.id
+        };
+    }
+
+    // --------------------------------------------------
+    // 11. Solicitar una activación por parte del primer contacto lanzador.
+    // La solicitud queda pendiente de validación por otro lanzador.
+    // No inicia el periodo de seguridad ni el envío de comunicaciones.
+    // OJO: pendiente integrar el registro persistente del aviso al administrador.
+    // --------------------------------------------------
+
+    async solicitarActivacionLanzador(
+        datos: SolicitarActivacionDto,
+        tokenSesion?: string
+    ) {
+
+        // Comprobar el formato del token de sesión
+        if (!this.tokenValido(tokenSesion)) {
+            throw new UnauthorizedException(
+                'Sesión de lanzador no válida.'
+            );
+        }
+
+        // La comunicación general es obligatoria
+        const mensajeGeneral = datos.mensajeGeneral.trim();
+
+        if (!mensajeGeneral || mensajeGeneral.length > 5000) {
+            throw new BadRequestException(
+                'Debes introducir una comunicación para que todos los destinatarios de esta despedida reciban la información necesaria.'
+            );
+        }
+
+        // La información de la ceremonia es opcional
+        const informacionCeremonia =
+            datos.informacionCeremonia?.trim() || null;
+
+        if (
+            informacionCeremonia &&
+            informacionCeremonia.length > 5000
+        ) {
+            throw new BadRequestException(
+                'La información de la ceremonia supera la longitud permitida.'
+            );
+        }
+
+        // Exigir la confirmación expresa del primer lanzador
+        if (datos.confirmaSolicitud !== true) {
+            throw new BadRequestException(
+                'Debes confirmar expresamente la solicitud de activación.'
+            );
+        }
+
+        try {
+
+            return await this.prisma.$transaction(async tx => {
+
+                // Comprobar y bloquear la sesión y las cuentas implicadas
+                const contexto =
+                    await this.comprobarSesionParaActivacion(
+                        tx,
+                        tokenSesion
+                    );
+
+                // Comprobar que no existe otra activación en curso
+                const activacionExistente =
+                    await tx.solicitudes_activacion.findFirst({
+                        where: {
+                            administrador_id: contexto.administradorId,
+                            estado: {
+                                in: this.estadosActivacionEnCurso
+                            }
+                        },
+                        select: {
+                            id: true
+                        }
+                    });
+
+                if (activacionExistente) {
+                    throw new ConflictException(
+                        'Ya existe una activación en curso.'
+                    );
+                }
+
+                // Consultar las autorizaciones dentro de la misma transacción
+                const lanzadoresHabilitados =
+                    await this.obtenerLanzadoresHabilitadosAdministrador(
+                        contexto.administradorId,
+                        tx
+                    );
+
+                // Comprobar que la asignación actual sigue habilitada
+                const solicitante = lanzadoresHabilitados.find(
+                    asignacion =>
+                        asignacion.id === contexto.asignacionId &&
+                        asignacion.lanzador_id === contexto.lanzadorId
+                );
+
+                if (!solicitante) {
+                    throw new ForbiddenException(
+                        'Tu autorización ya no está habilitada.'
+                    );
+                }
+
+                // Comprobar que existe al menos otro lanzador distinto del solicitante y que está autorizado para el mismo administrador
+                const segundoLanzadorDisponible =
+                    lanzadoresHabilitados.find(asignacion =>
+
+                        asignacion.lanzador_id !== contexto.lanzadorId &&
+
+                        asignacion.lanzadores.correo.trim().toLowerCase() !==
+                        solicitante.lanzadores.correo.trim().toLowerCase() &&
+
+                        (
+                            solicitante.lanzadores.usuario_id === null ||
+                            asignacion.lanzadores.usuario_id !==
+                            solicitante.lanzadores.usuario_id
+                        )
+
+                    );
+
+                if (!segundoLanzadorDisponible) {
+                    throw new ConflictException(
+                        'El administrador no dispone de otro contacto lanzador habilitado, por lo que no será posible el envío de las comunicaciones de esta despedida.'
+                    );
+                }
+
+
+                // Proteger la identidad del segundo lanzador frente a cambios concurrentes
+                await tx.$queryRaw`
+SELECT id
+FROM public.lanzadores
+WHERE id = ${segundoLanzadorDisponible.lanzador_id}::uuid
+FOR UPDATE NOWAIT
+`;
+
+                // Si el segundo lanzador tiene una cuenta propia, impedir que cambie de estado durante el registro de la solicitud
+                const usuarioSegundoLanzador =
+                    segundoLanzadorDisponible.lanzadores.usuario_id;
+
+                if (usuarioSegundoLanzador !== null) {
+
+                    await tx.$queryRaw`
+    SELECT id
+    FROM public.cuentas
+    WHERE id = ${usuarioSegundoLanzador}::uuid
+    FOR UPDATE NOWAIT
+`;
+                }
+
+                // Proteger la autorización del segundo lanzador frente a revocaciones
+                await tx.$queryRaw`
+SELECT id
+FROM public.asignaciones_lanzadores
+WHERE id = ${segundoLanzadorDisponible.id}::uuid
+FOR UPDATE NOWAIT
+`;
+
+                // Comprobar otra vez que el segundo lanzador sigue estando habilitado
+                const autorizacionesActualizadas =
+                    await this.obtenerLanzadoresHabilitadosAdministrador(
+                        contexto.administradorId,
+                        tx
+                    );
+
+                const segundoLanzadorHabilitado =
+                    autorizacionesActualizadas.some(
+                        asignacion =>
+                            asignacion.id === segundoLanzadorDisponible.id &&
+                            asignacion.lanzador_id ===
+                            segundoLanzadorDisponible.lanzador_id
+                    );
+
+                if (!segundoLanzadorHabilitado) {
+                    throw new ConflictException(
+                        'La autorización del segundo contacto lanzador ha cambiado. ' +
+                        'Actualiza el estado de activación e inténtalo de nuevo.'
+                    );
+                }
+
+
+                // No es obligatorio que el administrador tenga destinatarios.
+                // Tampoco es obligatorio que los destinatarios tengan mensajes privados preparados.
+                // Por privacidad de datos, si un lanzador solicita el envío, se gestionará como si los hubiese
+                const ahora = new Date();
+
+                // Registrar la solicitud pendiente de segunda validación
+                const solicitud = await tx.solicitudes_activacion.create({
+                    data: {
+                        administrador_id: contexto.administradorId,
+                        asignacion_solicitante_id: contexto.asignacionId,
+                        mensaje_general: mensajeGeneral,
+                        informacion_ceremonia: informacionCeremonia,
+                        estado: 'pendiente_validacion',
+                        solicitada_en: ahora
+                    },
+                    select: {
+                        id: true,
+                        estado: true,
+                        solicitada_en: true
+                    }
+                });
+
+                // OJO: pendiente registrar en esta misma transacción el aviso de solicitud de activación al administrador.
+                // El envío mediante Brevo se realizará fuera de la transacción.
+
+                return {
+                    solicitudId: solicitud.id,
+                    estado: solicitud.estado,
+                    solicitadaEn: solicitud.solicitada_en,
+                    mensaje:
+                        'La solicitud de activación se ha registrado. ' +
+                        'Está pendiente de confirmación por otro contacto lanzador.'
+                };
+
+            }, {
+                isolationLevel: 'Serializable'
+            });
+
+        } catch (error) {
+
+            if (
+                error instanceof BadRequestException ||
+                error instanceof UnauthorizedException ||
+                error instanceof ForbiddenException ||
+                error instanceof ConflictException
+            ) {
+                throw error;
+            }
+
+            // Evitar solicitudes duplicadas
+            if (
+                typeof error === 'object' &&
+                error !== null &&
+                'code' in error &&
+                error.code === 'P2002'
+            ) {
+                throw new ConflictException(
+                    'Ya existe una activación en curso.'
+                );
+            }
+
+            // Gestionar conflictos entre transacciones 
+            if (
+                typeof error === 'object' &&
+                error !== null &&
+                'code' in error &&
+                error.code === 'P2034'
+            ) {
+                throw new ConflictException(
+                    'Se ha producido un cambio simultáneo. ' +
+                    'Actualiza el estado de activación e inténtalo de nuevo.'
+                );
+            }
+
+            // Gestionar conflictos de bloqueo y concurrencia producidos por las consultas directas a Postgre
+            if (
+                typeof error === 'object' &&
+                error !== null &&
+                'code' in error &&
+                error.code === 'P2010' &&
+                'meta' in error &&
+                typeof error.meta === 'object' &&
+                error.meta !== null &&
+                'code' in error.meta &&
+                (
+                    error.meta.code === '55P03' ||
+                    error.meta.code === '40001' ||
+                    error.meta.code === '40P01'
+                )
+            ) {
+                throw new ConflictException(
+                    'Se ha producido un cambio simultáneo en las autorizaciones. ' +
+                    'Actualiza el estado de activación e inténtalo de nuevo.'
+                );
+            }
+
+            // No registrar mensajes privados ni comunicaciones de despedida por privacidad de datos
+            this.logger.error(
+                'Error al registrar una solicitud de activación.'
+            );
+
+            throw new InternalServerErrorException(
+                'No se ha podido registrar la solicitud de activación de esta despedida.'
+            );
+        }
+    }
 
 }
 

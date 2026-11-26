@@ -22,6 +22,100 @@
     margin: 0 0 0.75rem;
 }
 
+// Estado de activación del administrador
+.espacio-lanzador__estado {
+    margin: 1.25rem 0;
+    padding: 1rem;
+
+    border: 1px solid #c8dcd9;
+    border-radius: 1rem;
+    background: #fbfbfb;
+}
+
+.espacio-lanzador__estado-cabecera {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+
+    margin-bottom: 1rem;
+
+    h3 {
+        margin: 0;
+        color: #2f3747;
+        font-size: 1.05rem;
+        font-weight: 600;
+    }
+}
+
+.espacio-lanzador__estado-titulo {
+    margin: 0 0 0.5rem;
+    color: #2f3747;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.espacio-lanzador__estado-detalle {
+    margin: 0 0 0.75rem;
+    color: #3e4653;
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+.espacio-lanzador__estado-fechas {
+
+    p {
+        margin: 0 0 0.5rem;
+        color: #3e4653;
+        font-size: 0.85rem;
+        line-height: 1.5;
+    }
+}
+
+.espacio-lanzador__ultima-actualizacion {
+    margin: 0.75rem 0 0;
+    color: #476987;
+    font-size: 0.8rem;
+}
+
+.espacio-lanzador__estado-error {
+    margin: 0 0 0.75rem;
+    color: #a43b48;
+    font-size: 0.85rem;
+    line-height: 1.5;
+}
+
+
+// Botón de actualización manual del estado de activación
+.espacio-lanzador__actualizar {
+    min-height: 2.75rem;
+    padding: 0.5rem 0.85rem;
+
+    border: 1px solid #59f0dd;
+    border-radius: 0.8rem;
+    background: #dff3f1;
+
+    color: #3e4653;
+    font: inherit;
+    font-size: 0.85rem;
+
+    cursor: pointer;
+
+    &:hover:not(:disabled) {
+        background: #c8eae5;
+    }
+
+    &:focus-visible {
+        outline: 2px solid #476987;
+        outline-offset: 4px;
+    }
+
+    &:disabled {
+        opacity: 0.55;
+        cursor: not-allowed;
+    }
+}
+
 // Tarjetas una debajo de otra
 .espacio-lanzador__acciones {
     display: grid;
@@ -103,6 +197,24 @@
 
     .espacio-lanzador__aviso {
         margin: 0.75rem 0;
+    }
+
+    // Mostrar el título y el botón de actualización en misma fila
+    .espacio-lanzador__estado-cabecera {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .espacio-lanzador__estado {
+        margin: 0.75rem 0;
+        padding: 1rem 1.25rem;
+    }
+
+    .espacio-lanzador__estado-fechas {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem 1.5rem;
     }
 }
 

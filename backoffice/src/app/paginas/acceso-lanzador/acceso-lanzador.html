@@ -215,7 +215,10 @@
         </p>
       </div>
 
-      <app-espacio-lanzador [sesion]="datosSesion" />
+
+      <app-espacio-lanzador [sesion]="datosSesion" [estadoActivacion]="estadoActivacion()"
+        [cargandoEstado]="cargandoEstadoActivacion() || cerrandoSesion()" [errorEstado]="errorEstadoActivacion()"
+        [ultimaActualizacion]="ultimaActualizacionEstado()" (actualizarEstado)="consultarEstadoActivacion()" />
 
       }
 
